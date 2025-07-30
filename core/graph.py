@@ -3,6 +3,7 @@ from langchain.schema import HumanMessage, AIMessage
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, List
 import os, json, requests
+import re
 
 
 API = "http://127.0.0.1:8000"
@@ -18,16 +19,39 @@ llm = ChatGroq(model="gemma2-9b-it", temperature=0, api_key="")
 def intent_node(state: ChatState) -> ChatState:
     user_msg = state["messages"][-1].content
     prompt = f"""
-    Classify the intent of: "{user_msg}".
-    Valid intents: create_user, delete_user, update_user, chat.
-    Extract params like name, email, id if present.
 
-    Return JSON only, like: {{"intent": "...", "params": {{"id":1,"name":"Bob","email":"bob@x.com"}}}}.
-    """
+        You are AI assistant, clarify the intenet of {user_msg} and work with testdb database.
+
+        Classify the intent of: "{user_msg}". and create_user, delete_user,update_user, update_user and chat history in database testdb
+
+        Database: testdb
+        Table: users(id, name, email)
+
+        Valid intents:
+        - create_user (requires name, email)
+        - delete_user (requires id)
+        - update_user (requires id, name/email if given)
+        - chat (free text, fallback if no DB action is needed)
+
+        Extract any parameters (id, name, email) mentioned.
+
+        Return **only** valid JSON, no extra text. Example:
+        {{"intent": "create_user", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
+        """
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
+   
+    print(ai_resp.content)
+
+    raw_output = ai_resp.content.strip()
+
+    # Clean any accidental code block markers (like ```json ... ```)
+    raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()
+
+    
 
     try:
-        parsed = json.loads(ai_resp.content)
+        parsed = json.loads(raw_output)
+        print(parsed)
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
@@ -70,7 +94,7 @@ def update_node(state: ChatState) -> ChatState:
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)]}
 
 def chat_node(state: ChatState) -> ChatState:
-    ai_reply = llm(state["messages"]).content
+    ai_reply = llm.invoke(state["messages"]).content
     return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)]}
 
 # --- Graph ---
