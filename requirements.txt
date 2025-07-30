@@ -1,0 +1,10 @@
+fastapi 
+uvicorn 
+sqlalchemy 
+pymysql 
+langchain 
+langgraph 
+openai 
+streamlit 
+requests
+langchain_groq
