@@ -9,5 +9,7 @@ st.title("LangGraph Chatbot (FastAPI-backed)")
 
 msg = st.text_input("Ask (e.g., 'create user Alice alice@x.com', 'delete user 2')")
 if st.button("Send"):
+    print("on click send")
     res = requests.post(f"{API}/chat/", params={"session_id": st.session_state["session_id"], "message": msg})
+    print("after post")
     st.write(f"Bot: {res.json()['reply']}")

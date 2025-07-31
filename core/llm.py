@@ -1,0 +1,10 @@
+from langchain_groq.chat_models import ChatGroq
+from langchain.schema import HumanMessage, AIMessage
+from langgraph.graph import StateGraph, END
+
+import os, json, requests
+import re
+from core.schema import ChatState
+
+
+llm = ChatGroq(model="gemma2-9b-it", temperature=0, api_key="")
