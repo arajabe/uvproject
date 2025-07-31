@@ -9,13 +9,48 @@ from core.schema import ChatState
 
 API = "http://127.0.0.1:8000"
 
+def intent_node(state:ChatState) -> ChatState:
+    msg = state["messages"][-1].content
+    prompt = f"""
+            You are an intent classification assistant. Your job is to classify a user message into one of two categories based on whether the user is referring to contact-related operations or user-related operations.
+            You are AI assistant, clarify the intent of {msg}
+            Available intents:
+            - contact: The user wants to perform create, read, update, or delete operations on contacts. Examples: "Add a new contact", "Update John's phone number", "Delete contact Mike", "Show me my contacts".
+            - user: The user wants to perform create, read, update, or delete operations on users. Examples: "Create a new user", "Get user info for ID 5", "Update user email", "Delete user 7".
+
+            Only respond with one of the two values: "contact" or "user".
+            Do not add any explanation or extra text.
+
+            Examples:
+
+            Message: "Add a new contact for John"
+            Intent: contact
+
+            Message: {msg}
+            Intent:
+            """.strip()
+    
+    result = llm.invoke([HumanMessage(content=prompt)])
+    print("intent node")
+    print(result.content)
+    # routing logic
+    
+    return{** state, "messages":state["messages"], "intent": result.content}
+    
+    
+def intent_node_contact(state: ChatState) -> ChatState:
+    print("i am intent node contact")
+    result = llm.invoke(state['messages']).content
+    print(result)
+    return{"messages" : state["messages"] + [AIMessage(content=result)], "response" : {"node" : "i am contact intent node"}}
 
 # --- Node 1: Intent Analysis ---
 def intent_node_user(state: ChatState) -> ChatState:
+    print("i am intent node user")
     user_msg = state["messages"][-1].content
     prompt = f"""
 
-        You are AI assistant, clarify the intenet of {user_msg} and work with testdb database.
+        You are AI assistant, clarify the intent of {user_msg} and work with testdb database.
 
         Classify the intent of: "{user_msg}". and create_user, delete_user,update_user, update_user and chat history in database testdb
 
@@ -50,6 +85,26 @@ def intent_node_user(state: ChatState) -> ChatState:
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
+
+def router_node(state: ChatState) -> str:
+    print("i am router node")
+    print(state["intent"])
+    x = str(state["intent"]).strip().lower()
+    print(type(x))
+    if x == str("contact"):
+        return "intent_node_contact"
+    elif x == str("user"):
+        return "intent_node_user"
+    else:
+        print("router chat node")
+        return "chat_node"
+
+    match x:
+        case "contact" : return "intent_node_contact"
+        case "user": return "intent_node_user"
+        case _: 
+            print(" hello chat user case")
+            return "chat_node"
 
 # --- Node 2: Router ---
 def router_node_user(state: ChatState) -> str:
@@ -94,17 +149,25 @@ def update_node_user(state: ChatState) -> ChatState:
 def chat_node(state: ChatState) -> ChatState:
     ai_reply = llm.invoke(state["messages"]).content
     print("chat node")
-    return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": AIMessage(content=ai_reply)}
-
+    #return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": AIMessage(content=ai_reply)}
+    return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": {"hello":"i am chat node"}}
 # --- Graph ---
 graph = StateGraph(ChatState)
+
+graph.add_node("intent_node", intent_node)
 graph.add_node("intent_node_user", intent_node_user)
+graph.add_node("intent_node_contact", intent_node_contact)
 graph.add_node("create_node_user", create_node_user)
 graph.add_node("delete_node_user", delete_node_user)
 graph.add_node("update_node_user", update_node_user)
 graph.add_node("chat_node", chat_node)
 
-graph.set_entry_point("intent_node_user")
+graph.set_entry_point("intent_node")
+graph.add_conditional_edges("intent_node", router_node, {
+    "intent_node_contact" : "intent_node_contact",
+    "intent_node_user" : "intent_node_user",
+    "chat_node": "chat_node"
+})
 graph.add_conditional_edges("intent_node_user", router_node_user, {
     "create_node_user": "create_node_user",
     "delete_node_user": "delete_node_user",
@@ -114,6 +177,7 @@ graph.add_conditional_edges("intent_node_user", router_node_user, {
 graph.add_edge("create_node_user", END)
 graph.add_edge("delete_node_user", END)
 graph.add_edge("update_node_user", END)
+graph.add_edge("intent_node_contact", END)
 graph.add_edge("chat_node", END)
 
 intent_graph = graph.compile()

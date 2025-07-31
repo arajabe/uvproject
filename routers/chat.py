@@ -16,6 +16,7 @@ def chat(session_id: str, message: str):
     print("after sharing session_id in chat post")
     print(result['response'])
     reply = [m for m in result["messages"] if isinstance(m, AIMessage)][-1].content
+    
     print(reply)
    # return {"reply": reply}
     return {"reply": result['response']}
