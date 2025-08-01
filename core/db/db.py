@@ -35,6 +35,22 @@ class Student(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
     timestamp = Column(DateTime, default=datetime.utcnow)
 
+class Teacher(Base):
+    __tablename__ = "Teacher"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(50), nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+class Parent(Base):
+    __tablename__ = "parent"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(50), nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
 Base.metadata.create_all(bind=engine)
 
 def get_db():
