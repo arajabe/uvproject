@@ -15,20 +15,22 @@ if "chat_history" not in st.session_state:
 st.title("LangGraph Chatbot (FastAPI-backed)")
 
 # Role selection buttons
-col1, col2, col3, col4 = st.columns(4)
-with col1:
+with st.sidebar:
+    st.write("### Select Role")
+
     if st.button("Admin"):
         st.session_state["role"] = "admin"
-with col2:
+
     if st.button("Student"):
         st.session_state["role"] = "student"
-with col3:
+
     if st.button("Parent"):
         st.session_state["role"] = "parent"
-with col3:
-    if st.button("teacher"):
+
+    if st.button("Teacher"):
         st.session_state["role"] = "teacher"
-    
+
+    st.markdown(f"**Current Role**: `{st.session_state.get('role', 'None')}`")   
 
 # Show current role
 role = st.session_state["role"]
