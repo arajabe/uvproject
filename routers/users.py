@@ -10,6 +10,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.post("/")
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    print("create_user(user: UserCreate, db: Session = Depends(get_db))")
     db_user = User(name=user.name, email=user.email)
     db.add(db_user)
     db.commit()

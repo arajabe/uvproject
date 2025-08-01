@@ -10,7 +10,11 @@ if "session_id" not in st.session_state:
 if "role" not in st.session_state:
     st.session_state["role"] = None
 if "chat_history" not in st.session_state:
-    st.session_state["chat_history"] = []
+    res = requests.get(f"{API}/history/", params={"session_id": st.session_state["session_id"]})
+    if res.ok:
+        st.session_state["chat_history"] = [(item["user"], item["bot"]) for item in res.json()]
+    else:
+        st.session_state["chat_history"] = []
 
 st.title("LangGraph Chatbot (FastAPI-backed)")
 
@@ -70,6 +74,7 @@ if st.button("Send"):
                 }
             )
             st.write(f"Bot: {res.json().get('reply', '(No reply found)')}")
+            st.write(f"Bot: {res.json().get('aireply', '(ai reply not found)')}")
         except Exception as e:
             st.error(f"Error: {e}")
     elif role == "teacher":
@@ -84,5 +89,21 @@ if st.button("Send"):
             st.write(f"Bot: {res.json().get('reply', '(No reply found)')}")
         except Exception as e:
             st.error(f"Error: {e}")
+
+    elif role == "student":
+        try:
+            res = requests.post(
+                f"{API}/chat/history",
+                params={
+                    "session_id": st.session_state["session_id"],
+                    "message": msg
+                }
+            )
+            st.write(f"Bot: {res.json().get('reply', '(No reply found)')}")
+            st.write(f"Bot: {res.json().get('aireply', '(ai reply not found)')}")
+        except Exception as e:
+            st.error(f"Error: {e}")
     else:
         st.error(f"As a `{role}`, you are not allowed to perform this operation.")
+    
+    

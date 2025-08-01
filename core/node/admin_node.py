@@ -19,10 +19,11 @@ Available intents:
 - teacher: The user wants to perform create, read, update, or delete operations on teachers. Examples: "Add a new teacher", "Update John's phone number", "Delete teacher Mike", "Show me my teachers".
 - user: The user wants to perform create, read, update, or delete operations on users. Examples: "Create a new user", "Get user info for ID 5", "Update user email", "Delete user 7".
 - parents: The user wants to perform create, read, update, or delete operations on parents. Examples: "Create a new parent", "Get parent info for ID 5", "Update parent email", "Delete parent 7".
+- student: The user wants to perform create, read, update, or delete operations on student. Examples: "Create a new student", "Get student info for ID 5", "Update student email", "Delete student 7".
 - others: If the user wants to perform create, read, update, or delete operations on something other than teacher, user, or parents.
 - error : If the user wants to perform create, read, update, or delete operations like following Examples: "create raja", "delete 7" , "update phone number"
 
-Only respond with one of the fiver values: "teacher", "user", "parents", "others", "error".
+Only respond with one of the six values: "teacher", "user", "parents", "others", "error", "student".
 Do not add any explanation or extra text.
 
 Examples:
@@ -40,6 +41,17 @@ Intent:
     # routing logic
     
     return{** state, "messages":state["messages"], "intent": result.content}
+
+def router_node(state: ChatState) -> str:
+    x = str(state["intent"]).strip().lower()
+    print("router node")
+    match x:
+        case "contact" : return "intent_node_contact"
+        case "user": return "intent_node_user"
+        case "student": return "intent_node_student"
+        case _: 
+            print(" hello chat user case")
+            return "chat_node"
     
     
 def intent_node_teacher(state: ChatState) -> ChatState:
@@ -90,25 +102,51 @@ def intent_node_user(state: ChatState) -> ChatState:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
 
-def router_node(state: ChatState) -> str:
-    print("i am router node")
-    print(state["intent"])
-    x = str(state["intent"]).strip().lower()
-    print(type(x))
-    if x == str("teacher"):
-        return "intent_node_teacher"
-    elif x == str("user"):
-        return "intent_node_user"
-    else:
-        print("router chat node")
-        return "chat_node"
+# --- Node 1: Intent Analysis ---
+def intent_node_student(state: ChatState) -> ChatState:
+    print("intent_node_student")
+    user_msg = state["messages"][-1].content
+    prompt = f"""
 
-    match x:
-        case "contact" : return "intent_node_contact"
-        case "user": return "intent_node_user"
-        case _: 
-            print(" hello chat user case")
-            return "chat_node"
+        You are AI assistant, clarify the intent of {user_msg} and work with testdb database.
+
+        Classify the intent of: "{user_msg}". and create_student, delete_student, update_student, update_student and chat history in database testdb
+
+        Database: testdb
+        Table: student(id, name, email)
+
+        Valid intents:
+        - create_student (requires name, email)
+        - delete_student (requires id)
+        - update_student (requires id, name/email if given)
+        - chat (free text, fallback if no DB action is needed)
+
+        Extract any parameters (id, name, email) mentioned.
+
+        Return **only** valid JSON, no extra text. Example:
+        {{"intent": "create_student", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
+        {{"intent": "create_student", "params": {{"name": "Bob", "email": "bob@x.com", "id": 10}}}}
+        """
+    print("before create_node invoke")
+    ai_resp = llm.invoke([HumanMessage(content=prompt)])
+   
+    print("after create_node invoke")
+
+    raw_output = ai_resp.content.strip()
+
+    # Clean any accidental code block markers (like ```json ... ```)
+    raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()   
+    print("raw_output") 
+    print(raw_output)
+
+    try:
+        parsed = json.loads(raw_output)
+        print(parsed)
+    except:
+        parsed = {"intent": "chat", "params": {}}
+    return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
+
+
 
 # --- Node 2: Router ---
 def router_node_user(state: ChatState) -> str:
@@ -118,16 +156,41 @@ def router_node_user(state: ChatState) -> str:
         case "update_user": return "update_node_user"
         case _: return "chat_node"
 
+def router_node_student(state: ChatState) -> str:
+    print("router_node_student")
+    match state["intent"]:
+        case "create_student": 
+            print("create_student")
+            return "create_node_student"
+        case "delete_student": return "delete_node_student"
+        case "update_student": return "update_node_student"
+        case _: 
+            print("chat node")
+            return "chat_node"
+
 # --- Action Nodes (call FastAPI) ---
 def create_node_user(state: ChatState) -> ChatState:
     p = state["params"]
    
     if "name" in p and "email" in p:
-        print("before graph request post")
+        print("before graph request post user")
         r = requests.post(f"{API}/users/", json={"name": p["name"], "email": p["email"]})
-        print("after graph request post")
+        print("after graph request post user")
         print(r.json())
         reply = f"Created user {p['name']}." if r.status_code == 200 else "Failed to create user."
+    else:
+        reply = "Need name and email."
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
+
+def create_node_student(state: ChatState) -> ChatState:
+    p = state["params"]
+    print("create_node_student")
+    if "name" in p and "email" in p:
+        print("before graph request post student")
+        r = requests.post(f"{API}/student/", json={"name": p["name"], "email": p["email"]})
+        print("after graph request post student")
+        print(r.json())
+        reply = f"Created user {p['name']}." if r.status_code == 200 else "Failed to create student."
     else:
         reply = "Need name and email."
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
@@ -141,6 +204,15 @@ def delete_node_user(state: ChatState) -> ChatState:
         reply = "Need a user ID to delete."
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
 
+def delete_node_student(state: ChatState) -> ChatState:
+    p = state["params"]
+    if "id" in p:
+        r = requests.delete(f"{API}/student/{p['id']}")
+        reply = "student deleted." if r.status_code == 200 else "student not found."
+    else:
+        reply = "Need a student ID to delete."
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
+
 def update_node_user(state: ChatState) -> ChatState:
     p = state["params"]
     if "id" in p:
@@ -148,6 +220,15 @@ def update_node_user(state: ChatState) -> ChatState:
         reply = "User updated." if r.status_code == 200 else "User not found."
     else:
         reply = "Need user ID to update."
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)]}
+
+def update_node_student(state: ChatState) -> ChatState:
+    p = state["params"]
+    if "id" in p:
+        r = requests.put(f"{API}/student/{p['id']}", json={"name": p.get("name"), "email": p.get("email")})
+        reply = "student updated." if r.status_code == 200 else "student not found."
+    else:
+        reply = "student user ID to update."
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)]}
 
 def chat_node(state: ChatState) -> ChatState:

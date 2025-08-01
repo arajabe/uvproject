@@ -15,3 +15,11 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     name: str | None = None
     email: EmailStr | None = None
+
+class StudentCreate(BaseModel):
+    name: str
+    email: EmailStr
+
+class StudentUpdate(BaseModel):
+    name: str | None = None
+    email: EmailStr | None = None

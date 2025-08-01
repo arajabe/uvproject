@@ -7,4 +7,4 @@ import re
 from core.model.schema import ChatState
 
 
-llm = ChatGroq(model="gemma2-9b-it", temperature=0, api_key="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")
+llm = ChatGroq(model="gemma2-9b-it", temperature=0, api_key="")
