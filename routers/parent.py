@@ -28,7 +28,7 @@ def delete_parent(parent_id: int, db: Session = Depends(get_db)):
     return {"status": "deleted", "id": parent_id}
 
 @router.put("/{parent_id}")
-def update_user(parent_id: int, parent: ParentUpdate, db: Session = Depends(get_db)):
+def update_parent(parent_id: int, parent: ParentUpdate, db: Session = Depends(get_db)):
     db_parent = db.query(Parent).filter(Parent.id == parent_id).first()
     if not db_parent:
         raise HTTPException(404, "parent not found")

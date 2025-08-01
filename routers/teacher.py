@@ -10,6 +10,7 @@ router = APIRouter(prefix="/teacher", tags=["teacher"])
 
 @router.post("/")
 def create_teacher(teacher: TeacherCreate, db: Session = Depends(get_db)):
+    print("teacher post")
     db_teacher = Teacher(name=teacher.name, email=teacher.email)
     db.add(db_teacher)
     db.commit()

@@ -185,7 +185,7 @@ def intent_node_student(state: ChatState) -> ChatState:
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
 
 def intent_node_parent(state: ChatState) -> ChatState:
-    print("intent_node_student")
+    print("intent_node_parent")
     user_msg = state["messages"][-1].content
     prompt = f"""
 
@@ -231,6 +231,7 @@ def intent_node_parent(state: ChatState) -> ChatState:
 
 # --- Node 2: Router ---
 def router_node_user(state: ChatState) -> str:
+    print("router_node_user")
     match state["intent"]:
         case "create_user": return "create_node_user"
         case "delete_user": return "delete_node_user"
@@ -247,6 +248,7 @@ def router_node_student(state: ChatState) -> str:
 
 
 def router_node_parent(state: ChatState) -> str:
+    print("router node parent")
     
     match state["intent"]:
         case "create_parent": return "create_node_parent"
@@ -257,6 +259,8 @@ def router_node_parent(state: ChatState) -> str:
 
 def router_node_teacher(state: ChatState) -> str:
 
+    print("routher node teacher")
+
     match state["intent"]:
         case "create_teacher": return "create_node_teacher"
         case "delete_teacher": return "delete_node_teacher"
@@ -265,6 +269,8 @@ def router_node_teacher(state: ChatState) -> str:
 
 # --- Action Nodes (call FastAPI) ---
 def create_node_user(state: ChatState) -> ChatState:
+
+    print("create node user ")
     p = state["params"]
    
     if "name" in p and "email" in p:
@@ -282,7 +288,12 @@ def create_node_student(state: ChatState) -> ChatState:
     print("create_node_student")
     if "name" in p and "email" in p:
         print("before graph request post student")
+
+        print("pai request")
+        print(f"{API}/student/", json={"name": p["name"], "email": p["email"]})
+        
         r = requests.post(f"{API}/student/", json={"name": p["name"], "email": p["email"]})
+        
         print("after graph request post student")
         print(r.json())
         reply = f"Created user {p['name']}." if r.status_code == 200 else "Failed to create student."
@@ -292,10 +303,13 @@ def create_node_student(state: ChatState) -> ChatState:
 
 def create_node_parent(state: ChatState) -> ChatState:
     p = state["params"]
-    print("create_node_student")
+    print("create_node_parent")
     if "name" in p and "email" in p:
-        print("before graph request post student")
+        print("before graph request post parent")
         r = requests.post(f"{API}/parent/", json={"name": p["name"], "email": p["email"]})
+        print(f"{API}/parent/", json={"name": p["name"], "email": p["email"]})
+        print("====================")
+        print(r)
         reply = f"Created parent {p['name']}." if r.status_code == 200 else "Failed to create parent."
     else:
         reply = "Need name and email."
@@ -303,7 +317,7 @@ def create_node_parent(state: ChatState) -> ChatState:
 
 def create_node_teacher(state: ChatState) -> ChatState:
     p = state["params"]
-   
+    print("create node teacher")
     if "name" in p and "email" in p:
         
         r = requests.post(f"{API}/teacher/", json={"name": p["name"], "email": p["email"]})
