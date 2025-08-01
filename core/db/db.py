@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP, func
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
-from core.schema import UserCreate, UserUpdate
+from core.model.schema import UserCreate, UserUpdate
 
 DATABASE_URL = "mysql+pymysql://root:Nannilam123@127.0.0.1/testdb"
 engine = create_engine(DATABASE_URL, echo=True, future=True)

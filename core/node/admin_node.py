@@ -4,7 +4,7 @@ from langgraph.graph import StateGraph, END
 from core.llm import llm
 import os, json, requests
 import re
-from core.schema import ChatState
+from core.model.schema import ChatState
 
 
 API = "http://127.0.0.1:8000"
@@ -12,23 +12,27 @@ API = "http://127.0.0.1:8000"
 def intent_node(state:ChatState) -> ChatState:
     msg = state["messages"][-1].content
     prompt = f"""
-            You are an intent classification assistant. Your job is to classify a user message into one of two categories based on whether the user is referring to contact-related operations or user-related operations.
-            You are AI assistant, clarify the intent of {msg}
-            Available intents:
-            - contact: The user wants to perform create, read, update, or delete operations on contacts. Examples: "Add a new contact", "Update John's phone number", "Delete contact Mike", "Show me my contacts".
-            - user: The user wants to perform create, read, update, or delete operations on users. Examples: "Create a new user", "Get user info for ID 5", "Update user email", "Delete user 7".
+You are an intent classification assistant. Your job is to classify a user message into one of the intent categories.
+You are an AI assistant. Clarify the intent of this message: "{msg}".
 
-            Only respond with one of the two values: "contact" or "user".
-            Do not add any explanation or extra text.
+Available intents:
+- teacher: The user wants to perform create, read, update, or delete operations on teachers. Examples: "Add a new teacher", "Update John's phone number", "Delete teacher Mike", "Show me my teachers".
+- user: The user wants to perform create, read, update, or delete operations on users. Examples: "Create a new user", "Get user info for ID 5", "Update user email", "Delete user 7".
+- parents: The user wants to perform create, read, update, or delete operations on parents. Examples: "Create a new parent", "Get parent info for ID 5", "Update parent email", "Delete parent 7".
+- others: If the user wants to perform create, read, update, or delete operations on something other than teacher, user, or parents.
+- error : If the user wants to perform create, read, update, or delete operations like following Examples: "create raja", "delete 7" , "update phone number"
 
-            Examples:
+Only respond with one of the fiver values: "teacher", "user", "parents", "others", "error".
+Do not add any explanation or extra text.
 
-            Message: "Add a new contact for John"
-            Intent: contact
+Examples:
 
-            Message: {msg}
-            Intent:
-            """.strip()
+Message: "Add a new teacher for John"
+Intent: teacher
+
+Message: {msg}
+Intent:
+""".strip()
     
     result = llm.invoke([HumanMessage(content=prompt)])
     print("intent node")
@@ -38,11 +42,11 @@ def intent_node(state:ChatState) -> ChatState:
     return{** state, "messages":state["messages"], "intent": result.content}
     
     
-def intent_node_contact(state: ChatState) -> ChatState:
-    print("i am intent node contact")
+def intent_node_teacher(state: ChatState) -> ChatState:
+ 
     result = llm.invoke(state['messages']).content
     print(result)
-    return{"messages" : state["messages"] + [AIMessage(content=result)], "response" : {"node" : "i am contact intent node"}}
+    return{"messages" : state["messages"] + [AIMessage(content=result)], "response" : {"node" : "i am teacher intent node"}}
 
 # --- Node 1: Intent Analysis ---
 def intent_node_user(state: ChatState) -> ChatState:
@@ -91,8 +95,8 @@ def router_node(state: ChatState) -> str:
     print(state["intent"])
     x = str(state["intent"]).strip().lower()
     print(type(x))
-    if x == str("contact"):
-        return "intent_node_contact"
+    if x == str("teacher"):
+        return "intent_node_teacher"
     elif x == str("user"):
         return "intent_node_user"
     else:
@@ -151,33 +155,3 @@ def chat_node(state: ChatState) -> ChatState:
     print("chat node")
     #return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": AIMessage(content=ai_reply)}
     return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": {"hello":"i am chat node"}}
-# --- Graph ---
-graph = StateGraph(ChatState)
-
-graph.add_node("intent_node", intent_node)
-graph.add_node("intent_node_user", intent_node_user)
-graph.add_node("intent_node_contact", intent_node_contact)
-graph.add_node("create_node_user", create_node_user)
-graph.add_node("delete_node_user", delete_node_user)
-graph.add_node("update_node_user", update_node_user)
-graph.add_node("chat_node", chat_node)
-
-graph.set_entry_point("intent_node")
-graph.add_conditional_edges("intent_node", router_node, {
-    "intent_node_contact" : "intent_node_contact",
-    "intent_node_user" : "intent_node_user",
-    "chat_node": "chat_node"
-})
-graph.add_conditional_edges("intent_node_user", router_node_user, {
-    "create_node_user": "create_node_user",
-    "delete_node_user": "delete_node_user",
-    "update_node_user": "update_node_user",
-    "chat_node": "chat_node"
-})
-graph.add_edge("create_node_user", END)
-graph.add_edge("delete_node_user", END)
-graph.add_edge("update_node_user", END)
-graph.add_edge("intent_node_contact", END)
-graph.add_edge("chat_node", END)
-
-intent_graph = graph.compile()

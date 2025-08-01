@@ -4,7 +4,7 @@ from langgraph.graph import StateGraph, END
 
 import os, json, requests
 import re
-from core.schema import ChatState
+from core.model.schema import ChatState
 
 
 llm = ChatGroq(model="gemma2-9b-it", temperature=0, api_key="")
