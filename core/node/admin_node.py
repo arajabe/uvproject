@@ -1,10 +1,11 @@
 from langchain_groq.chat_models import ChatGroq
 from langchain.schema import HumanMessage, AIMessage
 from langgraph.graph import StateGraph, END
-from core.llm import llm
+
 import os, json, requests
 import re
 from core.model.schema import ChatState
+from llm.llm import llm
 
 
 API = "http://127.0.0.1:8000"
@@ -290,8 +291,8 @@ def create_node_student(state: ChatState) -> ChatState:
         print("before graph request post student")
 
         print("pai request")
-        print(f"{API}/student/", json={"name": p["name"], "email": p["email"]})
-        
+        print("9999999999999999999999")
+
         r = requests.post(f"{API}/student/", json={"name": p["name"], "email": p["email"]})
         
         print("after graph request post student")
@@ -306,10 +307,8 @@ def create_node_parent(state: ChatState) -> ChatState:
     print("create_node_parent")
     if "name" in p and "email" in p:
         print("before graph request post parent")
-        r = requests.post(f"{API}/parent/", json={"name": p["name"], "email": p["email"]})
-        print(f"{API}/parent/", json={"name": p["name"], "email": p["email"]})
-        print("====================")
-        print(r)
+        r = requests.post(f"{API}/parent/", json={"name": p["name"], "email": p["email"]})        
+    
         reply = f"Created parent {p['name']}." if r.status_code == 200 else "Failed to create parent."
     else:
         reply = "Need name and email."
@@ -369,7 +368,7 @@ def update_node_user(state: ChatState) -> ChatState:
         reply = "User updated." if r.status_code == 200 else "User not found."
     else:
         reply = "Need user ID to update."
-    return {**state, "messages": state["messages"] + [AIMessage(content=reply)]}
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
 
 def update_node_student(state: ChatState) -> ChatState:
     p = state["params"]
@@ -378,7 +377,7 @@ def update_node_student(state: ChatState) -> ChatState:
         reply = "student updated." if r.status_code == 200 else "student not found."
     else:
         reply = "student user ID to update."
-    return {**state, "messages": state["messages"] + [AIMessage(content=reply)]}
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
 
 def update_node_parent(state: ChatState) -> ChatState:
     p = state["params"]
@@ -387,7 +386,7 @@ def update_node_parent(state: ChatState) -> ChatState:
         reply = "parent updated." if r.status_code == 200 else "parent not found."
     else:
         reply = "student user ID to update."
-    return {**state, "messages": state["messages"] + [AIMessage(content=reply)]}
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
 
 def update_node_teacher(state: ChatState) -> ChatState:
     p = state["params"]
@@ -396,7 +395,7 @@ def update_node_teacher(state: ChatState) -> ChatState:
         reply = "teacher updated." if r.status_code == 200 else "teacher not found."
     else:
         reply = "student user ID to update."
-    return {**state, "messages": state["messages"] + [AIMessage(content=reply)]}
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
 
 def chat_node(state: ChatState) -> ChatState:
     ai_reply = llm.invoke(state["messages"]).content

@@ -20,7 +20,7 @@ def create_teacher(teacher: TeacherCreate, db: Session = Depends(get_db)):
 
 @router.delete("/{teacher_id}")
 def delete_teacher(teacher_id: int, db: Session = Depends(get_db)):
-    teacher = db.query(teacher).filter(Teacher.id == teacher_id).first()
+    teacher = db.query(Teacher).filter(Teacher.id == teacher_id).first()
     if not teacher:
         raise HTTPException(404, "teacher not found")
     db.delete(teacher)

@@ -1,7 +1,6 @@
 from langchain_groq.chat_models import ChatGroq
 from langchain.schema import HumanMessage, AIMessage
 from langgraph.graph import StateGraph, END
-from core.llm import llm
 import os, json, requests
 import re
 from core.model.schema import ChatState

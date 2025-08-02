@@ -18,7 +18,7 @@ def chat(session_id: str, message: str, db: Session = Depends(get_db)):
     sessions[session_id] = {"messages": result["messages"]}
     print(result['response'])
     reply = [m for m in result["messages"] if isinstance(m, AIMessage)][-1].content
-    save_chat(session_id=session_id, role="admin", user_msg=message, bot_reply=reply, db=db)
+    save_chat(session_id=session_id, role="admin rara", user_msg=message, bot_reply=reply, db=db)
     print(reply)
    # return {"reply": reply}
     return {"reply": result['response'], "aireply" : reply}

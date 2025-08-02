@@ -10,7 +10,7 @@ router = APIRouter(prefix="/parent", tags=["parent"])
 
 @router.post("/")
 def create_parent(parent: ParentCreate, db: Session = Depends(get_db)):
-    
+    print(" i am parent post")
     db_parent = Parent(name=parent.name, email=parent.email)
     db.add(db_parent)
     db.commit()
