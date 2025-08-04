@@ -58,49 +58,41 @@ def is_operation_allowed(msg, role):
         return False
     return True
 
+def is_operation_allowed_teacher(msg, role):
+    if role == "teacher":
+        return True
+    if any(word in msg.lower() for word in ["create", "update", "delete"]):
+        return False
+    return True
+
+role_endpoints = {
+    "admin": "admin",
+    "teacher": "teacher",
+    "student": "history"
+}
+
 # Send button
 if st.button("Send"):
     if not role:
         st.warning("Please select a role first.")
     elif not msg.strip():
         st.warning("Please enter a message.")
-    elif role == "admin":
+    
+    ##elif not is_operation_allowed(msg, role):
+        ##st.error(f"As a `{role}`, you are not allowed to perform this operation.")
+    elif role in role_endpoints:
         try:
+            endpoint = role_endpoints[role]
             res = requests.post(
-                f"{API}/chat/admin",
+                f"{API}/chat/{endpoint}",
                 params={
                     "session_id": st.session_state["session_id"],
                     "message": msg
                 }
             )
-            st.write(f"Bot: {res.json().get('reply', '(No reply found)')}")
-            st.write(f"Bot: {res.json().get('aireply', '(ai reply not found)')}")
-        except Exception as e:
-            st.error(f"Error: {e}")
-    elif role == "teacher":
-        try:
-            res = requests.post(
-                f"{API}/chat/teacher",
-                params={
-                    "session_id": st.session_state["session_id"],
-                    "message": msg
-                }
-            )
-            st.write(f"Bot: {res.json().get('reply', '(No reply found)')}")
-        except Exception as e:
-            st.error(f"Error: {e}")
-
-    elif role == "student":
-        try:
-            res = requests.post(
-                f"{API}/chat/history",
-                params={
-                    "session_id": st.session_state["session_id"],
-                    "message": msg
-                }
-            )
-            st.write(f"Bot: {res.json().get('reply', '(No reply found)')}")
-            st.write(f"Bot: {res.json().get('aireply', '(ai reply not found)')}")
+            data = res.json()
+            st.write(f"Bot: {data.get('reply', '(No reply found)')}")
+            # st.write(f"Bot: {data.get('aireply', '(AI reply not found)')}")
         except Exception as e:
             st.error(f"Error: {e}")
     else:

@@ -8,12 +8,28 @@ from core.node import teacher_node
 
 graph = StateGraph(ChatState)
 
-graph.add_node("teacher_node", teacher_node.teacher_node)
+graph.add_node("intent_node_mark", teacher_node.intent_node_mark)
+graph.add_node("intent_node_create_mark", teacher_node.intent_node_create_mark)
+graph.add_node("intent_node_update_mark", teacher_node.intent_node_update_mark)
+graph.add_node("intent_node_delete_mark", teacher_node.intent_node_delete_mark)
+graph.add_node("chat_node_initial", teacher_node.chat_node_initial)
 
 
-graph.set_entry_point("teacher_node")
+graph.set_entry_point("intent_node_mark")
 
 
-graph.add_edge("teacher_node", END)
+graph.add_conditional_edges("intent_node_mark", teacher_node.router_node_mark, {
+    "intent_node_create_mark" : "intent_node_create_mark",
+    "intent_node_update_mark" : "intent_node_update_mark",
+    "intent_node_delete_mark" : "intent_node_delete_mark",
+    "chat_node_initial": "chat_node_initial"
+})
+
+
+graph.add_edge("intent_node_create_mark", END)
+graph.add_edge("intent_node_update_mark", END)
+graph.add_edge("intent_node_delete_mark", END)
+graph.add_edge("chat_node_initial", END)
+
 
 teacher_graph = graph.compile()

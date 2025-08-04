@@ -14,7 +14,7 @@ def intent_node(state:ChatState) -> ChatState:
     msg = state["messages"][-1].content
     prompt = f"""
 You are an intent classification assistant. Your job is to classify a user message into one of the intent categories.
-You are an AI assistant. Clarify the intent of this message: "{msg}".
+Analyze a message ({msg}) to determine whether its purpose or request is related to extracting or identifying personal information — specifically identity-related details like names, contact info, or address.
 
 Available intents:
 - teacher: The user wants to perform create, read, update, or delete operations on teachers. Examples: "Add a new teacher", "Update John's phone number", "Delete teacher Mike", "Show me my teachers".
@@ -73,7 +73,7 @@ def intent_node_teacher(state: ChatState) -> ChatState:
         Valid intents:
         - create_teacher (requires name, email)
         - delete_teacher (requires id)
-        - update_teacher (requires id, name/email if given)
+        - update_teacher (requires id, name or email must be given)
         - chat (free text, fallback if no DB action is needed)
 
         Extract any parameters (id, name, email) mentioned.

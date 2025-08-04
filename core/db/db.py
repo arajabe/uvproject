@@ -4,6 +4,10 @@ from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP, func, 
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from core.model.schema import UserCreate, UserUpdate
 from datetime import datetime
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy import CheckConstraint,UniqueConstraint
+from sqlalchemy import Computed
 
 DATABASE_URL = "mysql+pymysql://root:Nannilam123@127.0.0.1/testdb"
 engine = create_engine(DATABASE_URL, echo=True, future=True)
@@ -50,6 +54,44 @@ class Parent(Base):
     email = Column(String(100), unique=True, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+class Mark(Base):
+    __tablename__ = "termmark"  
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("student.id"), nullable=False)
+    term = Column(Integer, nullable=False, index=True)
+    language_1_status = Column(String(5), Computed("CASE WHEN language_1 >= 35 THEN 'pass' ELSE 'fail' END"), nullable=False)
+    language_1 = Column(Integer, nullable=False, index=True)
+    language_2_status = Column(String(5), Computed("CASE WHEN language_2 >= 35 THEN 'pass' ELSE 'fail' END"), nullable=False)
+    language_2 = Column(Integer, nullable=False, index=True)
+    maths_status = Column(String(5), Computed("CASE WHEN maths >= 35 THEN 'pass' ELSE 'fail' END"), nullable=False)
+    maths = Column(Integer, nullable=False, index=True)
+    science_status = Column(String(5), Computed("CASE WHEN science >= 35 THEN 'pass' ELSE 'fail' END"), nullable=False)
+    science = Column(Integer, nullable=False, index=True)
+    social_science_status = Column(String(5), Computed("CASE WHEN social_science >= 35 THEN 'pass' ELSE 'fail' END"), nullable=False)
+    social_science = Column(Integer, nullable=False, index=True)       
+    total = Column(Integer, Computed("language_1 + language_2 + maths + science + social_science"), nullable=False)
+    overall_status = Column(
+    String(5),
+    Computed(
+        "CASE WHEN (language_1 >= 35 AND language_2 >= 35 AND maths >= 35 AND science >= 35 AND social_science >= 35) THEN 'pass' ELSE 'fail' END",
+        persisted=True
+    ),
+    nullable=False,
+)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    
+    student = relationship("Student", backref="marks")
+
+    __table_args__ = (
+        CheckConstraint('language_1 >= 0 AND language_1 <= 100', name='lang1_range'),
+        CheckConstraint('language_2 >= 0 AND language_2 <= 100', name='lang2_range'),
+        CheckConstraint('maths >= 0 AND language_2 <= 100', name='maths_range'),
+        CheckConstraint('science >= 0 AND language_2 <= 100', name='sscience_range'),
+        CheckConstraint('social_science >= 0 AND language_2 <= 100', name='social_science_range'),
+        CheckConstraint('total >= 0 AND total <= 500', name='total_range'),
+        UniqueConstraint('student_id', 'term', name='uq_student_term')
+    )
 
 Base.metadata.create_all(bind=engine)
 

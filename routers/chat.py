@@ -20,6 +20,7 @@ def chat(session_id: str, message: str, db: Session = Depends(get_db)):
     reply = [m for m in result["messages"] if isinstance(m, AIMessage)][-1].content
     save_chat(session_id=session_id, role="admin rara", user_msg=message, bot_reply=reply, db=db)
     print(reply)
+    print("chat/admin called")
    # return {"reply": reply}
     return {"reply": result['response'], "aireply" : reply}
 
@@ -31,8 +32,11 @@ def chat(session_id: str, message: str, db: Session = Depends(get_db)):
     sessions[session_id] = {"messages": result["messages"]}
     reply = [m for m in result["messages"] if isinstance(m, AIMessage)][-1].content
     save_chat(session_id=session_id, role="teacher", user_msg=message, bot_reply=reply, db=db)
-    print("teacher graph")
    # return {"reply": reply}
+    print("teacher/admin called")
+   # return {"reply": result['response'], "aireply" : reply}
+    print("reply")
+    print(reply)
     return {"reply": result['response']}
 
 @router.post("/history")

@@ -1,4 +1,4 @@
-from typing import TypedDict, List
+from typing import TypedDict, List, Optional
 import os, json, requests
 from pydantic import BaseModel, EmailStr
 
@@ -39,3 +39,21 @@ class ParentCreate(BaseModel):
 class ParentUpdate(BaseModel):
     name: str | None = None
     email: EmailStr | None = None
+    
+class MarkCreate(BaseModel):
+    student_id: int | None = None
+    term : int | None = None
+    language_1 : int | None = None
+    language_2 : int | None = None
+    maths : int |None = None
+    science : int | None = None
+    social_science : int | None = None
+
+class MarkUpdate(BaseModel):
+    student_id: Optional[int] = None
+    term: Optional[int] = None
+    language_1: Optional[int] = None
+    language_2: Optional[int] = None
+    maths: Optional[int] = None
+    science: Optional[int] = None
+    social_science: Optional[int] = None
