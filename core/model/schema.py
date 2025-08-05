@@ -62,3 +62,6 @@ class MarkQueryParams(BaseModel):
     student_id: int
     subject: List[str]  # e.g. ["maths", "science"]
     term: List[int] 
+
+class RequestPayload(BaseModel):
+    params: MarkQueryParams

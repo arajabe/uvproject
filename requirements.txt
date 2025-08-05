@@ -8,3 +8,4 @@ openai
 streamlit 
 requests
 langchain_groq
+tabulate

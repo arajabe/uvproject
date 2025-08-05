@@ -9,7 +9,7 @@ from core.db.db import get_db, Mark
 router = APIRouter(prefix="/mark", tags=["mark"])
 
 @router.post("/")
-def create_user(mark: MarkCreate, db: Session = Depends(get_db)):
+def create_student_mark(mark: MarkCreate, db: Session = Depends(get_db)):
     print("create_user(user: UserCreate, db: Session = Depends(get_db))")
     db_mark = Mark(student_id=mark.student_id, term = mark.term, language_1=mark.language_1, language_2=mark.language_2, 
                    maths = mark.maths, science = mark.science, social_science = mark.social_science)
@@ -39,7 +39,7 @@ def update_student_mark(student_id: int, term: int, mark: MarkUpdate, db: Sessio
     return {"status": "mark updated", "student_id": student_id, "term": term}
 
 @router.delete("/{student_id}/{term}")
-def delete_teacher(student_id: int, term : int, db: Session = Depends(get_db)):
+def delete_student_mark(student_id: int, term : int, db: Session = Depends(get_db)):
     db_mark = db.query(Mark).filter(Mark.student_id == student_id, Mark.term == term).first()
     print("db_mark", db_mark)
     if not db_mark:
@@ -47,3 +47,13 @@ def delete_teacher(student_id: int, term : int, db: Session = Depends(get_db)):
     db.delete(db_mark)
     db.commit()
     return {"status": "deleted mark list", "student_id": student_id, "term" : term}
+
+@router.get("/{student_id}/{term}")
+def delete_student_mark(student_id: int, term : int, db: Session = Depends(get_db)):
+    db_mark = db.query(Mark).filter(Mark.student_id == student_id, Mark.term == term).first()
+    print("db_mark", db_mark)
+    if not db_mark:
+        raise HTTPException(404, "student not found")
+    get_mark = db.get(db_mark)
+    db.commit()
+    return {"status": "deleted mark list", "student_id": student_id, "term" : term, "mark" : get_mark}

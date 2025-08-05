@@ -52,7 +52,7 @@ def chat(session_id: str, message: str, db: Session = Depends(get_db)):
     print("teacher/admin called")
    # return {"reply": result['response'], "aireply" : reply}
     print("reply")
-    print(reply)
+    print(result['response'])
     return {"reply": result['response']}
 
 

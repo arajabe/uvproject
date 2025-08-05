@@ -6,27 +6,34 @@ from core.model.schema import ChatState
 from llm.llm import llm
 import re,requests
 import json
+import pandas as pd
+from core.db.db import get_db
 
 API = "http://127.0.0.1:8000"
 
 def intent_node_performance_initial(state : ChatState) -> ChatState:
     msg = state["messages"][-1].content
     prompt = f"""
-                You are AI assistant analyze the {msg} and classify the intent.
+You are a helpful AI assistant. Analyze the given user message and classify its intent.
 
-                Avaliable intents:
-                - mark_list : The user wants to get the scored subject mark in the term exam 
-                - performance : The user wants to get the student performance in term exam
+You must choose **only one** of the following two intent labels:
 
-                 only respond with following values : "mark_list", "performance"
+- **mark_list** → When the user is asking for specific subject marks in a term exam  
+  (e.g., "What is my science mark in term 2?")
 
-                 Examples:
+- **performance** → When the user is asking for overall performance in a term  
+  (e.g., "How did I perform in term 1?" or "Give me my result analysis")
 
-                 Message: what is my maths mark in term 1
-                 Intent : "mark_list"
-                """.strip()
+📌 Respond with exactly one word: **"mark_list"** or **"performance"** or  **"others"** 
+📌 Do **not** explain your answer. Do **not** add punctuation or extra text.
+
+---
+
+Message: {msg}
+Intent:
+""".strip()
     result = llm.invoke([HumanMessage(content=prompt)])
-    print("intent node")
+    print("intent_node_performance_initial")
     print(result.content)
     # routing logic
     
@@ -40,8 +47,7 @@ def router_node(state: ChatState) -> str:
         case "performance": return "intent_node_performance"
 
         case _: 
-            print(" hello chat user case")
-            return "chat_node"
+            return "intent_chat_node"
 
 
 def intent_node_performance(state: ChatState) -> ChatState:
@@ -148,6 +154,13 @@ def intent_node_mark_list(state : ChatState) -> ChatState:
 
         Extract any parameters (student_id, term, subject, other) mentioned.
 
+        Examples:
+        messages:
+        - what is the mark for science in term 1 and 2 for student id 90
+        - get student id 90 marks in term 1 and 2
+        - get student id 90 marks in maths term 1, 2
+
+
         Return **only** valid JSON, no extra text. Example:
         {{"params": {{"student_id": 36, "subject": [maths,science], "term":[1,2]}}}}  
         {{"params": {{"student_id": 25, "subject": [maths,science], "term":[1,2]. "other":[rank,total]}}}}  
@@ -165,17 +178,50 @@ def intent_node_mark_list(state : ChatState) -> ChatState:
     print(raw_output)
     p = json.loads(raw_output)
 
-   
-    url = f"{API}/performance"
-
     # Only include non-None fields in PATCH
     payload = {key: p[key] for key in [
             "term", "student_id", "subject"
         ] if key in p and p[key] is not None}
+    
+    print("payload")
+    print(p)
+   
+    r = requests.post(f"{API}/performance/", json = p)  
 
-    r = requests.post(url, json=payload)
+    print("requests")
+    print(r.json())
 
-    return {"messages" : state["messages"] + [AIMessage(content= "i am intent_node_mark_list")], "response" : r}
+
+    return {"messages" : state["messages"] + [AIMessage(content= "i am intent_node_mark_list")], "response" : r.json()}
+
+def intent_rank_node(state : ChatState):
+    df = pd.read_sql("SELECT * FROM termmark", get_db)
+
 
 def intent_chat_node(state : ChatState) -> ChatState:
-    pass
+    db = next(get_db()) 
+    df = pd.read_sql("SELECT * FROM termmark", db.bind)
+    subject_cols = ["language_1", "language_2", "maths", "science", "social_science"]
+
+    df["total"] = df[subject_cols].sum(axis=1)
+    df["average"] = df[subject_cols].mean(axis=1)
+    # Rank by total within each term
+    df["rank_total"] = df.groupby("term")["total"].rank(ascending=False, method="min")
+    # Rank by each subject within term
+    for subject in subject_cols:
+        df[f"rank_{subject}"] = df.groupby("term")[subject].rank(ascending=False, method="min")
+    # Term-wise performance summary
+    term_summary = df.groupby("term")[subject_cols + ["total", "average"]].mean().reset_index()
+    print("term_summary")
+    print(term_summary)
+    prompt = f"""Here is the average subject performance by term:
+        {term_summary.to_markdown(index=False)}
+
+            Please analyze which term had the best overall performance, and which subject needs improvement.
+        """
+
+    response = llm.invoke([HumanMessage(content=prompt)])
+  
+
+
+    return {"messages" : state["messages"] + [AIMessage(content= response.content)], "response" : response.content}
