@@ -1,0 +1,181 @@
+from sqlalchemy.orm import Session
+from core.db.db import get_db, Mark
+from langchain.schema import AIMessage,HumanMessage
+from langchain.prompts import ChatPromptTemplate
+from core.model.schema import ChatState
+from llm.llm import llm
+import re,requests
+import json
+
+API = "http://127.0.0.1:8000"
+
+def intent_node_performance_initial(state : ChatState) -> ChatState:
+    msg = state["messages"][-1].content
+    prompt = f"""
+                You are AI assistant analyze the {msg} and classify the intent.
+
+                Avaliable intents:
+                - mark_list : The user wants to get the scored subject mark in the term exam 
+                - performance : The user wants to get the student performance in term exam
+
+                 only respond with following values : "mark_list", "performance"
+
+                 Examples:
+
+                 Message: what is my maths mark in term 1
+                 Intent : "mark_list"
+                """.strip()
+    result = llm.invoke([HumanMessage(content=prompt)])
+    print("intent node")
+    print(result.content)
+    # routing logic
+    
+    return{** state, "messages":state["messages"], "intent": result.content}
+
+def router_node(state: ChatState) -> str:
+    x = str(state["intent"]).strip().lower()
+    print("router node")
+    match x:
+        case "mark_list" : return "intent_node_mark_list"
+        case "performance": return "intent_node_performance"
+
+        case _: 
+            print(" hello chat user case")
+            return "chat_node"
+
+
+def intent_node_performance(state: ChatState) -> ChatState:
+    msg = state["messages"][-1].content
+    prompt = f"""
+                you are AI assistant get student_id form the {msg} to do performance analyze.
+
+        Return **only** valid JSON, no extra text. Example:
+        {{"params": {{"student_id": 35}}}}
+            """
+    result = llm.invoke([HumanMessage(content=prompt)])
+
+    print(result)
+    raw_output = result.content.strip()
+
+    # Clean any accidental code block markers (like ```json ... ```)
+    raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip() 
+    
+
+    print("raw output")
+    print(raw_output)
+    parsed = json.loads(raw_output)
+
+    student_id = parsed.get("params", {}).get("student_id")
+
+    if not student_id:
+        reply = "Student ID is required to analyze performance."
+        return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": reply}
+
+    db: Session = next(get_db())
+    all_marks = db.query(Mark).all()
+
+    if not all_marks:
+        reply = "No mark data available to analyze."
+        return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": reply}
+
+    # Class average calculation
+    def safe_avg(values): return sum(values) / len(values) if values else 0
+
+    class_avg = {
+        "language_1": safe_avg([m.language_1 for m in all_marks]),
+        "language_2": safe_avg([m.language_2 for m in all_marks]),
+        "maths": safe_avg([m.maths for m in all_marks]),
+        "science": safe_avg([m.science for m in all_marks]),
+        "social_science": safe_avg([m.social_science for m in all_marks])
+    }
+
+    # Current student's marks
+    student_marks = [m for m in all_marks if m.student_id == student_id]
+    if not student_marks:
+        reply = f"No marks found for student ID {student_id}."
+        return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": reply}
+
+    term_analysis = []
+    for mark in student_marks:
+        diff = {
+            subject: {
+                "student_score": getattr(mark, subject),
+                "class_avg": class_avg[subject],
+                "below_avg": getattr(mark, subject) < class_avg[subject]
+            }
+            for subject in class_avg
+        }
+        term_analysis.append({
+            "term": mark.term,
+            "diff": diff
+        })
+
+    # Generate a natural language prompt for LLM
+    prompt_template = ChatPromptTemplate.from_template("""
+You are a school performance assistant. A student has the following subject scores compared to the class averages.
+
+Provide clear performance feedback, stating where the student is performing well, and what subjects they should focus on improving.
+
+Student ID: {student_id}
+
+Performance per term:
+{performance_json}
+
+Respond like you're advising a student.
+""")
+
+    # Serialize performance data
+    prompt_json = prompt_template.format(
+        student_id=student_id,
+        performance_json=json.dumps(term_analysis, indent=2)
+    )
+
+    # Call LLM to generate response
+    response = llm.predict(prompt_json)
+
+    return {
+        **state,
+        "messages": state["messages"] + [AIMessage(content=response)],
+        "response": response
+    }
+
+def intent_node_mark_list(state : ChatState) -> ChatState:
+    msg = state["messages"][-1].content
+    prompt = f""" You are AI assistint analyze the {msg} and return the paramaters.
+        
+        Database: testdb
+        Table: Mark(student_id, term, language_1, language_2, maths, science. social_science)
+
+        Extract any parameters (student_id, term, subject, other) mentioned.
+
+        Return **only** valid JSON, no extra text. Example:
+        {{"params": {{"student_id": 36, "subject": [maths,science], "term":[1,2]}}}}  
+        {{"params": {{"student_id": 25, "subject": [maths,science], "term":[1,2]. "other":[rank,total]}}}}  
+"""
+    ai_resp = llm.invoke([HumanMessage(content=prompt)])
+    print(ai_resp)
+
+    raw_output = ai_resp.content.strip()
+
+    # Clean any accidental code block markers (like ```json ... ```)
+    raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip() 
+    
+
+    print("raw output")
+    print(raw_output)
+    p = json.loads(raw_output)
+
+   
+    url = f"{API}/performance"
+
+    # Only include non-None fields in PATCH
+    payload = {key: p[key] for key in [
+            "term", "student_id", "subject"
+        ] if key in p and p[key] is not None}
+
+    r = requests.post(url, json=payload)
+
+    return {"messages" : state["messages"] + [AIMessage(content= "i am intent_node_mark_list")], "response" : r}
+
+def intent_chat_node(state : ChatState) -> ChatState:
+    pass

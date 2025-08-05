@@ -39,7 +39,7 @@ class ParentCreate(BaseModel):
 class ParentUpdate(BaseModel):
     name: str | None = None
     email: EmailStr | None = None
-    
+
 class MarkCreate(BaseModel):
     student_id: int | None = None
     term : int | None = None
@@ -50,10 +50,15 @@ class MarkCreate(BaseModel):
     social_science : int | None = None
 
 class MarkUpdate(BaseModel):
-    student_id: Optional[int] = None
-    term: Optional[int] = None
+    student_id: int = None
+    term: int = None
     language_1: Optional[int] = None
     language_2: Optional[int] = None
     maths: Optional[int] = None
     science: Optional[int] = None
     social_science: Optional[int] = None
+
+class MarkQueryParams(BaseModel):
+    student_id: int
+    subject: List[str]  # e.g. ["maths", "science"]
+    term: List[int] 

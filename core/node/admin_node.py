@@ -401,4 +401,4 @@ def chat_node(state: ChatState) -> ChatState:
     ai_reply = llm.invoke(state["messages"]).content
     print("chat node")
     #return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": AIMessage(content=ai_reply)}
-    return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": {"hello":"i am chat node"}}
+    return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": {"hello":"This is irrelevant chat. we will assist you with student performance"}}

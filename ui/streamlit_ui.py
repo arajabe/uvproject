@@ -34,7 +34,11 @@ with st.sidebar:
     if st.button("Teacher"):
         st.session_state["role"] = "teacher"
 
-    st.markdown(f"**Current Role**: `{st.session_state.get('role', 'None')}`")   
+    st.markdown(f"**Current Role**: `{st.session_state.get('role', 'None')}`")  
+
+with st.sidebar:
+    option = st.selectbox('What do you want to do?',
+                             ('performance')) 
 
 # Show current role
 role = st.session_state["role"]
@@ -68,11 +72,44 @@ def is_operation_allowed_teacher(msg, role):
 role_endpoints = {
     "admin": "admin",
     "teacher": "teacher",
-    "student": "history"
+    "student": "performance",
+    "parent": "performance"
 }
 
+
+
+
 # Send button
+if st.button("get performance"):
+    
+    if not role:
+        st.warning("Please select a role first.")
+    elif not msg.strip():
+        st.warning("Please enter a message.")
+    
+    ##elif not is_operation_allowed(msg, role):
+        ##st.error(f"As a `{role}`, you are not allowed to perform this operation.")
+    elif role in role_endpoints:
+        try:
+            endpoint = role_endpoints[role]
+            res = requests.post(
+                f"{API}/chat/performance",
+                params={
+                    "session_id": st.session_state["session_id"],
+                    "message": msg
+                }
+            )
+            data = res.json()
+            st.write(f"Bot: {data.get('reply', '(No reply found)')}")
+            # st.write(f"Bot: {data.get('aireply', '(AI reply not found)')}")
+        except Exception as e:
+            st.error(f"Error: {e}")
+    else:
+        st.error(f"As a `{role}`, you are not allowed to perform this operation.")
+
+    # Send button
 if st.button("Send"):
+    
     if not role:
         st.warning("Please select a role first.")
     elif not msg.strip():
@@ -97,5 +134,7 @@ if st.button("Send"):
             st.error(f"Error: {e}")
     else:
         st.error(f"As a `{role}`, you are not allowed to perform this operation.")
+
+    
     
     

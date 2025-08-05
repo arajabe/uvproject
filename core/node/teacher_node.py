@@ -102,7 +102,45 @@ def intent_node_create_mark(state: ChatState) -> ChatState:
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
 
 def intent_node_update_mark(state: ChatState) -> ChatState:
-    pass
+    p = state["params"]
+
+    # Check required params
+    if "student_id" in p and "term" in p:
+        url = f"{API}/mark/{p['student_id']}/{p['term']}"
+
+        # Only include non-None fields in PATCH
+        payload = {key: p[key] for key in [
+            "language_1", "language_2", "maths", "science", "social_science"
+        ] if key in p and p[key] is not None}
+
+        if not payload:
+            reply = "No fields provided to update."
+            return {**state, "messages": state["messages"] + [AIMessage(content=reply)]}
+
+        r = requests.patch(url, json=payload)
+
+        if r.status_code == 200:
+            reply = "Mark updated successfully."
+        elif r.status_code == 404:
+            reply = "Mark record not found."
+        else:
+            reply = f"Update failed with status {r.status_code}"
+
+        return {
+            **state,
+            "messages": state["messages"] + [AIMessage(content=reply)],
+            "response": r.json() if r.status_code == 200 else {}
+        }
+
+    else:
+        reply = "Both student ID and term are required to update marks."
+        return {**state, "messages": state["messages"] + [AIMessage(content=reply)]}
 
 def intent_node_delete_mark(state: ChatState) -> ChatState:
-    pass
+    p = state["params"]
+    if "student_id" in p:
+        r = requests.delete(f"{API}/mark/{p['student_id']}/{p['term']}")
+        reply = "mark list deleted." if r.status_code == 200 else "student list not found."
+    else:
+        reply = "Need a student ID to delete mark list"
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}

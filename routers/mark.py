@@ -35,5 +35,15 @@ def update_student_mark(student_id: int, term: int, mark: MarkUpdate, db: Sessio
 
     db.commit()
     db.refresh(db_mark)
-
+    print("patch called")
     return {"status": "mark updated", "student_id": student_id, "term": term}
+
+@router.delete("/{student_id}/{term}")
+def delete_teacher(student_id: int, term : int, db: Session = Depends(get_db)):
+    db_mark = db.query(Mark).filter(Mark.student_id == student_id, Mark.term == term).first()
+    print("db_mark", db_mark)
+    if not db_mark:
+        raise HTTPException(404, "student not found")
+    db.delete(db_mark)
+    db.commit()
+    return {"status": "deleted mark list", "student_id": student_id, "term" : term}
