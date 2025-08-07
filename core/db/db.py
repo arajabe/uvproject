@@ -77,8 +77,7 @@ class Mark(Base):
         "CASE WHEN (language_1 >= 35 AND language_2 >= 35 AND maths >= 35 AND science >= 35 AND social_science >= 35) THEN 'pass' ELSE 'fail' END",
         persisted=True
     ),
-    nullable=False,
-)
+    nullable=False,)
     timestamp = Column(DateTime, default=datetime.utcnow)
     
     student = relationship("Student", backref="marks")

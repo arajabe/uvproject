@@ -205,15 +205,31 @@ def intent_chat_node(state : ChatState) -> ChatState:
 
     df["total"] = df[subject_cols].sum(axis=1)
     df["average"] = df[subject_cols].mean(axis=1)
+
     # Rank by total within each term
     df["rank_total"] = df.groupby("term")["total"].rank(ascending=False, method="min")
+    print("rank_total")
+    print(df)
+
+    y = ""
     # Rank by each subject within term
     for subject in subject_cols:
         df[f"rank_{subject}"] = df.groupby("term")[subject].rank(ascending=False, method="min")
+    y = df.to_markdown()
+    print(" hello df")
+    print()
+
     # Term-wise performance summary
     term_summary = df.groupby("term")[subject_cols + ["total", "average"]].mean().reset_index()
+
+    # Save final table with rankings
+    df.to_csv("student_performance_ranked.csv", index=False)
+
     print("term_summary")
-    print(term_summary)
+    # print(df.to_csv("student_performance_ranked.csv", index=False)
+   # print(df[df["term"] == 1][["student_id", "term", "total", "rank_total"]].sort_values(["term", "rank_total"]))
+    df = df[["student_id", "term", "total", "rank_total"]].sort_values(["term", "rank_total"])
+    print(df[df["student_id"] == 24])
     prompt = f"""Here is the average subject performance by term:
         {term_summary.to_markdown(index=False)}
 
@@ -221,7 +237,10 @@ def intent_chat_node(state : ChatState) -> ChatState:
         """
 
     response = llm.invoke([HumanMessage(content=prompt)])
-  
+    
+    x= df[df["student_id"] == 20].to_markdown(index=False)
+    
+    print("mark down")
 
-
-    return {"messages" : state["messages"] + [AIMessage(content= response.content)], "response" : response.content}
+    print(x)
+    return {"messages" : state["messages"] + [AIMessage(content= response.content)], "response_pd" : y}

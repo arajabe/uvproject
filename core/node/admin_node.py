@@ -14,26 +14,24 @@ def intent_node(state:ChatState) -> ChatState:
     msg = state["messages"][-1].content
     prompt = f"""
 You are an intent classification assistant. Your job is to classify a user message into one of the intent categories.
-Analyze a message ({msg}) to determine whether its purpose or request is related to extracting or identifying personal information — specifically identity-related details like names, contact info, or address.
 
-Available intents:
-- teacher: The user wants to perform create, read, update, or delete operations on teachers. Examples: "Add a new teacher", "Update John's phone number", "Delete teacher Mike", "Show me my teachers".
-- user: The user wants to perform create, read, update, or delete operations on users. Examples: "Create a new user", "Get user info for ID 5", "Update user email", "Delete user 7".
-- parent: The user wants to perform create, read, update, or delete operations on parents. Examples: "Create a new parent", "Get parent info for ID 5", "Update parent email", "Delete parent 7".
-- student: The user wants to perform create, read, update, or delete operations on student. Examples: "Create a new student", "Get student info for ID 5", "Update student email", "Delete student 7".
-- others: If the user wants to perform create, read, update, or delete operations on something other than teacher, user, or parents.
-- error : If the user wants to perform create, read, update, or delete operations like following Examples: "create raja", "delete 7" , "update phone number"
+Analyze the following message:
 
-Only respond with one of the six values: "teacher", "user", "parents", "others", "error", "student".
-Do not add any explanation or extra text.
+Message: "{msg}"
+
+Determine whether its purpose or request is related to extracting or identifying personal information,
+specifically identity-related details like names, contact info, or address.
 
 Examples:
 
-Message: "Add a new teacher for John"
+Message: "Add a new teacher for John"  
 Intent: teacher
 
-Message: {msg}
-Intent:
+Message: "create contact for"  
+Intent: others
+
+Only respond with one of the six intent values: "teacher", "officestaff", "parent", "others", "error", "student".  
+Do not include any explanation or extra text.
 """.strip()
     
     result = llm.invoke([HumanMessage(content=prompt)])
@@ -46,9 +44,9 @@ Intent:
 def router_node(state: ChatState) -> str:
     x = str(state["intent"]).strip().lower()
     print("router node")
+    print(x)
     match x:
-        case "contact" : return "intent_node_contact"
-        case "user": return "intent_node_user"
+        case "officestaff": return "intent_node_user"
         case "student": return "intent_node_student"
         case "parent": return "intent_node_parent"
         case "teacher": return "intent_node_teacher"
@@ -147,10 +145,7 @@ def intent_node_student(state: ChatState) -> ChatState:
     user_msg = state["messages"][-1].content
     prompt = f"""
 
-        You are AI assistant, clarify the intent of {user_msg} and work with testdb database.
-
-        Classify the intent of: "{user_msg}". and create_student, delete_student, update_student, update_student and chat history in database testdb
-
+        You are AI assistant, clarify the intent of {user_msg}.
         Database: testdb
         Table: student(id, name, email)
 
@@ -158,7 +153,6 @@ def intent_node_student(state: ChatState) -> ChatState:
         - create_student (requires name, email)
         - delete_student (requires id)
         - update_student (requires id, name/email if given)
-        - chat (free text, fallback if no DB action is needed)
 
         Extract any parameters (id, name, email) mentioned.
 
@@ -190,9 +184,7 @@ def intent_node_parent(state: ChatState) -> ChatState:
     user_msg = state["messages"][-1].content
     prompt = f"""
 
-        You are AI assistant, clarify the intent of {user_msg} and work with testdb database.
-
-        Classify the intent of: "{user_msg}". and create_parent, delete_parent, update_parent, update_parent and chat history in database testdb
+        You are AI assistant, clarify the intent of {user_msg}.
 
         Database: testdb
         Table: parent(id, name, email)
@@ -201,7 +193,6 @@ def intent_node_parent(state: ChatState) -> ChatState:
         - create_parent (requires name, email)
         - delete_parent (requires id)
         - update_parent (requires id, name/email if given)
-        - chat (free text, fallback if no DB action is needed)
 
         Extract any parameters (id, name, email) mentioned.
 
@@ -233,15 +224,16 @@ def intent_node_parent(state: ChatState) -> ChatState:
 # --- Node 2: Router ---
 def router_node_user(state: ChatState) -> str:
     print("router_node_user")
-    match state["intent"]:
+    x = str(state["intent"]).strip().lower()
+    match x:
         case "create_user": return "create_node_user"
         case "delete_user": return "delete_node_user"
         case "update_user": return "update_node_user"
         case _: return "chat_node"
 
 def router_node_student(state: ChatState) -> str:
-    print("router_node_student")
-    match state["intent"]:
+    x = str(state["intent"]).strip().lower()
+    match x:
         case "create_student": return "create_node_student"
         case "delete_student": return "delete_node_student"
         case "update_student": return "update_node_student"
@@ -250,8 +242,8 @@ def router_node_student(state: ChatState) -> str:
 
 def router_node_parent(state: ChatState) -> str:
     print("router node parent")
-    
-    match state["intent"]:
+    x = str(state["intent"]).strip().lower()
+    match x:
         case "create_parent": return "create_node_parent"
         case "delete_parent": return "delete_node_parent"
         case "update_parent": return "update_node_parent"
@@ -261,8 +253,8 @@ def router_node_parent(state: ChatState) -> str:
 def router_node_teacher(state: ChatState) -> str:
 
     print("routher node teacher")
-
-    match state["intent"]:
+    x = str(state["intent"]).strip().lower()
+    match x:
         case "create_teacher": return "create_node_teacher"
         case "delete_teacher": return "delete_node_teacher"
         case "update_teacher": return "update_node_teacher"

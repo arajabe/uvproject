@@ -1,12 +1,14 @@
 from typing import TypedDict, List, Optional
 import os, json, requests
 from pydantic import BaseModel, EmailStr
+import pandas
 
 class ChatState(TypedDict):
     messages: List
     intent: str
     params: dict
     response : json
+    response_pd : str
 
 class UserCreate(BaseModel):
     name: str
@@ -65,3 +67,7 @@ class MarkQueryParams(BaseModel):
 
 class RequestPayload(BaseModel):
     params: MarkQueryParams
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
