@@ -8,6 +8,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy import CheckConstraint,UniqueConstraint
 from sqlalchemy import Computed
+from sqlalchemy import Column, Date
 
 DATABASE_URL = "mysql+pymysql://root:Nannilam123@127.0.0.1/testdb"
 engine = create_engine(DATABASE_URL, echo=True, future=True)
@@ -16,9 +17,17 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String(50), primary_key=True, index=True)
     name = Column(String(50), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
+    fathername = Column(String(50), nullable=False)
+    mothername = Column(String(50), nullable=False)
+    dateofbirth = Column(String(50), nullable = False)
+    address = Column(String(200), nullable=False)
+    city = Column(String(50), nullable=False)
+    pincode = Column(String(6), nullable=False)
+    contactnumber = Column(String(10), nullable=False)
+    email = Column(String(50), nullable=False)
+    aadhar = Column(String(17), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
 class ChatHistory(Base):
@@ -33,32 +42,53 @@ class ChatHistory(Base):
 
 class Student(Base):
     __tablename__ = "student"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String(50), primary_key=True, index=True)
     name = Column(String(50), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
+    fathername = Column(String(50), nullable=False)
+    mothername = Column(String(50), nullable=False)
+    dateofbirth = Column(String(50), nullable = False)
+    address = Column(String(200), nullable=False)
+    city = Column(String(50), nullable=False)
+    pincode = Column(String(6), nullable=False)
+    contactnumber = Column(String(10), nullable=False)
+    email = Column(String(50), nullable=False)
+    aadhar = Column(String(17), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    timestamp = Column(DateTime, default=datetime.utcnow)
 
 class Teacher(Base):
     __tablename__ = "Teacher"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String(50), primary_key=True, index=True)
     name = Column(String(50), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
+    fathername = Column(String(50), nullable=False)
+    mothername = Column(String(50), nullable=False)
+    dateofbirth = Column(String(50), nullable = False)
+    address = Column(String(200), nullable=False)
+    city = Column(String(50), nullable=False)
+    pincode = Column(String(6), nullable=False)
+    contactnumber = Column(String(10), nullable=False)
+    email = Column(String(50), nullable=False)
+    aadhar = Column(String(17), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    timestamp = Column(DateTime, default=datetime.utcnow)
 
 class Parent(Base):
     __tablename__ = "parent"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String(50), primary_key=True, index=True)
     name = Column(String(50), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
+    fathername = Column(String(50), nullable=False)
+    mothername = Column(String(50), nullable=False)
+    dateofbirth = Column(String(50), nullable = False)
+    address = Column(String(200), nullable=False)
+    city = Column(String(50), nullable=False)
+    pincode = Column(String(6), nullable=False)
+    contactnumber = Column(String(10), nullable=False)
+    email = Column(String(50), nullable=False)
+    aadhar = Column(String(17), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    timestamp = Column(DateTime, default=datetime.utcnow)
 
 class Mark(Base):
     __tablename__ = "termmark"  
     id = Column(Integer, primary_key=True, index=True)
-    student_id = Column(Integer, ForeignKey("student.id"), nullable=False)
+    student_id = Column(String(50), ForeignKey("student.id"), nullable=False)
     term = Column(Integer, nullable=False, index=True)
     language_1_status = Column(String(5), Computed("CASE WHEN language_1 >= 35 THEN 'pass' ELSE 'fail' END"), nullable=False)
     language_1 = Column(Integer, nullable=False, index=True)

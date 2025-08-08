@@ -10,8 +10,13 @@ router = APIRouter(prefix="/student", tags=["student"])
 
 @router.post("/")
 def create_student(student: StudentCreate, db: Session = Depends(get_db)):
+    new_id = generate_student_id(db)
     print("create_student(student: StudentCreate, db: Session = Depends(get_db))")
-    db_student = Student(name=student.name, email=student.email)
+    db_student = Student(name=student.name, email=student.email, fathername = student.fathername,
+                         mothername = student.mothername, dateofbirth = student.dateofbirth, 
+                         address =student.address, city = student.city, pincode = student.pincode, 
+                         contactnumber = student.contactnumber, aadhar = student.aadhar, id = new_id)
+
     db.add(db_student)
     db.commit()
     db.refresh(db_student)
@@ -36,3 +41,12 @@ def update_student(student_id: int, student: StudentUpdate, db: Session = Depend
     if student.email: db_student.email = student.email
     db.commit()
     return {"status": "updated", "id": db_student.id}
+
+def generate_student_id(db: Session):
+    last = db.query(Student).order_by(Student.id.desc()).first()
+    if last:
+        last_num = int(last.id[4:])  
+        new_id = f"STUD{last_num + 1:04d}"
+    else:
+        new_id = "STUD0001"
+    return new_id

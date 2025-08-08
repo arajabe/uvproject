@@ -11,7 +11,11 @@ router = APIRouter(prefix="/parent", tags=["parent"])
 @router.post("/")
 def create_parent(parent: ParentCreate, db: Session = Depends(get_db)):
     print(" i am parent post")
-    db_parent = Parent(name=parent.name, email=parent.email)
+    new_id = generate_parent_id(db)
+    db_parent = Parent(name=parent.name, email=parent.email, fathername = parent.fathername,
+                         mothername = parent.mothername, dateofbirth = parent.dateofbirth, 
+                         address =parent.address, city = parent.city, pincode = parent.pincode, 
+                         contactnumber = parent.contactnumber, aadhar = parent.aadhar, id = new_id)
     db.add(db_parent)
     db.commit()
     db.refresh(db_parent)
@@ -36,3 +40,12 @@ def update_parent(parent_id: int, parent: ParentUpdate, db: Session = Depends(ge
     if parent.email: db_parent.email = parent.email
     db.commit()
     return {"status": "updated", "id": db_parent.id}
+
+def generate_parent_id(db: Session):
+    last = db.query(Parent).order_by(Parent.id.desc()).first()
+    if last:
+        last_num = int(last.id[2:])  # Remove 'P' and convert to int
+        new_id = f"PA{last_num + 1:04d}"
+    else:
+        new_id = "PA0001"
+    return new_id

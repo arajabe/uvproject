@@ -10,8 +10,11 @@ router = APIRouter(prefix="/teacher", tags=["teacher"])
 
 @router.post("/")
 def create_teacher(teacher: TeacherCreate, db: Session = Depends(get_db)):
-    print("teacher post")
-    db_teacher = Teacher(name=teacher.name, email=teacher.email)
+    new_id = generate_teacher_id(db)
+    db_teacher = Teacher(name=teacher.name, email=teacher.email, fathername = teacher.fathername,
+                         mothername = teacher.mothername, dateofbirth = teacher.dateofbirth, 
+                         address =teacher.address, city = teacher.city, pincode = teacher.pincode, 
+                         contactnumber = teacher.contactnumber, aadhar = teacher.aadhar, id = new_id)
     db.add(db_teacher)
     db.commit()
     db.refresh(db_teacher)
@@ -36,3 +39,12 @@ def update_teacher(teacher_id: int, user: TeacherUpdate, db: Session = Depends(g
     if user.email: db_teacher.email = user.email
     db.commit()
     return {"status": "updated", "id": db_teacher.id}
+
+def generate_teacher_id(db: Session):
+    last = db.query(Teacher).order_by(Teacher.id.desc()).first()
+    if last:
+        last_num = int(last.id[3:])  
+        new_id = f"TEA{last_num + 1:04d}"
+    else:
+        new_id = "TEA0001"
+    return new_id

@@ -11,7 +11,11 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.post("/")
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     print("create_user(user: UserCreate, db: Session = Depends(get_db))")
-    db_user = User(name=user.name, email=user.email)
+    new_id = generate_user_id(db)
+    db_user = User(name=user.name, email=user.email, fathername = user.fathername,
+                         mothername = user.mothername, dateofbirth = user.dateofbirth, 
+                         address =user.address, city = user.city, pincode = user.pincode, 
+                         contactnumber = user.contactnumber, aadhar = user.aadhar, id = new_id)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -36,3 +40,12 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     if user.email: db_user.email = user.email
     db.commit()
     return {"status": "updated", "id": db_user.id}
+
+def generate_user_id(db: Session):
+    last = db.query(User).order_by(User.id.desc()).first()
+    if last:
+        last_num = int(last.id[3:])  
+        new_id = f"USR{last_num + 1:04d}"
+    else:
+        new_id = "USR0001"
+    return new_id
