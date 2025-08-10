@@ -13,30 +13,24 @@ API = "http://127.0.0.1:8000"
 def intent_node(state:ChatState) -> ChatState:
     msg = state["messages"][-1].content
     prompt = f"""
-
-        You are AI assistant, clarify the intent of {msg} and work with testdb database.
-
-        clarify the intent of :student, teacher, parent, officestaff, others
-
-        Extract intent mentioned.
+    Task:
+    Identify the exact intent from {msg} without inferring related meanings. Valid intents are: student, teacher, parent, officestaff
+    - Output only valid JSON.
 
         Return **only** valid JSON, no extra text. Example:
         {{"intent": "parent"}}
         {{"intent": "teacher"}}
         """
-    print("before create_node invoke")
-    ai_resp = llm.invoke([HumanMessage(content=prompt)])
-   
-    print("after create_node invoke")
+
+    ai_resp = llm.invoke([HumanMessage(content=prompt)])   
 
     raw_output = ai_resp.content.strip()
 
     # Clean any accidental code block markers (like ```json ... ```)
     raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()    
-
+    print(raw_output)
     try:
         parsed = json.loads(raw_output)
-        print(parsed)
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat")}
@@ -46,7 +40,7 @@ def router_node(state: ChatState) -> str:
     print("router node")
     print(x)
     match x:
-        case "officestaff": return "intent_node_user"
+        case "officestaff": return "intent_node_officestaff"
         case "student": return "intent_node_student"
         case "parent": return "intent_node_parent"
         case "teacher": return "intent_node_teacher"
@@ -63,21 +57,23 @@ def intent_node_teacher(state: ChatState) -> ChatState:
 
         You are AI assistant, clarify the intent of {user_msg} and work with testdb database.
 
-        Classify the intent of: "{user_msg}". and create_teacher, delete_teacher, update_teacher, update_teacher and chat history in database testdb
+        Classify the intent of: "{user_msg}". and create_teacher, delete_teacher, update_teacher and chat history in database testdb
 
         Database: testdb
-        Table: teacher(id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar)
+        Table: teacher(teacherid, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar,reason, graduatedegree, subject)
 
         Valid intents:
-        - create_teacher (requires name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar)
-        - delete_teacher (requires id)
-        - update_teacher (requires id, name/fathername/mothername/dateofbirth/address/city/pincode/contactnumber/email/aadhar if given)
+        - create_teacher (requires name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, graduatedegree, subject)
+        - delete_teacher (requires teacherid, reason)
+        - update_teacher (requires teacherid, name/fathername/mothername/dateofbirth/address/city/pincode/contactnumber/email/aadhar/reason/graduatedegree/subject if given)
 
-        Extract any parameters (id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar) mentioned.
+        Extract any parameters (teacherid, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar,reason, graduatedegree, subject) mentioned.
 
         Return **only** valid JSON, no extra text. Example:
         {{"intent": "create_teacher", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
-        {{"intent": "create_teacher", "params": {{"name": "Bob", "email": "bob@x.com", "id": 10}}}}
+        {{"intent": "update_teacher", "params": {{"name": "Bob", "email": "bob@x.com", "teacherid": "10", reason = "upgraded"}}}}
+        {{"intent": "delete_teacher", "params": {{"teacherid": "10", reason="transfer"}}}}
+
         """
     print("before create_node invoke")
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
@@ -97,32 +93,32 @@ def intent_node_teacher(state: ChatState) -> ChatState:
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
 
 # --- Node 1: Intent Analysis ---
-def intent_node_user(state: ChatState) -> ChatState:
+def intent_node_officestaff(state: ChatState) -> ChatState:
     print("i am intent node user")
     user_msg = state["messages"][-1].content
     prompt = f"""
 
         You are AI assistant, clarify the intent of {user_msg} and work with testdb database.
 
-        Classify the intent of: "{user_msg}". and create_user, delete_user,update_user, update_user and chat history in database testdb
+        Classify the intent of: "{user_msg}". and create_officestaff, delete_officestaff,update_officestaff and chat history in database testdb
 
         Database: testdb
-        Table: users(id, name, email)
+        Table: OfficeStaff(id, name, email)
 
         Valid intents:
-        Table: users(id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar)
+        Table: OfficeStaff(id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, role, graduatedegree, subject)
 
         Valid intents:
-        - create_user (requires name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar)
-        - delete_user (requires id)
-        - update_user (requires id, name/fathername/mothername/dateofbirth/address/city/pincode/contactnumber/email/aadhar if given)
+        - create_officestaff (requires name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, role, graduatedegree, subject)
+        - delete_officestaff (requires officestaffid, reason)
+        - update_officestaff (requires officestaffid, name/fathername/mothername/dateofbirth/address/city/pincode/contactnumber/email/aadhar/graduatedegree/subject if given)
 
-        Extract any parameters (id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar) mentioned.
-        Extract any parameters (id, name, email) mentioned.
+        Extract any parameters (parentid, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, role, graduatedegree, subject) mentioned.
+        Extract any parameters (parentid, name, email) mentioned.
 
         Return **only** valid JSON, no extra text. Example:
-        {{"intent": "create_user", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
-        {{"intent": "create_user", "params": {{"name": "Bob", "email": "bob@x.com", "id": 10}}}}
+        {{"intent": "create_officestaff", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
+        {{"intent": "create_officestaff", "params": {{"name": "Bob", "email": "bob@x.com", "parentid": 10}}}}
         """
     print("before create_node invoke")
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
@@ -149,18 +145,19 @@ def intent_node_student(state: ChatState) -> ChatState:
 
         You are AI assistant, clarify the intent of {user_msg}.
         Database: testdb
-        Table: student(id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar)
+        Table: student(id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, parentid, parentrelation)
 
         Valid intents:
-        - create_student (requires name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar)
-        - delete_student (requires id)
-        - update_student (requires id, name/fathername/mothername/dateofbirth/address/city/pincode/contactnumber/email/aadhar if given)
+        - create_student (requires name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, parentid, parentrelation)
+        - delete_student (requires studentid, reason)
+        - update_student (requires studentid, name/fathername/mothername/dateofbirth/address/city/pincode/contactnumber/email/aadhar/reason/parentid/parentrelation if given)
 
-        Extract any parameters (id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar) mentioned.
+        Extract any parameters (studentid, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, parentid, parentrelation) mentioned.
 
         Return **only** valid JSON, no extra text. Example:
         {{"intent": "create_student", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
-        {{"intent": "create_student", "params": {{"name": "Bob", "email": "bob@x.com", "id": 10}}}}
+        {{"intent": "create_student", "params": {{"name": "Bob", "email": "bob@x.com", "studentid": 10}}}}
+        {{"intent": "delete_student", "params": {{"studentid": 10, reason: "transfer"}}}}
         """
     print("before create_node invoke")
     ai_resp = llm.invoke([HumanMessage(content=create_prompt)])
@@ -188,18 +185,18 @@ def intent_node_parent(state: ChatState) -> ChatState:
 
         You are AI assistant, clarify the intent of {user_msg}.
 
-        Table: parent(id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar)
+        Table: parent(name,email,fathername,mothername,dateofbirth,address,city,pincode,contactnumber,aadhar,reason,fatheroccupation,motheroccupation)
 
         Valid intents:
-        - create_parent (requires name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar)
-        - delete_parent (requires id)
-        - update_parent (requires id, name/fathername/mothername/dateofbirth/address/city/pincode/contactnumber/email/aadhar if given)
+        - create_parent (requires name, email, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, aadhar, reason, fatheroccupation, motheroccupation)
+        - delete_parent (requires parentid, reason)
+        - update_parent (requires parentid and reason, name/fathername/mothername/dateofbirth/address/city/pincode/contactnumber/email/aadhar/fatheroccupation/motheroccupation if given)
 
-        Extract any parameters (id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar) mentioned.
+        Extract any parameters (id,name,email,fathername,mothername,dateofbirth,address,city,pincode,contactnumber,aadhar,reason,fatheroccupation,motheroccupation) mentioned.
 
         Return **only** valid JSON, no extra text. Example:
         {{"intent": "create_parent", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
-        {{"intent": "create_parent", "params": {{"name": "Bob", "email": "bob@x.com", "id": 10}}}}
+        {{"intent": "create_parent", "params": {{"name": "Bob", "email": none "parentid": "10}}}}
         """
     print("before create_node invoke")
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
@@ -223,13 +220,13 @@ def intent_node_parent(state: ChatState) -> ChatState:
 
 
 # --- Node 2: Router ---
-def router_node_user(state: ChatState) -> str:
+def router_node_officestaff(state: ChatState) -> str:
     print("router_node_user")
     x = str(state["intent"]).strip().lower()
     match x:
-        case "create_user": return "create_node_user"
-        case "delete_user": return "delete_node_user"
-        case "update_user": return "update_node_user"
+        case "create_officestaff": return "create_node_officestaff"
+        case "delete_officestaff": return "delete_node_officestaff"
+        case "update_officestaff": return "update_node_officestaff"
         case _: return "chat_node"
 
 def router_node_student(state: ChatState) -> str:
@@ -262,13 +259,13 @@ def router_node_teacher(state: ChatState) -> str:
         case _: return "chat_node"
 
 # --- Action Nodes (call FastAPI) ---
-def create_node_user(state: ChatState) -> ChatState:
+def create_node_officestaff(state: ChatState) -> ChatState:
 
     print("create node user ")
     p = state["params"]
     if "name" in p and "email" in p:
-        r = requests.post(f"{API}/users/", json=p)
-        reply = f"Created user {p['name']}." if r.status_code == 200 else "Failed to create Teacher."
+        r = requests.post(f"{API}/officestaff/", json=p)
+        reply = f"Created office staff {p['name']}." if r.status_code == 200 else "Failed to create office staff."
     else:
         reply = "Need name and email."
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
@@ -286,7 +283,7 @@ def create_node_parent(state: ChatState) -> ChatState:
     p = state["params"]
     if "name" in p and "email" in p:
             r = requests.post(f"{API}/parent/", json=p)
-            reply = f"Created parent {p['name']}." if r.status_code == 200 else "Failed to create student."
+            reply = f"Created parent {p['name']}." if r.status_code == 200 else "Failed to create parent."
     else:
             reply = "Need name and email."
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
@@ -297,81 +294,89 @@ def create_node_teacher(state: ChatState) -> ChatState:
     print(p)
     if "name" in p and "email" in p:
         r = requests.post(f"{API}/teacher/", json=p)
-        reply = f"Created teacher {p['name']}." if r.status_code == 200 else "Failed to create student."
+        reply = f"Created teacher {p['name']}." if r.status_code == 200 else "Failed to create teacher."
     else:
         reply = "Need name and email."
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
 
-def delete_node_user(state: ChatState) -> ChatState:
+def delete_node_officestaff(state: ChatState) -> ChatState:
     p = state["params"]
-    if "id" in p:
-        r = requests.delete(f"{API}/users/{p['id']}")
-        reply = "User deleted." if r.status_code == 200 else "User not found."
+    if "officestaffid" in p:
+        r = requests.delete(f"{API}/officestaff/{p['id']}")
+        reply = "office staff deleted." if r.status_code == 200 else "office staff not found."
     else:
-        reply = "Need a user ID to delete."
+        reply = "Need a officestaff ID to delete."
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
 
 def delete_node_student(state: ChatState) -> ChatState:
     p = state["params"]
-    if "id" in p:
-        r = requests.delete(f"{API}/student/{p['id']}")
+    if "studentid" in p:
+        res = requests.delete(f"{API}/student/{p['studentid']}")
         reply = "student deleted." if r.status_code == 200 else "student not found."
+        response_data = res.json()
     else:
         reply = "Need a student ID to delete."
-    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
+        response_data = "Since, no student id, student details not updated"
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": response_data}
 
 def delete_node_parent(state: ChatState) -> ChatState:
     p = state["params"]
-    if "id" in p:
-        r = requests.delete(f"{API}/parent/{p['id']}")
-        reply = "parent deleted." if r.status_code == 200 else "parent not found."
+    if "parentid" in p:
+        res = requests.delete(f"{API}/parent/{p['parentid']}")
+        reply = "parent deleted." if res.status_code == 200 else "parent not found."
+        response_data = res.json()
+
     else:
         reply = "Need a student ID to delete."
-    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
+        response_data = "Since, no parent id, parent details not updated"
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": response_data}
 
 def delete_node_teacher(state: ChatState) -> ChatState:
     p = state["params"]
-    if "id" in p:
-        r = requests.delete(f"{API}/teacher/{p['id']}")
-        reply = "teacher deleted." if r.status_code == 200 else "parent not found."
+    if "teacherid" in p:
+        r = requests.delete(f"{API}/teacher/{p['teacherid']}")
+        reply = "teacher deleted." if r.status_code == 200 else "teacher not found."
     else:
         reply = "Need a teacher ID to delete."
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
 
-def update_node_user(state: ChatState) -> ChatState:
+def update_node_officestaff(state: ChatState) -> ChatState:
     p = state["params"]
-    if "id" in p:
-        r = requests.put(f"{API}/users/{p['id']}", json={"name": p.get("name"), "email": p.get("email")})
-        reply = "User updated." if r.status_code == 200 else "User not found."
+    if "officestaffid" in p:
+        r = requests.patch(f"{API}/officestaff/{p['officestaffid']}", json=p)
+        reply = "office staff updated." if r.status_code == 200 else "User not found."
     else:
-        reply = "Need user ID to update."
+        reply = "Need office staff ID to update."
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
 
 def update_node_student(state: ChatState) -> ChatState:
     p = state["params"]
-    if "id" in p:
-        r = requests.put(f"{API}/student/{p['id']}", json={"name": p.get("name"), "email": p.get("email")})
+    if "studentid" in p:
+        r = requests.patch(f"{API}/student/{p['studentid']}", json=p)
         reply = "student updated." if r.status_code == 200 else "student not found."
     else:
-        reply = "student user ID to update."
+        reply = "student ID to update."
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
 
 def update_node_parent(state: ChatState) -> ChatState:
     p = state["params"]
-    if "id" in p:
-        r = requests.put(f"{API}/parent/{p['id']}", json={"name": p.get("name"), "email": p.get("email")})
-        reply = "parent updated." if r.status_code == 200 else "parent not found."
+    if "parentid" in p:
+        res = requests.patch(f"{API}/parent/{p['parentid']}", json=p)
+        reply = "parent updated." if res.status_code == 200 else "parent not found."
+        response_data = res.json()
     else:
-        reply = "student user ID to update."
-    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": r.json()}
+        response_data = {"error": "Provide parent id"}
+        reply = "Since, no parent id, parent details not updated"
+
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": response_data}
 
 def update_node_teacher(state: ChatState) -> ChatState:
     p = state["params"]
-    if "id" in p:
-        r = requests.put(f"{API}/teacher/{p['id']}", json={"name": p.get("name"), "email": p.get("email")})
+    if "teacherid" in p:
+        r = requests.patch(f"{API}/teacher/{p['teacherid']}", json=p)
         reply = "teacher updated." if r.status_code == 200 else "teacher not found."
     else:
-        reply = "student user ID to update."
+        reply = "student ID to update."
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
 
 def chat_node(state: ChatState) -> ChatState:

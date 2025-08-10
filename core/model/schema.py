@@ -1,6 +1,6 @@
 from typing import TypedDict, List, Optional,Annotated
 import os, json, requests
-from pydantic import BaseModel, EmailStr,constr, StringConstraints
+from pydantic import BaseModel, EmailStr,constr, StringConstraints, Field
 import pandas
 from datetime import date
 
@@ -27,35 +27,12 @@ class UserCreate(BaseModel):
     contactnumber: ContactNumberStr  # Valid 10-digit Indian number
     email: EmailStr
     aadhar: AadharStr
+    reason : str
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     fathername : Optional[str] = None
     mothername : Optional[str] = None
-    dateofbirth : Optional[date] = None
-    address : Optional[str] = None
-    city : Optional[str] = None
-    pincode : Optional[PincodeStr] = None
-    contactnumber : Optional[ContactNumberStr] = None
-    email: Optional[EmailStr] = None
-    aadhar : Optional[AadharStr] = None
-
-class StudentCreate(BaseModel):
-    name: str
-    fathername: str
-    mothername: str
-    dateofbirth: str
-    address: str
-    city: str
-    pincode: PincodeStr # 6-digit pincode
-    contactnumber: ContactNumberStr  # Valid 10-digit Indian number
-    email: EmailStr
-    aadhar: AadharStr
-
-class StudentUpdate(BaseModel):
-    name: Optional[str] = None
-    fathername : Optional[str] = None
-    mothername : Optional[str] = None
     dateofbirth : Optional[str] = None
     address : Optional[str] = None
     city : Optional[str] = None
@@ -63,55 +40,51 @@ class StudentUpdate(BaseModel):
     contactnumber : Optional[ContactNumberStr] = None
     email: Optional[EmailStr] = None
     aadhar : Optional[AadharStr] = None
+    reason: str = Field(..., description="Reason for update (required)")
 
-class TeacherCreate(BaseModel):
-    name: str
-    fathername: str
-    mothername: str
-    dateofbirth: str
-    address: str
-    city: str
-    pincode: PincodeStr # 6-digit pincode
-    contactnumber: ContactNumberStr  # Valid 10-digit Indian number
-    email: EmailStr
-    aadhar: AadharStr
+class UserDelete(BaseModel):
+    id : str
+    reason : str
 
 
-class TeacherUpdate(BaseModel):
-    name: Optional[str] = None
-    fathername : Optional[str] = None
-    mothername : Optional[str] = None
-    dateofbirth : Optional[str] = None
-    address : Optional[str] = None
-    city : Optional[str] = None
-    pincode : Optional[PincodeStr] = None
-    contactnumber : Optional[ContactNumberStr] = None
-    email: Optional[EmailStr] = None
-    aadhar : Optional[AadharStr] = None
+class StudentCreate(UserCreate):
+    parentid: str
+    parentrelation : str
 
-class ParentCreate(BaseModel):
-    name: str
-    fathername: str
-    mothername: str
-    dateofbirth: str
-    address: str
-    city: str
-    pincode: PincodeStr # 6-digit pincode
-    contactnumber: ContactNumberStr  # Valid 10-digit Indian number
-    email: EmailStr
-    aadhar: AadharStr
 
-class ParentUpdate(BaseModel):
-    name: Optional[str] = None
-    fathername : Optional[str] = None
-    mothername : Optional[str] = None
-    dateofbirth : Optional[str] = None
-    address : Optional[str] = None
-    city : Optional[str] = None
-    pincode : Optional[PincodeStr] = None
-    contactnumber : Optional[ContactNumberStr] = None
-    email: Optional[EmailStr] = None
-    aadhar : Optional[AadharStr] = None
+class StudentUpdate(UserUpdate):
+    studentid : str
+    parentid: Optional[str] = None
+    parentrelation : Optional[str] = None
+
+class TeacherCreate(UserCreate):
+    graduatedegree : str    
+    subject : str
+
+class TeacherUpdate(UserUpdate):
+    teacherid : str
+    graduatedegree :Optional[str]  = None 
+    subject : Optional[str] = None
+
+class OfficeStaffCreate(UserCreate):
+    graduatedegree : str    
+    subject : str
+    role : str
+
+class OfficeStaffUpdate(UserUpdate):
+    officestaffid : str
+    graduatedegree :Optional[str]  = None 
+    subject : Optional[str] = None
+    role : str
+
+class ParentCreate(UserCreate):
+    fatheroccupation : str
+    motheroccupation : str
+
+class ParentUpdate(UserUpdate):
+    parentid : str
+    fatheroccupation : Optional[str] = None
+    motheroccupation : Optional[str] = None
 
 class MarkCreate(BaseModel):
     student_id: int | None = None

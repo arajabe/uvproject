@@ -1,3 +1,1 @@
 id,student_id,term,language_1_status,language_1,language_2_status,language_2,maths_status,maths,science_status,science,social_science_status,social_science,total,overall_status,timestamp,average,rank_total,rank_language_1,rank_language_2,rank_maths,rank_science,rank_social_science
-3,20,2,pass,39,pass,99,fail,0,pass,89,fail,33,260,fail,,52.0,1.0,1.0,1.0,1.0,1.0,1.0
-7,20,9,pass,39,pass,99,fail,0,pass,89,fail,33,260,fail,,52.0,1.0,1.0,1.0,1.0,1.0,1.0

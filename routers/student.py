@@ -15,7 +15,8 @@ def create_student(student: StudentCreate, db: Session = Depends(get_db)):
     db_student = Student(name=student.name, email=student.email, fathername = student.fathername,
                          mothername = student.mothername, dateofbirth = student.dateofbirth, 
                          address =student.address, city = student.city, pincode = student.pincode, 
-                         contactnumber = student.contactnumber, aadhar = student.aadhar, id = new_id)
+                         contactnumber = student.contactnumber, aadhar = student.aadhar, id = new_id, reason = student.reason,
+                         parentid = student.parentid, parentrelation = student.parentrelation, role = "student")
 
     db.add(db_student)
     db.commit()
@@ -24,7 +25,7 @@ def create_student(student: StudentCreate, db: Session = Depends(get_db)):
     return {"status": "created", "student": {"id": db_student.id, "name": db_student.name}}
 
 @router.delete("/{student_id}")
-def delete_student(student_id: int, db: Session = Depends(get_db)):
+def delete_student(student_id: str, db: Session = Depends(get_db)):
     student = db.query(Student).filter(Student.id == student_id).first()
     if not student:
         raise HTTPException(404, "Student not found")
@@ -32,15 +33,27 @@ def delete_student(student_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "deleted", "id": student_id}
 
-@router.put("/{student_id}")
-def update_student(student_id: int, student: StudentUpdate, db: Session = Depends(get_db)):
+@router.patch("/{student_id}")
+def update_student(student_id: str, student: StudentUpdate, db: Session = Depends(get_db)):
     db_student = db.query(Student).filter(Student.id == student_id).first()
     if not db_student:
-        raise HTTPException(404, "Student not found")
-    if student.name: db_student.name = student.name
-    if student.email: db_student.email = student.email
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    update_data = student.dict(exclude_unset=True)
+
+    # Apply only provided fields
+    for key, value in student.dict(exclude_none=True).items():
+        setattr(db_student, key, value)
+
     db.commit()
-    return {"status": "updated", "id": db_student.id}
+    db.refresh(db_student)
+
+    return {
+        "status": "updated",
+        "id": db_student.id,
+        "updated_fields": list(update_data.keys()),
+        "reason": student.reason
+    }
 
 def generate_student_id(db: Session):
     last = db.query(Student).order_by(Student.id.desc()).first()

@@ -15,7 +15,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = User(name=user.name, email=user.email, fathername = user.fathername,
                          mothername = user.mothername, dateofbirth = user.dateofbirth, 
                          address =user.address, city = user.city, pincode = user.pincode, 
-                         contactnumber = user.contactnumber, aadhar = user.aadhar, id = new_id)
+                         contactnumber = user.contactnumber, aadhar = user.aadhar, id = new_id, reason = user.reason)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -35,11 +35,24 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.id == user_id).first()
     if not db_user:
-        raise HTTPException(404, "User not found")
-    if user.name: db_user.name = user.name
-    if user.email: db_user.email = user.email
+        raise HTTPException(status_code=404, detail="User not found")
+
+    update_data = user.dict(exclude_unset=True)
+
+    for field, value in update_data.items():
+        if field == "reason":
+            continue  # skip reason for DB update
+        setattr(db_user, field, value)
+
     db.commit()
-    return {"status": "updated", "id": db_user.id}
+    db.refresh(db_user)
+
+    return {
+        "status": "updated",
+        "id": db_user.id,
+        "updated_fields": list(update_data.keys()),
+        "reason": user.reason
+    }
 
 def generate_user_id(db: Session):
     last = db.query(User).order_by(User.id.desc()).first()

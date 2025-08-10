@@ -10,14 +10,14 @@ graph = StateGraph(ChatState)
 
 graph.add_node("intent_node", admin_node.intent_node)
 
-graph.add_node("intent_node_user", admin_node.intent_node_user)
+graph.add_node("intent_node_officestaff", admin_node.intent_node_officestaff)
 graph.add_node("intent_node_teacher", admin_node.intent_node_teacher)
 graph.add_node("intent_node_student", admin_node.intent_node_student)
 graph.add_node("intent_node_parent", admin_node.intent_node_parent)
 
-graph.add_node("create_node_user", admin_node.create_node_user)
-graph.add_node("delete_node_user", admin_node.delete_node_user)
-graph.add_node("update_node_user", admin_node.update_node_user)
+graph.add_node("create_node_officestaff", admin_node.create_node_officestaff)
+graph.add_node("delete_node_officestaff", admin_node.delete_node_officestaff)
+graph.add_node("update_node_officestaff", admin_node.update_node_officestaff)
 
 graph.add_node("create_node_student", admin_node.create_node_student)
 graph.add_node("delete_node_student", admin_node.delete_node_student)
@@ -37,16 +37,16 @@ graph.set_entry_point("intent_node")
 
 graph.add_conditional_edges("intent_node", admin_node.router_node, {
     "intent_node_teacher" : "intent_node_teacher",
-    "intent_node_user" : "intent_node_user",
+    "intent_node_officestaff" : "intent_node_officestaff",
     "intent_node_student" : "intent_node_student",
     "intent_node_parent" : "intent_node_parent",
     "chat_node": "chat_node"
 })
 
-graph.add_conditional_edges("intent_node_user", admin_node.router_node_user, {
-    "create_node_user": "create_node_user",
-    "delete_node_user": "delete_node_user",
-    "update_node_user": "update_node_user",
+graph.add_conditional_edges("intent_node_officestaff", admin_node.router_node_officestaff, {
+    "create_node_officestaff": "create_node_officestaff",
+    "delete_node_officestaff": "delete_node_officestaff",
+    "update_node_officestaff": "update_node_officestaff",
     "chat_node": "chat_node"
 })
 
@@ -72,9 +72,9 @@ graph.add_conditional_edges("intent_node_teacher", admin_node.router_node_teache
 })
 
 
-graph.add_edge("create_node_user", END)
-graph.add_edge("delete_node_user", END)
-graph.add_edge("update_node_user", END)
+graph.add_edge("create_node_officestaff", END)
+graph.add_edge("delete_node_officestaff", END)
+graph.add_edge("update_node_officestaff", END)
 
 graph.add_edge("create_node_student", END)
 graph.add_edge("delete_node_student", END)

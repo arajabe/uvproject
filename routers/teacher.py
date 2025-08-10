@@ -14,7 +14,9 @@ def create_teacher(teacher: TeacherCreate, db: Session = Depends(get_db)):
     db_teacher = Teacher(name=teacher.name, email=teacher.email, fathername = teacher.fathername,
                          mothername = teacher.mothername, dateofbirth = teacher.dateofbirth, 
                          address =teacher.address, city = teacher.city, pincode = teacher.pincode, 
-                         contactnumber = teacher.contactnumber, aadhar = teacher.aadhar, id = new_id)
+                         contactnumber = teacher.contactnumber, aadhar = teacher.aadhar, id = new_id, reason = teacher.reason,
+                         graduatedegree = teacher.graduatedegree, subject = teacher.subject, role = "teacher"
+                         )
     db.add(db_teacher)
     db.commit()
     db.refresh(db_teacher)
@@ -22,7 +24,7 @@ def create_teacher(teacher: TeacherCreate, db: Session = Depends(get_db)):
     return {"status": "created", "teacher": {"id": db_teacher.id, "name": db_teacher.name}}
 
 @router.delete("/{teacher_id}")
-def delete_teacher(teacher_id: int, db: Session = Depends(get_db)):
+def delete_teacher(teacher_id: str, db: Session = Depends(get_db)):
     teacher = db.query(Teacher).filter(Teacher.id == teacher_id).first()
     if not teacher:
         raise HTTPException(404, "teacher not found")
@@ -30,15 +32,20 @@ def delete_teacher(teacher_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "deleted", "id": teacher_id}
 
-@router.put("/{teacher_id}")
-def update_teacher(teacher_id: int, user: TeacherUpdate, db: Session = Depends(get_db)):
+@router.patch("/{teacher_id}")
+def update_teacher(teacher_id: str, teacher: TeacherUpdate, db: Session = Depends(get_db)):
     db_teacher = db.query(Teacher).filter(Teacher.id == teacher_id).first()
     if not db_teacher:
-        raise HTTPException(404, "Teacher not found")
-    if user.name: db_teacher.name = user.name
-    if user.email: db_teacher.email = user.email
+        raise HTTPException(status_code=404, detail="Teacher not found")
+
+    # Apply only provided fields
+    for key, value in teacher.dict(exclude_none=True).items():
+        setattr(db_teacher, key, value)
+
     db.commit()
-    return {"status": "updated", "id": db_teacher.id}
+    db.refresh(db_teacher)
+
+    return {"message": "Teacher updated successfully", "data": db_teacher}
 
 def generate_teacher_id(db: Session):
     last = db.query(Teacher).order_by(Teacher.id.desc()).first()

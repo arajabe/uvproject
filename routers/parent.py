@@ -15,7 +15,8 @@ def create_parent(parent: ParentCreate, db: Session = Depends(get_db)):
     db_parent = Parent(name=parent.name, email=parent.email, fathername = parent.fathername,
                          mothername = parent.mothername, dateofbirth = parent.dateofbirth, 
                          address =parent.address, city = parent.city, pincode = parent.pincode, 
-                         contactnumber = parent.contactnumber, aadhar = parent.aadhar, id = new_id)
+                         contactnumber = parent.contactnumber, aadhar = parent.aadhar, id = new_id, reason = parent.reason,
+                         fatheroccupation = parent.fatheroccupation, motheroccupation = parent.motheroccupation, role = 'parent')
     db.add(db_parent)
     db.commit()
     db.refresh(db_parent)
@@ -23,7 +24,7 @@ def create_parent(parent: ParentCreate, db: Session = Depends(get_db)):
     return {"status": "created", "parent": {"id": db_parent.id, "name": db_parent.name}}
 
 @router.delete("/{parent_id}")
-def delete_parent(parent_id: int, db: Session = Depends(get_db)):
+def delete_parent(parent_id: str, db: Session = Depends(get_db)):
     parent = db.query(Parent).filter(Parent.id == parent_id).first()
     if not parent:
         raise HTTPException(404, "Parent not found")
@@ -31,15 +32,19 @@ def delete_parent(parent_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "deleted", "id": parent_id}
 
-@router.put("/{parent_id}")
-def update_parent(parent_id: int, parent: ParentUpdate, db: Session = Depends(get_db)):
+@router.patch("/{parent_id}")
+def update_parent(parent_id: str, parent: ParentUpdate, db: Session = Depends(get_db)):
     db_parent = db.query(Parent).filter(Parent.id == parent_id).first()
     if not db_parent:
-        raise HTTPException(404, "parent not found")
-    if parent.name: db_parent.name = parent.name
-    if parent.email: db_parent.email = parent.email
+        raise HTTPException(status_code=404, detail="Parent not found")
+
+    # Apply only provided fields
+    for key, value in parent.dict(exclude_none=True).items():
+        setattr(db_parent, key, value)
+
     db.commit()
-    return {"status": "updated", "id": db_parent.id}
+    db.refresh(db_parent)  # Optional, if you want updated object returned
+    return {"message": "Parent updated successfully", "data": db_parent}
 
 def generate_parent_id(db: Session):
     last = db.query(Parent).order_by(Parent.id.desc()).first()

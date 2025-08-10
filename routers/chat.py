@@ -15,14 +15,10 @@ def chat(session_id: str, message: str, db: Session = Depends(get_db)):
     history = sessions.get(session_id, {"messages": []})
     history["messages"].append(HumanMessage(content=message))
     result = intent_graph.invoke(history)
-    print(result)
     sessions[session_id] = {"messages": result["messages"]}
     print(result['response'])
     reply = [m for m in result["messages"] if isinstance(m, AIMessage)][-1].content
     save_chat(session_id=session_id, role="admin rara", user_msg=message, bot_reply=reply, db=db)
-    print(reply)
-    print("chat/admin called")
-   # return {"reply": reply}
     return {"reply": result['response'], "aireply" : reply}
 
 @router.post("/teacher")
