@@ -18,12 +18,12 @@ API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
 
 def displayui():
     try:
-                endpoint = st.session_state.roleendpointsrole
+                endpoint = st.session_state['roleendpointsrole']
                 res = requests.post(
                     f"{API}/chat/{endpoint}",
                     params={
                         "session_id": st.session_state["session_id"],
-                        "message": st.session_state.usermessage
+                        "message": st.session_state['usermessage']
                     }
                 )
                 data = res.json()
@@ -45,7 +45,7 @@ def displayui():
                     
                     if st.session_state["reset_flag"]:
                         st.session_state["action"] = "how can i help you"
-                        st.session_state.chat_history = []
+                        st.session_state['chat_history'] = []
                         st.rerun()                
                 else:
                     st.error(f"Failed with status code: {res.status_code}")

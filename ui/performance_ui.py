@@ -16,7 +16,7 @@ API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
 
 def performance():
 
-    role = st.session_state.role
+    role = st.session_state['logedin_role']
 
     def is_operation_allowed(msg, role):
         if role in ["admin", "teacher"]:

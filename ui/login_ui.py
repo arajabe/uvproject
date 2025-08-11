@@ -42,17 +42,17 @@ def login_screen():
 
             if response.status_code == 200:
                 data = response.json()
-                st.session_state.logged_in = True
-                st.session_state.username = data["username"]
-                st.session_state.role = data["role"]
+                st.session_state['logged_in'] = True
+                st.session_state['username'] = data["username"]
+                st.session_state['logedin_role'] = data["role"]
 
                 # Optionally fetch chat history
                 try:
                     res = requests.get(f"{API}/chat/history/", params={"session_id": st.session_state["session_id"]})
                     if res.ok:
-                        st.session_state.chat_history = [(item["user"], item["bot"]) for item in res.json()]
+                        st.session_state['chat_history'] = [(item["user"], item["bot"]) for item in res.json()]
                 except:
-                    st.session_state.chat_history = []
+                    st.session_state['chat_history'] = []
 
                 st.success(f"Welcome, {data['username']}!")
                 st.rerun()

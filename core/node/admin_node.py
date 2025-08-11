@@ -302,7 +302,7 @@ def create_node_teacher(state: ChatState) -> ChatState:
 def delete_node_officestaff(state: ChatState) -> ChatState:
     p = state["params"]
     if "officestaffid" in p:
-        r = requests.delete(f"{API}/officestaff/{p['id']}")
+        r = requests.delete(f"{API}/officestaff/{p['officestaffid']}")
         reply = "office staff deleted." if r.status_code == 200 else "office staff not found."
     else:
         reply = "Need a officestaff ID to delete."

@@ -114,9 +114,11 @@ class OfficeStaff(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
     reason = Column(String(15), nullable = False)
     role = Column(String(15), nullable = False)
+    graduatedegree = Column(String(50), nullable=False) 
+    subject = Column(String(50), nullable=False)
 
 class Mark(Base):
-    __tablename__ = "termmark"  
+    __tablename__ = "termmark"          
     id = Column(Integer, primary_key=True, index=True)
     student_id = Column(String(50), ForeignKey("student.id"), nullable=False)
     term = Column(Integer, nullable=False, index=True)

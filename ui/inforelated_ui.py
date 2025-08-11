@@ -7,11 +7,11 @@ import os, json, requests
 from pydantic import BaseModel, EmailStr,constr, StringConstraints
 import pandas
 from datetime import date
-from core.model.schema import UserCreate, UserUpdate, ParentCreate, ParentUpdate, UserDelete, StudentCreate, StudentUpdate, TeacherCreate, TeacherUpdate
+from core.model.schema import UserCreate, UserUpdate, ParentCreate, OfficeStaffCreate, OfficeStaffUpdate, ParentUpdate, UserDelete, StudentCreate, StudentUpdate, TeacherCreate, TeacherUpdate
 from session_util import initialize_session_state
 
 initialize_session_state()
-API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
+API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint,
 
 def inforelated():
         
@@ -20,7 +20,7 @@ def inforelated():
         with col1:
             st.session_state["radio_action"] = st.columns(1)[0].radio(
                 "Choose action",
-                ["create", "update", "delete", "view", "none"],
+                ["none","create", "update", "delete", "view"],
                 horizontal=True
             )
         
@@ -28,7 +28,7 @@ def inforelated():
             with col2:
                 st.session_state["radio_action_on_person"] = st.radio(
                 "Choose person",
-                ["student", "parent", "teacher", "office staff", "none"],
+                ["none","student", "parent", "teacher", "office staff"],
                 horizontal=True
             )
 
@@ -47,6 +47,8 @@ def inforelated():
         student_update = UserUpdate.__annotations__ | StudentUpdate.__annotations__
         teacher_create = UserCreate.__annotations__ | TeacherCreate.__annotations__
         teacher_update = UserUpdate.__annotations__ | TeacherUpdate.__annotations__
+        officestaff_create = UserCreate.__annotations__ | OfficeStaffCreate.__annotations__
+        officestaff_update = UserUpdate.__annotations__ | OfficeStaffUpdate.__annotations__
 
         userdelete = UserDelete.__annotations__
 
@@ -73,17 +75,30 @@ def inforelated():
                 st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
             msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in student_update
                          if st.session_state.get(field_name, "").strip() != ""]
+            
         elif st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_person"] == "teacher":
             for field_name in teacher_create:
                 st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
             msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in teacher_create
                          if st.session_state.get(field_name, "").strip() != ""]
+            
         elif st.session_state["radio_action"] == "update" and st.session_state["radio_action_on_person"] == "teacher":
             for field_name in teacher_update:
                 st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
             msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in teacher_update
                          if st.session_state.get(field_name, "").strip() != ""]
-
+            
+        elif st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_person"] == "office staff":
+            for field_name in officestaff_create:
+                st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
+            msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in officestaff_create
+                         if st.session_state.get(field_name, "").strip() != ""]
+            
+        elif st.session_state["radio_action"] == "update" and st.session_state["radio_action_on_person"] == "office staff":
+            for field_name in officestaff_update:
+                st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
+            msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in officestaff_update
+                         if st.session_state.get(field_name, "").strip() != ""]
 
 
         elif st.session_state["radio_action"] == "delete" and st.session_state["radio_action_on_person"] != "none":
@@ -91,7 +106,7 @@ def inforelated():
                 st.session_state[field_name] = st.text_input(field_name.capitalize())
             msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in userdelete]
         
-        st.session_state.usermessage = f"{st.session_state["radio_action"]}{" "}{st.session_state["radio_action_on_person"]} details as follows: {msg_parts}"
+        st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "}{st.session_state["radio_action_on_person"]} details as follows: {msg_parts}"
 
         st.markdown(st.session_state['usermessage'])
 

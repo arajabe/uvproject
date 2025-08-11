@@ -26,7 +26,7 @@ def dashboard():
 
     sidebar()
 
-    role = st.session_state.role
+    role = st.session_state['logedin_role']
 
     st.markdown(
     "<h1 style='font-size: 20px;'> LangGraph Chatbot (FastAPI-backed) Login</h1>",
@@ -49,10 +49,10 @@ def dashboard():
         "admin": "admin",
         "teacher": "teacher",
         "student": "performance",
-        "parent": "performance"
+        "parent": "performance",
     }
     
-    st.session_state.roleendpointsrole = role_endpoints[st.session_state.role]
+    st.session_state['roleendpointsrole'] = role_endpoints[st.session_state['logedin_role']]
 
     def session_mode(value):
         match value:
@@ -61,7 +61,7 @@ def dashboard():
             case "Info Related":
                 inforelated() 
 
-    session_mode(st.session_state.mode)
+    session_mode(st.session_state['mode'])
       
 
     if st.button("Send", st.session_state['send']):

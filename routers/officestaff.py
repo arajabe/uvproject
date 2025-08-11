@@ -12,7 +12,7 @@ router = APIRouter(prefix="/officestaff", tags=["users"])
 def create_officestaff(office: OfficeStaffCreate, db: Session = Depends(get_db)):
 
     new_id = generate_officestaff_id(db)
-    db_office= office(name=office.name, email=office.email, fathername = office.fathername,
+    db_office= OfficeStaff(name=office.name, email=office.email, fathername = office.fathername,
                          mothername = office.mothername, dateofbirth = office.dateofbirth, 
                          address =office.address, city = office.city, pincode = office.pincode, 
                          contactnumber = office.contactnumber, aadhar = office.aadhar, id = new_id, reason = office.reason,
