@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import users, chat, student,teacher, parent, mark, performance,login, officestaff, assignement
+from routers import users, chat, student,teacher, parent, mark, performance,login, officestaff, assignement, subjecttermsplit
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="UV LangGraph API Framework")
@@ -27,6 +27,7 @@ app.include_router(performance.router)
 app.include_router(login.router)
 app.include_router(officestaff.router)
 app.include_router(assignement.router)
+app.include_router(subjecttermsplit.router)
 
 @app.get("/")
 def root():

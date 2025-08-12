@@ -31,7 +31,7 @@ def sidebar():
 
         # Role-based options
     role_options = {
-        "admin": ["None", "Info Related", "Performance"],
+        "admin": ["None", "Info Related", "Performance", "Class Teacher Allocation", "Student Allocation"],
         "teacher": ["None", "Mark Posting", "Performance"],
         "student": ["None", "Performance"],
         "parent": ["None", "Performance"]

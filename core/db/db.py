@@ -159,8 +159,24 @@ class Mark(Base):
 class StudentClass(Base):
     __tablename__ = "studentclass"
     id = Column(String(50), primary_key=True, index=True)
-    name = Column(String(50), nullable=False)
-    studentclass = Column(String(10), nullable = False)
+    student_id = Column(String(50), ForeignKey("student.id"), primary_key=True, index=True)
+    student_name = Column(String(50), nullable=False)
+    student_class = Column(String(10), nullable = False)
+    class_section = Column(String(10), nullable = False)
+
+    student = relationship("Student", backref="student_class")
+
+    UniqueConstraint('student_id', 'student_class', class_section, name='uq_student_class')
+
+class ClassTeacher(Base):
+    __tablename__ = "classteacher"
+    id = Column(String(50), primary_key=True, index=True)
+    teacher_id = Column(String(50),primary_key=True, index=True)
+    teaher_name = Column(String(50), nullable=False)
+    teacher_class = Column(String(10), nullable = False)
+    class_section = Column(String(10), nullable = False)
+
+    teacher = relationship("teacher", backref="teacher_class")
 
 class Assignement(Base):
     __tablename__ = "assignement"          
@@ -188,6 +204,32 @@ class Assignement(Base):
         UniqueConstraint('student_id', 'term', 'period', name='uq_student_term_period_assignement')
     )
 
+
+class SubjectTermSplit(Base):
+    __tablename__ = "subject_term_split"          
+    id = Column(String(50), primary_key=True, index=True)
+    student_id = Column(String(50), ForeignKey("student.id"), nullable=False)
+    student_name = Column(String(50), index=True)
+    term = Column(Integer, nullable=False, index=True)
+    subject = Column(String(50), nullable=False)
+    mark_section_A = Column(Integer, nullable=False, index=True)
+    mark_section_B = Column(Integer, nullable=False, index=True)
+    mark_section_C = Column(Integer, nullable=False, index=True)
+    mark_section_D = Column(Integer, nullable=False, index=True)
+    subject_total = Column(Integer, Computed("mark_section_A + mark_section_B + mark_section_C + mark_section_D"), nullable=False)     
+
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    
+    student = relationship("Student", backref="subject_mark_term_split")
+
+    __table_args__ = (
+        CheckConstraint('mark_section_A >= 0 AND mark_section_A <= 20', name='mark_range_section_A'),
+        CheckConstraint('mark_section_B >= 0 AND mark_section_B <= 20', name='mark_range_section_B'),
+        CheckConstraint('mark_section_C >= 0 AND mark_section_C <= 20', name='mark_range_section_C'),
+        CheckConstraint('mark_section_D >= 0 AND mark_section_D <= 20', name='mark_range_section_D'),
+        CheckConstraint("subject_total <= 80", name= 'subject_total'),
+        UniqueConstraint('student_id', 'term', 'subject', name='uq_student_term_period_assignement')
+    )
 Base.metadata.create_all(bind=engine)
 
 def get_db():

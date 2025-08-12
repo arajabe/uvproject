@@ -2,7 +2,9 @@ import uuid
 import streamlit as st
 from typing import get_type_hints
 from core.model.schema import (
-    AssignementCreate, MarkCreate, MarkUpdate, MarkDelete,
+    AssignementCreate, AssignementUpdate, AssignementDelete,
+    SubjectTermSplitCreate,SubjectTermSplitDelete,
+    MarkCreate, MarkUpdate, MarkDelete,
     ParentCreate, ParentUpdate,
     UserCreate, UserUpdate, UserDelete,
     OfficeStaffCreate, OfficeStaffUpdate,
@@ -73,6 +75,18 @@ def initialize_session_state():
         if field_name not in st.session_state:
             st.session_state[field_name] = ""
     for field_name in AssignementCreate.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
+    for field_name in AssignementUpdate.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
+    for field_name in AssignementDelete.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
+    for field_name in SubjectTermSplitCreate.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
+    for field_name in SubjectTermSplitDelete.__annotations__:
         if field_name not in st.session_state:
             st.session_state[field_name] = ""
 

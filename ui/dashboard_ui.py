@@ -14,6 +14,8 @@ from ui.performance_ui import performance
 from ui.inforelated_ui import inforelated
 from ui.display_ui import displayui
 from ui.markposting import markposting
+from ui.class_teacher_allocation import class_teacher_allocation
+from ui.student_class_allocation import student_class_allocation
 
 initialize_session_state()
 API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
@@ -61,8 +63,10 @@ def dashboard():
                 performance()
             case "Info Related":
                 inforelated() 
-            case "Mark Posting":
-                markposting()
+            case "Class Teacher Allocation":
+                 class_teacher_allocation()
+            case "Student Allocation":
+                student_class_allocation()
 
 
     session_mode(st.session_state['mode'])

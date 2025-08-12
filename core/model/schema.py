@@ -108,6 +108,16 @@ class MarkDelete(BaseModel):
     student_id: str 
     term : int 
 
+class AssignementUpdate(BaseModel):
+    student_id : Optional[str] = None
+    term : Optional[int] = None
+    period : Optional[int] = None
+    language_1 : Optional[int] = None
+    language_2 : Optional[int] = None
+    maths : Optional[int] = None
+    science : Optional[int] = None
+    social_science : Optional[int] = None
+
 class AssignementCreate(BaseModel):
     student_id : str
     term : int
@@ -117,6 +127,25 @@ class AssignementCreate(BaseModel):
     maths : int
     science : int
     social_science : int
+
+class AssignementDelete(BaseModel):
+    student_id : str
+    term : int
+    period : int
+
+class SubjectTermSplitCreate(BaseModel):         
+    student_id : str
+    term : int
+    subject : str
+    mark_section_A : int
+    mark_section_B : int
+    mark_section_C : int
+    mark_section_D : int
+
+class SubjectTermSplitDelete(BaseModel):         
+    student_id : str
+    term : int
+    subject : str
 
 class MarkQueryParams(BaseModel):
     student_id: int

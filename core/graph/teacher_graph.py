@@ -12,13 +12,21 @@ graph.add_node("intent_node", teacher_node.intent_node)
 
 graph.add_node("intent_node_mark", teacher_node.intent_node_mark)
 graph.add_node("intent_node_assignement", teacher_node.intent_node_assignement)
+graph.add_node("intent_node_subject_term_split", teacher_node.intent_node_subject_term_split)
+
 
 
 graph.add_node("intent_node_create_mark", teacher_node.intent_node_create_mark)
 graph.add_node("intent_node_update_mark", teacher_node.intent_node_update_mark)
 graph.add_node("intent_node_delete_mark", teacher_node.intent_node_delete_mark)
 
+graph.add_node("intent_node_create_subject_term_split", teacher_node.intent_node_create_subject_term_split)
+graph.add_node("intent_node_update_subject_term_split", teacher_node.intent_node_update_subject_term_split)
+graph.add_node("intent_node_delete_subject_term_split", teacher_node.intent_node_delete_subject_term_split)
+
 graph.add_node("intent_node_create_assignement", teacher_node.intent_node_create_assignement)
+graph.add_node("intent_node_update_assignement", teacher_node.intent_node_update_assignement)
+graph.add_node("intent_node_delete_assignement", teacher_node.intent_node_delete_assignement)
 
 graph.add_node("chat_node_initial", teacher_node.chat_node_initial)
 
@@ -28,6 +36,7 @@ graph.set_entry_point("intent_node")
 graph.add_conditional_edges("intent_node", teacher_node.router_node, {
      "intent_node_mark" : "intent_node_mark",
     "intent_node_assignement" : "intent_node_assignement",
+    "intent_node_subject_term_split" : "intent_node_subject_term_split",
     "chat_node_initial": "chat_node_initial"
 })
 
@@ -41,12 +50,29 @@ graph.add_conditional_edges("intent_node_mark", teacher_node.router_node_mark, {
 
 graph.add_conditional_edges("intent_node_assignement", teacher_node.router_node_assignement, {
     "intent_node_create_assignement" : "intent_node_create_assignement",
+    "intent_node_update_assignement": "intent_node_update_assignement",
+    "intent_node_delete_assignement" : "intent_node_delete_assignement",
+    "chat_node_initial": "chat_node_initial"
+})
+
+graph.add_conditional_edges("intent_node_subject_term_split", teacher_node.router_node_subject_term_split, {
+    "intent_node_create_subject_term_split" : "intent_node_create_subject_term_split",
+    "intent_node_update_subject_term_split": "intent_node_update_subject_term_split",
+    "intent_node_delete_subject_term_split" : "intent_node_delete_subject_term_split",
     "chat_node_initial": "chat_node_initial"
 })
 
 graph.add_edge("intent_node_create_mark", END)
+graph.add_edge("intent_node_update_mark", END)
+graph.add_edge("intent_node_delete_mark", END)
 
 graph.add_edge("intent_node_create_assignement", END)
+graph.add_edge("intent_node_update_assignement", END)
+graph.add_edge("intent_node_delete_assignement", END)
+
+graph.add_edge("intent_node_create_subject_term_split", END)
+graph.add_edge("intent_node_update_subject_term_split", END)
+graph.add_edge("intent_node_delete_subject_term_split", END)
 
 
 

@@ -15,6 +15,10 @@ def intent_node(state:ChatState) -> ChatState:
     prompt = f"""
     Task:
     Identify the exact intent from {msg} without inferring related meanings. Valid intents are: student, teacher, parent, officestaff
+   
+    Rules : 
+        the message contains a direct mention of an intent
+
     - Output only valid JSON.
 
         Return **only** valid JSON, no extra text. Example:
@@ -59,6 +63,9 @@ def intent_node_teacher(state: ChatState) -> ChatState:
 
         Classify the intent of: "{user_msg}". and create_teacher, delete_teacher, update_teacher and chat history in database testdb
 
+        Rules : 
+            the message contains a direct mention of an intent
+
         Database: testdb
         Table: teacher(teacherid, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar,reason, graduatedegree, subject)
 
@@ -101,6 +108,9 @@ def intent_node_officestaff(state: ChatState) -> ChatState:
         You are AI assistant, clarify the intent of {user_msg} and work with testdb database.
 
         Classify the intent of: "{user_msg}". and create_officestaff, delete_officestaff,update_officestaff and chat history in database testdb
+
+        Rules:
+        the message contains a direct mention of an intent
 
         Database: testdb
         Table: OfficeStaff(id, name, email)
@@ -147,6 +157,9 @@ def intent_node_student(state: ChatState) -> ChatState:
         Database: testdb
         Table: student(id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, parentid, parentrelation)
 
+        Rules:
+        The message contains a direct mention of an intent
+
         Valid intents:
         - create_student (requires name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, parentid, parentrelation)
         - delete_student (requires studentid, reason)
@@ -187,6 +200,9 @@ def intent_node_parent(state: ChatState) -> ChatState:
 
         Table: parent(name,email,fathername,mothername,dateofbirth,address,city,pincode,contactnumber,aadhar,reason,fatheroccupation,motheroccupation)
 
+        Rules:
+        The message contains a direct mention of an intent
+        
         Valid intents:
         - create_parent (requires name, email, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, aadhar, reason, fatheroccupation, motheroccupation)
         - delete_parent (requires parentid, reason)

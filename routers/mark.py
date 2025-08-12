@@ -12,9 +12,9 @@ router = APIRouter(prefix="/mark", tags=["mark"])
 def create_student_mark(mark: MarkCreate, db: Session = Depends(get_db)):
     new_id = generate_parent_id(db)
 
-    #std_name = db.query(Student.name).filter(Student.id == mark.student_id).first()
-    #if std_name:
-        #std_name = std_name[0]
+    std_name = db.query(Student.name).filter(Student.id == mark.student_id).first()
+    if std_name:
+        std_name = std_name[0]
 
     db_mark = Mark(**mark.dict(), id = new_id)
     db.add(db_mark)
