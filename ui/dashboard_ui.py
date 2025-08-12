@@ -13,6 +13,7 @@ from ui.sidebar_ui import sidebar
 from ui.performance_ui import performance
 from ui.inforelated_ui import inforelated
 from ui.display_ui import displayui
+from ui.markposting import markposting
 
 initialize_session_state()
 API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
@@ -60,6 +61,9 @@ def dashboard():
                 performance()
             case "Info Related":
                 inforelated() 
+            case "Mark Posting":
+                markposting()
+
 
     session_mode(st.session_state['mode'])
       

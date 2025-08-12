@@ -12,11 +12,7 @@ router = APIRouter(prefix="/student", tags=["student"])
 def create_student(student: StudentCreate, db: Session = Depends(get_db)):
     new_id = generate_student_id(db)
     print("create_student(student: StudentCreate, db: Session = Depends(get_db))")
-    db_student = Student(name=student.name, email=student.email, fathername = student.fathername,
-                         mothername = student.mothername, dateofbirth = student.dateofbirth, 
-                         address =student.address, city = student.city, pincode = student.pincode, 
-                         contactnumber = student.contactnumber, aadhar = student.aadhar, id = new_id, reason = student.reason,
-                         parentid = student.parentid, parentrelation = student.parentrelation, role = "student")
+    db_student = Student(** student.dict(), id = new_id, role = "student")
 
     db.add(db_student)
     db.commit()

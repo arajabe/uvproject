@@ -119,8 +119,9 @@ class OfficeStaff(Base):
 
 class Mark(Base):
     __tablename__ = "termmark"          
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String(50), primary_key=True, index=True)
     student_id = Column(String(50), ForeignKey("student.id"), nullable=False)
+    student_name = Column(String(50), index=True)
     term = Column(Integer, nullable=False, index=True)
     language_1_status = Column(String(5), Computed("CASE WHEN language_1 >= 35 THEN 'pass' ELSE 'fail' END"), nullable=False)
     language_1 = Column(Integer, nullable=False, index=True)
@@ -152,6 +153,39 @@ class Mark(Base):
         CheckConstraint('social_science >= 0 AND language_2 <= 100', name='social_science_range'),
         CheckConstraint('total >= 0 AND total <= 500', name='total_range'),
         UniqueConstraint('student_id', 'term', name='uq_student_term')
+    )
+
+    
+class StudentClass(Base):
+    __tablename__ = "studentclass"
+    id = Column(String(50), primary_key=True, index=True)
+    name = Column(String(50), nullable=False)
+    studentclass = Column(String(10), nullable = False)
+
+class Assignement(Base):
+    __tablename__ = "assignement"          
+    id = Column(String(50), primary_key=True, index=True)
+    student_id = Column(String(50), ForeignKey("student.id"), nullable=False)
+    student_name = Column(String(50), index=True)
+    term = Column(Integer, nullable=False, index=True)
+    period = Column(Integer, nullable=False, index=True)
+    language_1 = Column(Integer, nullable=False, index=True)
+    language_2 = Column(Integer, nullable=False, index=True)
+    maths = Column(Integer, nullable=False, index=True)
+    science = Column(Integer, nullable=False, index=True)
+    social_science = Column(Integer, nullable=False, index=True)       
+
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    
+    student = relationship("Student", backref="marks_assignement")
+
+    __table_args__ = (
+        CheckConstraint('language_1 >= 0 AND language_1 <= 10', name='lang1_range_assignement'),
+        CheckConstraint('language_2 >= 0 AND language_2 <= 10', name='lang2_range_assignement'),
+        CheckConstraint('maths >= 0 AND language_2 <= 10', name='maths_range_assignement'),
+        CheckConstraint('science >= 0 AND language_2 <= 10', name='sscience_range_assignement'),
+        CheckConstraint('social_science >= 0 AND language_2 <= 10', name='social_science_range_assignement'),
+        UniqueConstraint('student_id', 'term', 'period', name='uq_student_term_period_assignement')
     )
 
 Base.metadata.create_all(bind=engine)

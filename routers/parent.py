@@ -12,11 +12,7 @@ router = APIRouter(prefix="/parent", tags=["parent"])
 def create_parent(parent: ParentCreate, db: Session = Depends(get_db)):
     print(" i am parent post")
     new_id = generate_parent_id(db)
-    db_parent = Parent(name=parent.name, email=parent.email, fathername = parent.fathername,
-                         mothername = parent.mothername, dateofbirth = parent.dateofbirth, 
-                         address =parent.address, city = parent.city, pincode = parent.pincode, 
-                         contactnumber = parent.contactnumber, aadhar = parent.aadhar, id = new_id, reason = parent.reason,
-                         fatheroccupation = parent.fatheroccupation, motheroccupation = parent.motheroccupation, role = 'parent')
+    db_parent = Parent(**parent.dict(), id = new_id, role = 'parent')
     db.add(db_parent)
     db.commit()
     db.refresh(db_parent)

@@ -33,20 +33,16 @@ def displayui():
                     st.session_state["reset_flag"] = True
                     st.session_state['mode'] = 'None'
 
-                    if st.button("Reset" , key = "reset on sucess"):
-                        for key in ["id", "name", "email","send"]:
-                            st.session_state[key] = ""
-                        st.session_state["action"] = "how can i help you"    
+                    if st.button("Reset" , key = "reset on sucess"):                           
                         st.rerun()
+                        st.session_state['usermessage'] = "how can i help you" 
 
-                    with st.spinner("🔄 Resetting form in 3 seconds..."):
-                        time.sleep(60)
                     # Reset session state and restart from beginning
-                    
-                    if st.session_state["reset_flag"]:
-                        st.session_state["action"] = "how can i help you"
-                        st.session_state['chat_history'] = []
-                        st.rerun()                
+                    with st.spinner():
+                          st.session_state['usermessage'] = "how can i help you" 
+                          time.sleep(30)                          
+
+                    st.session_state['usermessage'] = "how can i help you"          
                 else:
                     st.error(f"Failed with status code: {res.status_code}")
                     

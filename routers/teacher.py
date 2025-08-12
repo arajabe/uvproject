@@ -11,11 +11,7 @@ router = APIRouter(prefix="/teacher", tags=["teacher"])
 @router.post("/")
 def create_teacher(teacher: TeacherCreate, db: Session = Depends(get_db)):
     new_id = generate_teacher_id(db)
-    db_teacher = Teacher(name=teacher.name, email=teacher.email, fathername = teacher.fathername,
-                         mothername = teacher.mothername, dateofbirth = teacher.dateofbirth, 
-                         address =teacher.address, city = teacher.city, pincode = teacher.pincode, 
-                         contactnumber = teacher.contactnumber, aadhar = teacher.aadhar, id = new_id, reason = teacher.reason,
-                         graduatedegree = teacher.graduatedegree, subject = teacher.subject, role = "teacher"
+    db_teacher = Teacher(**teacher.dict(), id = new_id, role = "teacher"
                          )
     db.add(db_teacher)
     db.commit()

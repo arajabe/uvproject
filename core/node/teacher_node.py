@@ -8,6 +8,53 @@ from core.model.schema import ChatState
 
 API = "http://127.0.0.1:8000"
 
+def intent_node(state:ChatState) -> ChatState:
+    msg = state["messages"][-1].content
+    prompt = f"""
+    Task:
+    Identify the exact intent from {msg} without inferring related meanings. 
+    Valid intents are: term mark, assignement, pratical.
+
+    Examples : 
+
+    Message : create Assignement details as follows
+    intent : assignement
+
+    Message : create term mark details as follows
+    intent : term mark
+    - Output only valid JSON.
+
+        Return **only** valid JSON, no extra text. Example:
+        {{"intent": "term mark"}}
+        {{"intent": "assignement"}}
+        """
+
+    ai_resp = llm.invoke([HumanMessage(content=prompt)])   
+
+    raw_output = ai_resp.content.strip()
+
+    # Clean any accidental code block markers (like ```json ... ```)
+    raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()    
+    print(raw_output)
+    try:
+        parsed = json.loads(raw_output)
+    except:
+        parsed = {"intent": "chat", "params": {}}
+    return {**state, "intent": parsed.get("intent", "chat")}
+
+def router_node(state: ChatState) -> str:
+    x = str(state["intent"]).strip().lower()
+    print("router node")
+    print(x)
+    match x:
+        case "term mark": return "intent_node_mark"
+        case "assignement": return "intent_node_assignement"
+        case "pratical": return "pratical"
+        case _: 
+            print(" hello chat user case")
+            return "chat_node"
+
+
 def intent_node_mark(state:ChatState) -> ChatState:
     msg = state["messages"][-1].content
     prompt = f"""
@@ -44,8 +91,8 @@ Database: testdb
 Extract any parameters (student_id, term, language_1, language_2, maths, science. social_science) mentioned.
 
         Return **only** valid JSON, no extra text. Example:
-        {{"intent": "create_student", "params": {{"student_id": 36, "maths": 98}}}}
-        {{"intent": "create_student", "params": {{"student_id": 45, "science": 10, "language_1": 76, "term": 1}}}}
+        {{"intent": "create_mark", "params": {{"student_id": 36, "maths": 98}}}}
+        {{"intent": "create_mark", "params": {{"student_id": 45, "science": 10, "language_1": 76, "term": 1}}}}
 """.strip()
     
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
@@ -66,6 +113,54 @@ Extract any parameters (student_id, term, language_1, language_2, maths, science
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
 
+def intent_node_assignement(state:ChatState) -> ChatState:
+    msg = state["messages"][-1].content
+    prompt = f"""
+You are an intent classification assistant. Your job is to classify a user message into one of the intent categories.
+You want the AI assistant to analyze a message ({msg}) and determine the intent, specifically in the context of student academic data — like subject-wise marks, performance, or term results.
+
+Available intents:
+- create_assignement: The user wants to perform create operations on assignement. Examples: "create assignement details as follows".
+- update_assignement: The user wants to perform update operations on assignement. Examples: "update assignement details as follows".
+- delete_assignement: The user wants to perform delete operations on assignement. Examples: "delete assignement details as follows".
+Only respond with one of the three values: "create_assignement", "user", "update_assignement", "delete_assignement".
+Do not add any explanation or extra text.
+
+Examples:
+
+Message: "create assignement details as follows"
+Intent: create_assignement
+
+Message: "update assignement details as follows"
+Intent: update_assignement
+
+Message: {msg}
+Intent:
+
+Database: testdb
+        Table: Assignement(student_id, assignement_period, term, language_1, language_2, maths, science. social_science)
+
+Extract any parameters (student_id, assignement_period, term, language_1, language_2, maths, science. social_science) mentioned.
+
+        Return **only** valid JSON, no extra text. Example:
+        {{"intent": "create_assignement", "params": {{"student_id": 36, "period" : 1, "maths": 98}}}}
+        {{"intent": "create_assignement", "params": {{"student_id": 45, "science": 10, "language_1": 76, "term": 1}}}}
+""".strip()
+    
+    ai_resp = llm.invoke([HumanMessage(content=prompt)])
+    # routing logic
+    
+    raw_output = ai_resp.content.strip()
+
+    # Clean any accidental code block markers (like ```json ... ```)
+    raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()    
+
+    try:
+        parsed = json.loads(raw_output)
+    except:
+        parsed = {"intent": "chat", "params": {}}
+    return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
+
 def router_node_mark(state: ChatState) -> str:
     x = str(state["intent"]).strip().lower()
     print("router node")
@@ -73,6 +168,17 @@ def router_node_mark(state: ChatState) -> str:
         case "create_mark" : return "intent_node_create_mark"
         case "update_mark": return "intent_node_update_mark"
         case "delete_mark": return "intent_node_delete_mark"
+        case _: 
+            print(" hello chat mark router")
+            return "chat_node_initial"
+        
+def router_node_assignement(state: ChatState) -> str:
+    x = str(state["intent"]).strip().lower()
+    print("router node")
+    match x:
+        case "create_assignement" : return "intent_node_create_assignement"
+        case "update_assignement": return "intent_node_update_assignement"
+        case "delete_assignement": return "intent_node_delete_assignement"
         case _: 
             print(" hello chat mark router")
             return "chat_node_initial"
@@ -93,6 +199,22 @@ def intent_node_create_mark(state: ChatState) -> ChatState:
         r = requests.post(f"{API}/mark/", json={"student_id": p["student_id"], "term" : p["term"], "language_1": p["language_1"], "language_2" : p["language_2"],
                                                 "maths" : p["maths"], "science": p["science"], "social_science" : p["social_science"]})
         reply = f"Created mark {p['student_id']}." if r.status_code == 200 else "Failed to create mark list."
+    else:
+        reply = "Need all marks with subject "
+    
+    print("r.json()")
+    print(r)
+
+    return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
+
+def intent_node_create_assignement(state: ChatState) -> ChatState:
+    p = state["params"]
+    print("create node mark node")
+
+    if "student_id" in p and "term" in p and "language_1" in p and "language_2" in p and "maths" in p and "science" in p and "social_science" in p:
+        
+        r = requests.post(f"{API}/assignement/", json= p )
+        reply = f"Created assigngment {p['student_id']}." if r.status_code == 200 else "Failed to create assigngment list."
     else:
         reply = "Need all marks with subject "
     

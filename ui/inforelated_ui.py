@@ -108,6 +108,7 @@ def inforelated():
         
         st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "}{st.session_state["radio_action_on_person"]} details as follows: {msg_parts}"
 
-        st.markdown(st.session_state['usermessage'])
+        st.markdown(st.session_state['usermessage'])    
+        
 
         

@@ -37,5 +37,5 @@ def sidebar():
         "parent": ["None", "Performance"]
     }
 
-    st.session_state.mode = st.sidebar.selectbox("Select Option", role_options.get(role, []))
+    st.session_state['mode'] = st.sidebar.selectbox("Select Option", role_options.get(role, []))
 

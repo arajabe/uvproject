@@ -1,7 +1,14 @@
 import uuid
 import streamlit as st
 from typing import get_type_hints
-from core.model.schema import ParentCreate, ParentUpdate, UserCreate, UserUpdate, UserDelete, OfficeStaffCreate, OfficeStaffUpdate, StudentCreate, StudentUpdate, TeacherCreate, TeacherUpdate  # adjust import to your actual model paths
+from core.model.schema import (
+    AssignementCreate, MarkCreate, MarkUpdate, MarkDelete,
+    ParentCreate, ParentUpdate,
+    UserCreate, UserUpdate, UserDelete,
+    OfficeStaffCreate, OfficeStaffUpdate,
+    StudentCreate, StudentUpdate,
+    TeacherCreate, TeacherUpdate
+)
 
 def initialize_session_state():
 
@@ -56,6 +63,18 @@ def initialize_session_state():
     for field_name in OfficeStaffUpdate.__annotations__:
         if field_name not in st.session_state:
             st.session_state[field_name] = ""
+    for field_name in MarkCreate.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
+    for field_name in MarkUpdate.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
+    for field_name in MarkDelete.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
+    for field_name in AssignementCreate.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
 
 
 
@@ -68,8 +87,10 @@ def initialize_session_state():
     if "roleendpointsrole" not in st.session_state:
         st.session_state["roleendpointsrole"] = ""
     if "radio_action" not in st.session_state:
-        st.session_state["radio_action"] = ""
+        st.session_state["radio_action"] = ""   
     if "radio_action_on_person" not in st.session_state:
         st.session_state['radio_action_on_person']="none"
     if "CONFIRM" not in st.session_state:
         st.session_state['CONFIRM'] = ""
+    if "radio_action_on_performance" not in st.session_state:
+        st.session_state["radio_action_on_performance"] = ""
