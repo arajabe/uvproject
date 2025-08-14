@@ -4,7 +4,7 @@ from langgraph.graph import StateGraph, END
 import os, json, requests
 import re
 from core.model.schema import ChatState
-from core.node import teacher_node
+from core.node.teachernode import teacher_node
 
 graph = StateGraph(ChatState)
 

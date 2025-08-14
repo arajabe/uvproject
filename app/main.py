@@ -1,8 +1,14 @@
 from fastapi import FastAPI
 from routers import users, chat, student,teacher, parent, mark, performance,login, officestaff, assignement, subjecttermsplit
 from fastapi.middleware.cors import CORSMiddleware
+from core.database.databse import Base, engine
+
+
+# Create tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="UV LangGraph API Framework")
+
 
 # Allow frontend (React on 5173)
 origins = [

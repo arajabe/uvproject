@@ -3,7 +3,8 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP, func
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from core.model.schema import LoginRequest
-from core.db.db import get_db, Parent
+from core.database.databse import get_db
+from core.database.databsetable.tables_users import Parent
 
 router = APIRouter(prefix="/login", tags=["login"])
 

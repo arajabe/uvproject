@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, EmailStr
-from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP, func
-from sqlalchemy.orm import sessionmaker, declarative_base, Session
-from core.model.schema import MarkQueryParams, RequestPayload
-from core.db.db import get_db, Mark
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from core.model.schema import RequestPayload
+from core.database.databse import get_db
+from core.database.databsetable.tables_marks import Mark
 
 router = APIRouter(prefix="/performance", tags=["performance"])
 

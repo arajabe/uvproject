@@ -15,6 +15,8 @@ class ChatState(TypedDict):
     params: dict
     response : json
     response_pd : str
+    role: str
+    radio_action_on_person: str
 
 class UserCreate(BaseModel):
     name: str

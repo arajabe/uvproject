@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from core.db.db import ChatHistory
+from core.database.databsetable.tables_history import ChatHistory
 
 def save_chat(session_id: str, role: str, user_msg: str, bot_reply: str, db: Session):
     chat = ChatHistory(

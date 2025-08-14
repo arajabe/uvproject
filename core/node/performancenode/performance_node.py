@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from core.db.db import get_db, Mark
+from core.database.databse import get_db
 from langchain.schema import AIMessage,HumanMessage
 from langchain.prompts import ChatPromptTemplate
 from core.model.schema import ChatState
@@ -7,7 +7,7 @@ from llm.llm import llm
 import re,requests
 import json
 import pandas as pd
-from core.db.db import get_db
+from core.database.databsetable.tables_marks import Mark
 
 API = "http://127.0.0.1:8000"
 

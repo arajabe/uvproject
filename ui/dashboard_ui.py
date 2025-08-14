@@ -67,6 +67,8 @@ def dashboard():
                  class_teacher_allocation()
             case "Student Allocation":
                 student_class_allocation()
+            case "Mark Posting":
+                markposting()
 
 
     session_mode(st.session_state['mode'])

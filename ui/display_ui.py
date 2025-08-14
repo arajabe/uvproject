@@ -19,12 +19,26 @@ API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
 def displayui():
     try:
                 endpoint = st.session_state['roleendpointsrole']
+
+                if endpoint == "admin":
+                      Payload = {
+                        "session_id": st.session_state["session_id"],
+                        "message": st.session_state['usermessage'],
+                        "role" : st.session_state['roleendpointsrole'],
+                        "radio_action_on_person" : st.session_state["radio_action_on_person"]
+                    }
+                elif endpoint == "teacher":
+                       Payload = {
+                        "session_id": st.session_state["session_id"],
+                        "message": st.session_state['usermessage'],
+                        "role" : st.session_state['roleendpointsrole'],
+                        "radio_action_on_person" : st.session_state["radio_action_on_performance"]
+                    }
+
+
                 res = requests.post(
                     f"{API}/chat/{endpoint}",
-                    params={
-                        "session_id": st.session_state["session_id"],
-                        "message": st.session_state['usermessage']
-                    }
+                    params= Payload
                 )
                 data = res.json()
                 if res.status_code == 200:

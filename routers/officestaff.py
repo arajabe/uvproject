@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, EmailStr
-from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP, func
-from sqlalchemy.orm import sessionmaker, declarative_base, Session
+from sqlalchemy.orm import Session
 from core.model.schema import OfficeStaffCreate, OfficeStaffUpdate
-from core.db.db import get_db, OfficeStaff
+from core.database.databse import get_db
+from core.database.databsetable.tables_users import OfficeStaff
 
 
 router = APIRouter(prefix="/officestaff", tags=["users"])
