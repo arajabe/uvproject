@@ -9,7 +9,7 @@ from core.database.databse import get_db
 router = APIRouter(prefix="/chat", tags=["chat"])
 sessions = {}
 
-@router.post("/admin")
+@router.post("/")
 def chat(session_id: str, message: str,  role : str, radio_action_on_person : str,
          db: Session = Depends(get_db)):
     print("chat api", role)

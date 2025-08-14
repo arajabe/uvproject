@@ -29,7 +29,7 @@ def create_student_subject_term_split(subject_term_split: SubjectTermSplitCreate
 
     return {"status": "subject split mark list created", "mark_status": {"student_id": db_subject_term_split.student_id, "status": db_subject_term_split.subject_total}}
 
-@router.patch("/{student_id}/{subject}/{term}")
+@router.patch("/student/{student_id}/subject/{subject}/term/{term}")
 def update_student_subject_term_split(student_id: str, term: int, subject : str, subject_term_split: SubjectTermSplitCreate, db: Session = Depends(get_db)):
     db_subject_term_split = db.query(SubjectTermSplit).filter(
         SubjectTermSplit.student_id == student_id,
@@ -50,7 +50,7 @@ def update_student_subject_term_split(student_id: str, term: int, subject : str,
     
     return {"status": "split term mark updated", "student_id": student_id, "term": term ,"subject total" : db_subject_term_split.subject_total}
 
-@router.delete("/{student_id}/{subject}/{term}")
+@router.delete("/student/{student_id}/subject/{subject}/term/{term}")
 def delete_student_subject_term_split(student_id: str, subject : str, term : int, db: Session = Depends(get_db)):
     db_subject_term_split = db.query(SubjectTermSplit).filter(
         SubjectTermSplit.student_id == student_id,

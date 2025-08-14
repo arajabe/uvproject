@@ -10,13 +10,10 @@ router = APIRouter(prefix="/student", tags=["student"])
 @router.post("/")
 def create_student(student: StudentCreate, db: Session = Depends(get_db)):
     new_id = generate_student_id(db)
-    print("create_student(student: StudentCreate, db: Session = Depends(get_db))")
-    db_student = Student(** student.dict(), id = new_id, role = "student")
-
+    db_student = Student(**student.dict(), id = new_id, role = "student")
     db.add(db_student)
     db.commit()
     db.refresh(db_student)
-    print("user request post")
     return {"status": "created", "student": {"id": db_student.id, "name": db_student.name}}
 
 @router.delete("/{student_id}")

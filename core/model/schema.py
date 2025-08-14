@@ -98,7 +98,7 @@ class MarkCreate(BaseModel):
     social_science : int
 
 class MarkUpdate(BaseModel):
-    student_id: Optional[int] = None
+    student_id: Optional[str] = None
     term: Optional[int] = None
     language_1: Optional[int] = None
     language_2: Optional[int] = None
