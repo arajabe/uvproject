@@ -4,7 +4,7 @@ from langgraph.graph import StateGraph, END
 
 import os, json, requests
 import re
-from core.model.schema import ChatState, OfficeStaffCreate
+from core.model.schema import ChatState, ClassTeacherAllocation
 from llm.llm import llm
 
 
@@ -12,8 +12,8 @@ API = "http://127.0.0.1:8000"
 
 
 # --- Node 1: Intent Analysis ---
-def intent_node_officestaff(state: ChatState) -> ChatState:
-    print("intent_node_officestaff")
+def intent_class_teacher_allocation(state: ChatState) -> ChatState:
+    print("intent_class_teacher_allocation")
     user_msg = state["messages"][-1].content
     role = state["role"]
     radio_action_on_person = state["radio_action_on_person"]
@@ -22,28 +22,27 @@ def intent_node_officestaff(state: ChatState) -> ChatState:
 
         You are AI assistant, clarify the intent of {user_msg} and work with testdb database.
 
-        Classify the intent of: "{user_msg}". and create_officestaff, delete_officestaff,update_officestaff and chat history in database testdb
-
+        Classify the intent of: "{user_msg}". and create_class_teacher_allocation, delete_class_teacher_allocation,update_class_teacher_allocation
+        
         Rules:
         the message contains a direct mention of an intent
 
         Database: testdb
-        Table: OfficeStaff(id, name, email)
+        Table: ClassTeacherAllocation(id, teacher_id, teacher_class, class_section)
 
         Valid intents:
-        Table: OfficeStaff(id, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, role, graduatedegree, subject)
+        Table: classteacherallocation(teacher_id, teacher_class, class_section)
 
         Valid intents:
-        - create_officestaff (requires name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, role, graduatedegree, subject)
-        - delete_officestaff (requires officestaffid, reason)
-        - update_officestaff (requires officestaffid, name/fathername/mothername/dateofbirth/address/city/pincode/contactnumber/email/aadhar/graduatedegree/subject if given)
+        - create_class_teacher_allocation (requires teacher_id, teacher_class, class_section)
+        - delete_class_teacher_allocation (requires classteacherallocationid, reason)
+        - update_class_teacher_allocation (requires classteacherallocationid, reason, teacher_id/teacher_class/class_section if given)
 
-        Extract any parameters (parentid, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, role, graduatedegree, subject) mentioned.
-        Extract any parameters (parentid, name, email) mentioned.
+        Extract any parameters (teacher_id, teacher_class, class_section, reason, classteacherallocationid) mentioned.
 
         Return **only** valid JSON, no extra text. Example:
-        {{"intent": "create_officestaff", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
-        {{"intent": "update_officestaff", "params": {{"name": "Bob", "email": "bob@x.com", "officestaffid": 10}}}}
+        {{"intent": "create_class_teacher_allocation", "params": {{"teacher_id": TEA0001, "teacher_class": 10, "class_section" : "B" }}}}
+        {{"intent": "update_class_teacher_allocation", "params": {{"classteacherallocationid": "CTA0001", "teacher_id": TEA0001, "class_section" : "B" , "rason": "any}}}}
         """
   
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
@@ -62,9 +61,9 @@ def intent_node_officestaff(state: ChatState) -> ChatState:
 
 
 # --- Action Nodes (call FastAPI) ---
-def node_officestaff(state: ChatState) -> ChatState:
+def node_class_teacher_allocation(state: ChatState) -> ChatState:
 
-    print("create node user")
+    print("create node class_teacher_allocation")
 
     intent_value = str(state["intent"]).strip().lower()
 
@@ -74,42 +73,42 @@ def node_officestaff(state: ChatState) -> ChatState:
 
     match intent_value:        
 
-        case "create_officestaff":   
+        case "create_class_teacher_allocation":   
 
-            required_keys = list(OfficeStaffCreate.model_fields.keys())       
+            required_keys = list(ClassTeacherAllocation.model_fields.keys())       
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
-                res = requests.post(f"{API}/officestaff/", json=parms_value)
+                res = requests.post(f"{API}/classteacherallocation/", json=parms_value)
                 reply = f"Created office staff {parms_value['name']}." if res.status_code == 200 else "Failed to create office staff."
                 response_data = res.json()
             else:
-                reply = "data are inadequate to create officestaff"
-                response_data = "data are inadequate to create officestaff"
+                reply = "data are inadequate to create class teacher allocation"
+                response_data = "data are inadequate to create class teacher allocation"
             
             return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : response_data}
         
-        case "delete_officestaff":
+        case "delete_class_teacher_allocation":
 
-            if "officestaffid" in parms_value:
-                res = requests.delete(f"{API}/officestaff/{parms_value['officestaffid']}")
+            if "classteacherallocationid" in parms_value:
+                res = requests.delete(f"{API}/classteacherallocation/{parms_value['classteacherallocationid']}")
                 reply = "office staff deleted." if res.status_code == 200 else "office staff not found."
                 response_data = res.json()
             else:
-                reply = "Need a officestaff ID to delete."
-                response_data = "Need a officestaff ID to delete."
+                reply = "Need a class teacher allocation ID to delete."
+                response_data = "Need a class teacher allocation ID to delete."
             return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": response_data}
         
-        case "update_officestaff":
+        case "update_class_teacher_allocation":
 
-            if "officestaffid" in parms_value:
-                res = requests.patch(f"{API}/officestaff/{parms_value['officestaffid']}", json=parms_value)
+            if "classteacherallocationid" in parms_value:
+                res = requests.patch(f"{API}/officestaff/{parms_value['classteacherallocationid']}", json=parms_value)
                 reply = "office staff updated." if res.status_code == 200 else "Office staff not found."
                 response_data = res.json()
             else:
-                reply = "Need office staff ID to update."
-                response_data = "Need office staff ID to update."
+                reply = "Need class teacher allocation ID to update."
+                response_data = "Need class teacher allocation ID to update."
             return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": response_data}
     
         case _: 
-            response_data = "The office staff is not create/updated/deleted"
+            response_data = "The class teacher allocation is not create/updated/deleted"
             return {**state, "messages": state["messages"] + [AIMessage(content=response_data)], "response": response_data}
 

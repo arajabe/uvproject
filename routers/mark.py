@@ -4,6 +4,7 @@ from core.model.schema import MarkCreate,MarkUpdate
 from core.database.databse import get_db
 from core.database.databsetable.tables_users import Student
 from core.database.databsetable.tables_marks import Mark
+from sqlalchemy.exc import SQLAlchemyError
 
 
 router = APIRouter(prefix="/mark", tags=["mark"])
@@ -16,12 +17,19 @@ def create_student_mark(mark: MarkCreate, db: Session = Depends(get_db)):
     if std_name:
         std_name = std_name[0]
 
-    db_mark = Mark(**mark.dict(), id = new_id)
+    db_mark = Mark(**mark.dict(), id = new_id, student_name = std_name)
     db.add(db_mark)
-    db.commit()
-    db.refresh(db_mark)
-    print("user request post")
-    return {"status": "mark list created", "mark_status": {"student_id": db_mark.student_id, "status": db_mark.overall_status}}
+    try:
+        db.commit()
+        db.refresh(db_mark)
+        return {"status": "mark list created", "mark":db_mark}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
+    
+    
 
 @router.patch("/{student_id}/{term}")
 def update_student_mark(student_id: str, term: int, mark: MarkUpdate, db: Session = Depends(get_db)):
@@ -37,10 +45,15 @@ def update_student_mark(student_id: str, term: int, mark: MarkUpdate, db: Sessio
     for field, value in mark.dict(exclude_none=True).items():
         setattr(db_mark, field, value)
 
-    db.commit()
-    db.refresh(db_mark)
-    
-    return {"status": "mark updated", "student_id": student_id, "term": term ,"performance" : db_mark.overall_status}
+    try :
+        db.commit()
+        db.refresh(db_mark)
+        return {"status": "mark updated", "updated mark":db_mark}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.delete("/{student_id}/{term}")
 def delete_student_mark(student_id: str, term : int, db: Session = Depends(get_db)):
@@ -48,9 +61,15 @@ def delete_student_mark(student_id: str, term : int, db: Session = Depends(get_d
     print("db_mark", db_mark)
     if not db_mark:
         raise HTTPException(404, "student not found")
-    db.delete(db_mark)
-    db.commit()
-    return {"status": "deleted mark list", "student_id": student_id, "term" : term}
+    try:
+        db.delete(db_mark)
+        db.commit()
+        return {"status": "deleted mark list", "student_id": student_id, "term" : term}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.get("/{student_id}/{term}")
 def delete_student_mark(student_id: str, term : int, db: Session = Depends(get_db)):
@@ -59,8 +78,14 @@ def delete_student_mark(student_id: str, term : int, db: Session = Depends(get_d
     if not db_mark:
         raise HTTPException(404, "student not found")
     get_mark = db.get(db_mark)
-    db.commit()
-    return {"status": "deleted mark list", "student_id": student_id, "term" : term, "mark" : get_mark}
+    try:
+        db.commit()
+        return {"status": "deleted mark list", "student_id": student_id, "term" : term, "mark" : get_mark}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 def generate_parent_id(db: Session):
     last = db.query(Mark).order_by(Mark.id.desc()).first()

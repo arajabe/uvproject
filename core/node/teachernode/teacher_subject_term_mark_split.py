@@ -2,7 +2,7 @@ from langchain.schema import HumanMessage, AIMessage
 from llm.llm import llm
 import os, json, requests
 import re
-from core.model.schema import ChatState
+from core.model.schema import ChatState, SubjectTermSplitCreate
 
 API = "http://127.0.0.1:8000"
 
@@ -65,7 +65,8 @@ def node_subject_term_mark_split(state: ChatState) -> ChatState:
     parms_value = state["params"]
     intent_value = state["intent"]
     print("intent_node_create_subject_term_split")
-    required_keys = ["student_id","term","subject", "mark_section_A", "mark_section_B", "mark_section_C", "mark_section_D"]
+
+    required_keys = list(SubjectTermSplitCreate.model_fields.keys())
 
     match intent_value:
         case "create_subject_term_split":

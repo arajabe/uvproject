@@ -12,15 +12,12 @@ sessions = {}
 @router.post("/")
 def chat(session_id: str, message: str,  role : str, radio_action_on_person : str,
          db: Session = Depends(get_db)):
-    print("chat api", role)
-    print("chat api", radio_action_on_person)
     history = sessions.get(session_id, {"messages": []})
     history["messages"].append(HumanMessage(content=message))
     result = office_staff_graph.invoke({"messages": history["messages"],
     "role": role,
     "radio_action_on_person": radio_action_on_person})
     sessions[session_id] = {"messages": result["messages"]}
-    print(result['response'])
     reply = [m for m in result["messages"] if isinstance(m, AIMessage)][-1].content
     save_chat(session_id=session_id, role="admin rara", user_msg=message, bot_reply=reply, db=db)
     return {"reply": result['response'], "aireply" : reply}

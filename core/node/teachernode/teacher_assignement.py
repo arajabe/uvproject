@@ -4,7 +4,7 @@ from langgraph.graph import StateGraph, END
 from llm.llm import llm
 import os, json, requests
 import re
-from core.model.schema import ChatState
+from core.model.schema import ChatState,AssignementCreate
 
 API = "http://127.0.0.1:8000"
 
@@ -70,9 +70,9 @@ def node_assignement(state: ChatState) -> ChatState:
 
         case "create_assignement":
 
-            required_keys = [ "student_id", "term", "period","language_1", "language_2","maths", "science", "social_science"]
+            required_keys = list(AssignementCreate.model_fields.keys())
 
-            if all(key in parms_value for key in required_keys):        
+            if all(parms_value.get(key) not in (None, "") for key in required_keys):        
                 res = requests.post(f"{API}/assignement/", json= parms_value)
                 reply = f"Created assigngment {parms_value['student_id']}." if res.status_code == 200 else "Failed to create assigngment list."
                 response_data = res.json()
@@ -84,7 +84,7 @@ def node_assignement(state: ChatState) -> ChatState:
             
         case "update_assignement":
             required_keys = ["student_id", "term", "period"]
-            if all(key in parms_value for key in required_keys):
+            if all(parms_value.get(key) not in (None, "") for key in required_keys):
                 res = requests.patch(f"{API}/assignement/{parms_value['student_id']}/term/{parms_value['term']}/period/{parms_value['period']}", json = parms_value)
                 reply = f"Updated assigngment {parms_value['student_id']}." if res.status_code == 200 else "Failed to updated assigngment list."
                 response_data = res.json()
@@ -96,7 +96,7 @@ def node_assignement(state: ChatState) -> ChatState:
         
         case "delete_assignement":
             required_keys = ["student_id", "term", "period"]
-            if all(key in parms_value for key in required_keys):
+            if all(parms_value.get(key) not in (None, "") for key in required_keys):
                 res = requests.delete(f"{API}/assignement/{parms_value['student_id']}/term/{parms_value['term']}/period/{parms_value['period']}")
                 reply = "Assignement list deleted." if res.status_code == 200 else "Assignement list not found."
                 response_data = res.json()

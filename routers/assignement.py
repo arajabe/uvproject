@@ -4,6 +4,7 @@ from core.model.schema import AssignementCreate, AssignementUpdate
 from core.database.databse import get_db
 from core.database.databsetable.tables_users import Student
 from core.database.databsetable.tables_marks import Mark, Assignement
+from sqlalchemy.exc import SQLAlchemyError
 
 
 router = APIRouter(prefix="/assignement", tags=["assignement"])
@@ -16,12 +17,17 @@ def create_student_assignement(assignement: AssignementCreate, db: Session = Dep
     if std_name:
         std_name = std_name[0]
 
-    db_assignement = Assignement(**assignement.dict(), id = new_id)
+    db_assignement = Assignement(**assignement.dict(), id = new_id, student_name = std_name)
     db.add(db_assignement)
-    db.commit()
-    db.refresh(db_assignement)
-    print("user request post")
-    return {"status": "assignement list created", "assignement_status": {"student_id": db_assignement.student_id}}
+    try:
+        db.commit()
+        db.refresh(db_assignement)
+        return {"status": "assignement list created", "created assignement": db_assignement}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.patch("/{student_id}/term/{term}/period/{period}")
 def update_student_mark(student_id: str, term: int, period : int, assignement_update: AssignementUpdate, db: Session = Depends(get_db)):
@@ -34,15 +40,23 @@ def update_student_mark(student_id: str, term: int, period : int, assignement_up
 
     if not db_assignement:
         raise HTTPException(status_code=404, detail="Assignement record not found")
-
-    # Only update fields that are not None
-    for field, value in assignement_update.dict(exclude_none=True).items():
-        setattr(db_assignement, field, value)
-
-    db.commit()
-    db.refresh(db_assignement)
     
-    return {"status": "assignement updated", "student_id": student_id, "term": term }
+    # Extract only provided fields and not None
+    update_data = assignement_update.dict(exclude_unset=True, exclude_none=True)
+
+    # Apply changes
+    for key, value in update_data.items():
+        setattr(db_assignement, key, value)
+
+    try:
+        db.commit()
+        db.refresh(db_assignement)
+        return {"status": "assignement updated", "assignement updated": db_assignement}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.delete("/{student_id}/term/{term}/period/{period}")
 def delete_student_mark(student_id: str, period : int, term : int, db: Session = Depends(get_db)):
@@ -52,8 +66,14 @@ def delete_student_mark(student_id: str, period : int, term : int, db: Session =
     if not db_assignement:
         raise HTTPException(404, "student not found")
     db.delete(db_assignement)
-    db.commit()
-    return {"status": "deleted assignement list", "student_id": student_id, "term" : term, "period": period}
+    try:
+        db.commit()
+        return {"status": "deleted assignement list", "student_id": student_id, "term" : term, "period": period}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.get("/{student_id}/{term}")
 def delete_student_mark(student_id: str, term : int, db: Session = Depends(get_db)):
@@ -62,8 +82,14 @@ def delete_student_mark(student_id: str, term : int, db: Session = Depends(get_d
     if not db_mark:
         raise HTTPException(404, "student not found")
     get_mark = db.get(db_mark)
-    db.commit()
-    return {"status": "deleted mark list", "student_id": student_id, "term" : term, "mark" : get_mark}
+    try :
+        db.commit()
+        return {"status": "deleted mark list", "student mark": get_mark}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 def generate_assignement_id(db: Session):
     last = db.query(Assignement).order_by(Assignement.id.desc()).first()

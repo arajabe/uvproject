@@ -37,13 +37,13 @@ class Mark(Base):
     student = relationship("Student", backref="marks")
 
     __table_args__ = (
-        CheckConstraint('language_1 >= 0 AND language_1 <= 100', name='lang1_range'),
-        CheckConstraint('language_2 >= 0 AND language_2 <= 100', name='lang2_range'),
-        CheckConstraint('maths >= 0 AND language_2 <= 100', name='maths_range'),
-        CheckConstraint('science >= 0 AND language_2 <= 100', name='sscience_range'),
-        CheckConstraint('social_science >= 0 AND language_2 <= 100', name='social_science_range'),
+        CheckConstraint('language_1 >= 0 AND language_1 <= 100', name='language_1 mark is not in range'),
+        CheckConstraint('language_2 >= 0 AND language_2 <= 100', name='language_2 mark is not in range'),
+        CheckConstraint('maths >= 0 AND maths <= 100', name='maths mark is not in range'),
+        CheckConstraint('science >= 0 AND science <= 100', name='science mark is not in range'),
+        CheckConstraint('social_science >= 0 AND social_science <= 100', name='social_science mark is not in range'),
         CheckConstraint('total >= 0 AND total <= 500', name='total_range'),
-        UniqueConstraint('student_id', 'term', name='uq_student_term')
+        UniqueConstraint('student_id', 'term', name='either student_id or term is duplicate')
     )
 
 
@@ -65,12 +65,12 @@ class Assignement(Base):
     student = relationship("Student", backref="marks_assignement")
 
     __table_args__ = (
-        CheckConstraint('language_1 >= 0 AND language_1 <= 10', name='lang1_range_assignement'),
-        CheckConstraint('language_2 >= 0 AND language_2 <= 10', name='lang2_range_assignement'),
-        CheckConstraint('maths >= 0 AND language_2 <= 10', name='maths_range_assignement'),
-        CheckConstraint('science >= 0 AND language_2 <= 10', name='sscience_range_assignement'),
-        CheckConstraint('social_science >= 0 AND language_2 <= 10', name='social_science_range_assignement'),
-        UniqueConstraint('student_id', 'term', 'period', name='uq_student_term_period_assignement')
+        CheckConstraint('language_1 >= 0 AND language_1 <= 10', name='language_1 assignement mark is not in range'),
+        CheckConstraint('language_2 >= 0 AND language_2 <= 10', name='language 2 assignement mark is not in range'),
+        CheckConstraint('maths >= 0 AND maths <= 10', name='maths assignement mark is not in range'),
+        CheckConstraint('science >= 0 AND science <= 10', name='sscience assignement mark is not in range '),
+        CheckConstraint('social_science >= 0 AND social_science <= 10', name='social assignement mark is not in range'),
+        UniqueConstraint('student_id', 'term', 'period', name='Duplicate')
     )
 
 

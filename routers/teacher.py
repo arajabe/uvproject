@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from core.model.schema import TeacherCreate, TeacherUpdate
 from core.database.databse import get_db
 from core.database.databsetable.tables_users import Teacher
+from sqlalchemy.exc import SQLAlchemyError
 
 
 router = APIRouter(prefix="/teacher", tags=["teacher"])
@@ -10,13 +11,17 @@ router = APIRouter(prefix="/teacher", tags=["teacher"])
 @router.post("/")
 def create_teacher(teacher: TeacherCreate, db: Session = Depends(get_db)):
     new_id = generate_teacher_id(db)
-    db_teacher = Teacher(**teacher.dict(), id = new_id, role = "teacher"
-                         )
+    db_teacher = Teacher(**teacher.dict(), id = new_id, role = "teacher")
     db.add(db_teacher)
-    db.commit()
-    db.refresh(db_teacher)
-    print("user request post")
-    return {"status": "created", "teacher": {"id": db_teacher.id, "name": db_teacher.name}}
+    try:
+        db.commit()
+        db.refresh(db_teacher)
+        return {"status": "teacher created", "teacher": db_teacher}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.delete("/{teacher_id}")
 def delete_teacher(teacher_id: str, db: Session = Depends(get_db)):
@@ -24,8 +29,14 @@ def delete_teacher(teacher_id: str, db: Session = Depends(get_db)):
     if not teacher:
         raise HTTPException(404, "teacher not found")
     db.delete(teacher)
-    db.commit()
-    return {"status": "deleted", "id": teacher_id}
+    try:
+        db.commit()
+        return {"status": "deleted", "id": teacher_id}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.patch("/{teacher_id}")
 def update_teacher(teacher_id: str, teacher: TeacherUpdate, db: Session = Depends(get_db)):
@@ -36,11 +47,15 @@ def update_teacher(teacher_id: str, teacher: TeacherUpdate, db: Session = Depend
     # Apply only provided fields
     for key, value in teacher.dict(exclude_none=True).items():
         setattr(db_teacher, key, value)
-
-    db.commit()
-    db.refresh(db_teacher)
-
-    return {"message": "Teacher updated successfully", "data": db_teacher}
+    try:
+        db.commit()
+        db.refresh(db_teacher)
+        return {"message": "Teacher updated successfully", "updated teacher": db_teacher}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 def generate_teacher_id(db: Session):
     last = db.query(Teacher).order_by(Teacher.id.desc()).first()

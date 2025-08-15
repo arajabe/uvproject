@@ -12,7 +12,7 @@ from sqlalchemy import Column, Date
 from core.database.databse import Base
 
 
-class StudentClass(Base):
+class StudentClassAllocation(Base):
     __tablename__ = "studentclass"
     id = Column(String(50), primary_key=True, index=True)
     student_id = Column(String(50), ForeignKey("student.id"), primary_key=True, index=True)
@@ -24,7 +24,7 @@ class StudentClass(Base):
 
     UniqueConstraint('student_id', 'student_class', class_section, name='uq_student_class')
 
-class ClassTeacher(Base):
+class ClassTeacherAllocation(Base):
     __tablename__ = "classteacher"
     id = Column(String(50), primary_key=True, index=True)
     teacher_id = Column(String(50),primary_key=True, index=True)

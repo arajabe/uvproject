@@ -41,6 +41,7 @@ def displayui():
                 if res.status_code == 200:
                     st.success("Message sent successfully.")
                     st.markdown(f"**Bot:** {data.get('reply', '(No reply found)')}")
+                    st.table(data.get('reply', '(No reply found)'))
                     st.session_state["reset_flag"] = True
                     st.session_state['mode'] = 'None'
 

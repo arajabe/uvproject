@@ -9,7 +9,8 @@ from core.model.schema import (
     UserCreate, UserUpdate, UserDelete,
     OfficeStaffCreate, OfficeStaffUpdate,
     StudentCreate, StudentUpdate,
-    TeacherCreate, TeacherUpdate
+    TeacherCreate, TeacherUpdate,
+    ClassTeacherAllocation, StudentClassAllocation
 )
 
 def initialize_session_state():
@@ -89,8 +90,12 @@ def initialize_session_state():
     for field_name in SubjectTermSplitDelete.__annotations__:
         if field_name not in st.session_state:
             st.session_state[field_name] = ""
-
-
+    for field_name in StudentClassAllocation.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
+    for field_name in ClassTeacherAllocation.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
 
 
     if "msg" not in st.session_state:

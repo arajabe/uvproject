@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from core.model.schema import OfficeStaffCreate, OfficeStaffUpdate
 from core.database.databse import get_db
 from core.database.databsetable.tables_users import OfficeStaff
+from sqlalchemy.exc import SQLAlchemyError
 
 
 router = APIRouter(prefix="/officestaff", tags=["users"])
@@ -17,10 +18,15 @@ def create_officestaff(office: OfficeStaffCreate, db: Session = Depends(get_db))
                          contactnumber = office.contactnumber, aadhar = office.aadhar, id = new_id, reason = office.reason,
                          role = office.role, graduatedegree = office.graduatedegree,  subject = office.subject)
     db.add(db_office)
-    db.commit()
-    db.refresh(db_office)
-
-    return {"status": "created", "office staff": {"id": db_office.id, "name": db_office.name}}
+    try:
+        db.commit()
+        db.refresh(db_office)
+        return {"status": "created", "office staff" : db_office}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.delete("/{officestaff_id}")
 def delete_officestaff(officestaff_id: str, db: Session = Depends(get_db)):
@@ -28,23 +34,34 @@ def delete_officestaff(officestaff_id: str, db: Session = Depends(get_db)):
     if not officestaff:
         raise HTTPException(404, "Office staff not found")
     db.delete(officestaff)
-    db.commit()
-    return {"status": "deleted", "office staff id": officestaff_id}
+    try :
+        db.commit()
+        return {"status": "deleted", "office staff id": officestaff_id}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.patch("/{officestaff_id}")
-def update_officestaff(officestaff_id: str, office: OfficeStaffUpdate, db: Session = Depends(get_db)):
+def update_officestaff(officestaff_id: str, office_update: OfficeStaffUpdate, db: Session = Depends(get_db)):
     db_office = db.query(OfficeStaff).filter(OfficeStaff.id == officestaff_id).first()
     if not db_office:
         raise HTTPException(status_code=404, detail="office staff not found")
 
     # Apply only provided fields
-    for key, value in office.dict(exclude_none=True).items():
+    for key, value in office_update.dict(exclude_none=True).items():
         setattr(db_office, key, value)
 
-    db.commit()
-    db.refresh(db_office)
-
-    return {"message": "Teacher updated successfully", "data": db_office}
+    try:
+        db.commit()
+        db.refresh(db_office)
+        return {"message": "office staff updated successfully", "updated office staff": db_office}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 def generate_officestaff_id(db: Session):
     last = db.query(OfficeStaff).order_by(OfficeStaff.id.desc()).first()

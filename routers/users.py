@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from core.model.schema import UserCreate, UserUpdate
 from core.database.databse import get_db
 from core.database.databsetable.tables_users import User
+from sqlalchemy.exc import SQLAlchemyError
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -16,10 +17,15 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
                          address =user.address, city = user.city, pincode = user.pincode, 
                          contactnumber = user.contactnumber, aadhar = user.aadhar, id = new_id, reason = user.reason)
     db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    print("user request post")
-    return {"status": "created", "user": {"id": db_user.id, "name": db_user.name}}
+    try:
+        db.commit()
+        db.refresh(db_user)  
+        return {"status": "user created", "user": db_user}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.delete("/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
@@ -27,31 +33,34 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(404, "User not found")
     db.delete(user)
-    db.commit()
-    return {"status": "deleted", "id": user_id}
+    try:
+        db.commit()
+        return {"status": "deleted", "id": user_id}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.put("/{user_id}")
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
-
     update_data = user.dict(exclude_unset=True)
-
     for field, value in update_data.items():
         if field == "reason":
             continue  # skip reason for DB update
         setattr(db_user, field, value)
-
-    db.commit()
-    db.refresh(db_user)
-
-    return {
-        "status": "updated",
-        "id": db_user.id,
-        "updated_fields": list(update_data.keys()),
-        "reason": user.reason
-    }
+    try:
+        db.commit()
+        db.refresh(db_user)
+        return {"status": "user updated", "updated_fields": db_user}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 def generate_user_id(db: Session):
     last = db.query(User).order_by(User.id.desc()).first()

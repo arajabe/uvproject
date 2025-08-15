@@ -160,3 +160,13 @@ class RequestPayload(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+class StudentClassAllocation(BaseModel):
+    student_id : str
+    student_class : int
+    class_section : str
+
+class ClassTeacherAllocation(BaseModel):
+    teacher_id : str
+    teacher_class : int
+    class_section : int

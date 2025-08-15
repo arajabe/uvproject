@@ -4,7 +4,7 @@ from langgraph.graph import StateGraph, END
 
 import os, json, requests
 import re
-from core.model.schema import ChatState
+from core.model.schema import ChatState, ParentCreate
 from llm.llm import llm
 
 
@@ -66,13 +66,14 @@ def node_parent(state: ChatState) -> ChatState:
     match intent_value:
          
         case "create_parent" :
-            if "name" in parms_value and "email" in parms_value:
+            required_keys = list(ParentCreate.model_fields.keys())
+            if all(parms_value.get(key) not in (None, "") for key in required_keys):
                 res = requests.post(f"{API}/parent/", json=parms_value)
                 reply = f"Created parent {parms_value['name']}." if  res.status_code == 200 else "Failed to create parent."
                 response_data = res.json()
             else:
                 reply = "Need name and email."
-                response_data = "Details not adequate to create parent"
+                response_data = "Details not inadequate to create parent"
             return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : response_data}
         
         case "delete_parent":

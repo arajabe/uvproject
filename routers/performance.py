@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from core.model.schema import RequestPayload
 from core.database.databse import get_db
 from core.database.databsetable.tables_marks import Mark
+from sqlalchemy.exc import SQLAlchemyError
 
 router = APIRouter(prefix="/performance", tags=["performance"])
 

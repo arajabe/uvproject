@@ -7,9 +7,7 @@ import os, json, requests
 from pydantic import BaseModel, EmailStr,constr, StringConstraints
 import pandas
 from datetime import date
-from core.model.schema import ( MarkCreate, MarkDelete,
-                               AssignementCreate, AssignementUpdate, AssignementDelete, 
-                               SubjectTermSplitCreate, SubjectTermSplitDelete)
+from core.model.schema import ( StudentClassAllocation)
 from session_util import initialize_session_state
 
 initialize_session_state()
@@ -40,11 +38,13 @@ def student_class_allocation():
         
         msg_parts = ""
 
-        if st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_class_teacher"] == "Student Allocation":      
-            for field_name in mark_create:
+        student_class_allocation = StudentClassAllocation.__annotations__
+
+        if st.session_state["radio_action"] in ["create", "update"] and st.session_state["radio_action_on_class_teacher"] == "Student Class Allocation":      
+            for field_name in student_class_allocation:
                 st.session_state[field_name] = st.text_input(field_name.capitalize())
             
-            msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in mark_create
+            msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in student_class_allocation
                          if st.session_state.get(field_name, "").strip() != ""]
 
         st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "} {""}{st.session_state["radio_action_on_performance"]}{""} details as follows: {msg_parts}"

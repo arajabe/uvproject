@@ -4,7 +4,7 @@ from langgraph.graph import StateGraph, END
 
 import os, json, requests
 import re
-from core.model.schema import ChatState
+from core.model.schema import ChatState, TeacherCreate
 from llm.llm import llm
 
 
@@ -68,7 +68,8 @@ def node_teacher(state: ChatState) -> ChatState:
 
     match intent_value:
         case "create_teacher":
-            if "name" in parms_value and "email" in parms_value:
+            required_keys = list(TeacherCreate.model_fields.keys())
+            if all(parms_value.get(key) not in (None, "") for key in required_keys):
                 res = requests.post(f"{API}/teacher/", json=parms_value)
                 reply = f"Created teacher {parms_value['name']}." if res.status_code == 200 else "Failed to create teacher."
                 response_data = res.json()

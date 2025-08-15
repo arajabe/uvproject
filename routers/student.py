@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from core.model.schema import StudentCreate, StudentUpdate
 from core.database.databse import get_db
 from core.database.databsetable.tables_users import Student
+from sqlalchemy.exc import SQLAlchemyError
 
 
 router = APIRouter(prefix="/student", tags=["student"])
@@ -12,9 +13,15 @@ def create_student(student: StudentCreate, db: Session = Depends(get_db)):
     new_id = generate_student_id(db)
     db_student = Student(**student.dict(), id = new_id, role = "student")
     db.add(db_student)
-    db.commit()
-    db.refresh(db_student)
-    return {"status": "created", "student": {"id": db_student.id, "name": db_student.name}}
+    try:
+        db.commit()
+        db.refresh(db_student)
+        return {"status": "student created", "student": db_student}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.delete("/{student_id}")
 def delete_student(student_id: str, db: Session = Depends(get_db)):
@@ -22,8 +29,14 @@ def delete_student(student_id: str, db: Session = Depends(get_db)):
     if not student:
         raise HTTPException(404, "Student not found")
     db.delete(student)
-    db.commit()
-    return {"status": "deleted", "id": student_id}
+    try:
+        db.commit()
+        return {"status": "student deleted", "id": student_id}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 @router.patch("/{student_id}")
 def update_student(student_id: str, student: StudentUpdate, db: Session = Depends(get_db)):
@@ -36,16 +49,15 @@ def update_student(student_id: str, student: StudentUpdate, db: Session = Depend
     # Apply only provided fields
     for key, value in student.dict(exclude_none=True).items():
         setattr(db_student, key, value)
-
-    db.commit()
-    db.refresh(db_student)
-
-    return {
-        "status": "updated",
-        "id": db_student.id,
-        "updated_fields": list(update_data.keys()),
-        "reason": student.reason
-    }
+    try:
+        db.commit()
+        db.refresh(db_student)
+        return {"status": "student updated", "updated student": db_student}
+    except SQLAlchemyError as e:
+        db.rollback()
+    # Return the SQL error details
+        response =  str(e.__cause__ or e)
+        return {"status": response}
 
 def generate_student_id(db: Session):
     last = db.query(Student).order_by(Student.id.desc()).first()
