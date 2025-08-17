@@ -38,12 +38,12 @@ Message: {msg}
 Intent:
 
 Database: testdb
-        Table: SubjectTermSpli(student_id, term, subject, mark_section_A, mark_section_B, mark_section_C, mark_section_D)
+        Table: SubjectTermSpli(student_id, term, subject, mark_section_A, mark_section_B, mark_section_C, mark_section_D, abscent)
 
-Extract any parameters (student_id, term, subject, mark_section_A, mark_section_B, mark_section_C, mark_section_D) mentioned.
+Extract any parameters (student_id, term, subject, mark_section_A, mark_section_B, mark_section_C, mark_section_D, abscent) mentioned.
 
         Return **only** valid JSON, no extra text. Example:
-        {{"intent": "create_subject_term_split", "params": {{"student_id": 36, "term" : 1, "mark_section_A": 8}}}}
+        {{"intent": "create_subject_term_split", "params": {{"student_id": 36, "term" : 1, "mark_section_A": 8, "abscent" = 'no'}}}}
         {{"intent": "update_subject_term_split", "params": {{"student_id": 45, "term": 10, "mark_section_B": 6, "mark_section_C": 8}}}}
 """.strip()
     

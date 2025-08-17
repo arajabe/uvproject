@@ -14,6 +14,7 @@ from ui.performance_ui import performance
 from ui.inforelated_ui import inforelated
 from ui.display_ui import displayui
 from ui.markposting import markposting
+from ui.bulk_subject_term_split import bulk_subject_term_split
 from ui.class_teacher_allocation import class_teacher_allocation
 from ui.student_class_allocation import student_class_allocation
 
@@ -69,6 +70,8 @@ def dashboard():
                 student_class_allocation()
             case "Mark Posting":
                 markposting()
+            case "bulk":
+                bulk_subject_term_split()
 
 
     session_mode(st.session_state['mode'])

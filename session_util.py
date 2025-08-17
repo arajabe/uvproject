@@ -10,7 +10,9 @@ from core.model.schema import (
     OfficeStaffCreate, OfficeStaffUpdate,
     StudentCreate, StudentUpdate,
     TeacherCreate, TeacherUpdate,
-    ClassTeacherAllocation, StudentClassAllocation
+    ClassTeacherAllocationCreate,ClassTeacherAllocationUpdate,
+    StudentClassAllocationCreate,StudentClassAllocationUpdate,
+    AuditDelete
 )
 
 def initialize_session_state():
@@ -90,13 +92,21 @@ def initialize_session_state():
     for field_name in SubjectTermSplitDelete.__annotations__:
         if field_name not in st.session_state:
             st.session_state[field_name] = ""
-    for field_name in StudentClassAllocation.__annotations__:
+    for field_name in ClassTeacherAllocationCreate.__annotations__:
         if field_name not in st.session_state:
             st.session_state[field_name] = ""
-    for field_name in ClassTeacherAllocation.__annotations__:
+    for field_name in ClassTeacherAllocationUpdate.__annotations__:
         if field_name not in st.session_state:
             st.session_state[field_name] = ""
-
+    for field_name in StudentClassAllocationCreate.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
+    for field_name in StudentClassAllocationUpdate.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
+    for field_name in AuditDelete.__annotations__:
+        if field_name not in st.session_state:
+            st.session_state[field_name] = ""
 
     if "msg" not in st.session_state:
         st.session_state.msg = "Kindly enter your request"
@@ -111,5 +121,7 @@ def initialize_session_state():
         st.session_state['radio_action_on_person']="none"
     if "CONFIRM" not in st.session_state:
         st.session_state['CONFIRM'] = ""
-    if "radio_action_on_performance" not in st.session_state:
-        st.session_state["radio_action_on_performance"] = ""
+    if "radio_action_on_regards" not in st.session_state:
+        st.session_state["radio_action_on_regards"] = ""
+    if "records" not in st.session_state:
+        st.session_state['records'] = ""

@@ -3,6 +3,7 @@ from core.model.schema import ChatState
 from core.node.adminnode import info_officestaff_node, info_parent_node, info_student_node, info_teacher_node
 from core.node.routernode import node_router
 from core.node.teachernode import teacher_assignement,teacher_term_mark,teacher_subject_term_mark_split
+from core.node.adminnode import info_class_teacher_allocation_node,info_student_class_allocation_node
 
 
 graph = StateGraph(ChatState)
@@ -31,6 +32,12 @@ graph.add_node("node_term_mark", teacher_term_mark.node_term_mark)
 graph.add_node("intent_node_subject_term_mark_split", teacher_subject_term_mark_split.intent_node_subject_term_mark_split)
 graph.add_node("node_subject_term_mark_split", teacher_subject_term_mark_split.node_subject_term_mark_split)
 
+graph.add_node("intent_node_student_class_allocation", info_student_class_allocation_node.intent_node_student_class_allocation)
+graph.add_node("node_student_class_allocation", info_student_class_allocation_node.node_student_class_allocation)
+
+graph.add_node("intent_node_class_teacher_allocation", info_class_teacher_allocation_node.intent_class_teacher_allocation)
+graph.add_node("node_class_teacher_allocation", info_class_teacher_allocation_node.node_class_teacher_allocation)
+
 graph.set_entry_point("entry_node")
 
 graph.add_conditional_edges("entry_node", node_router.router_node, {
@@ -41,6 +48,8 @@ graph.add_conditional_edges("entry_node", node_router.router_node, {
      "intent_node_assignement" : "intent_node_assignement",
      "intent_node_term_mark" : "intent_node_term_mark",
      "intent_node_subject_term_mark_split" : "intent_node_subject_term_mark_split",
+     "intent_node_class_teacher_allocation" : "intent_node_class_teacher_allocation",
+     "intent_node_student_class_allocation" : "intent_node_student_class_allocation",
 })
 
 
@@ -64,5 +73,11 @@ graph.add_edge("node_term_mark", END)
 
 graph.add_edge("intent_node_subject_term_mark_split", "node_subject_term_mark_split")
 graph.add_edge("node_subject_term_mark_split", END)
+
+graph.add_edge("intent_node_student_class_allocation", "node_student_class_allocation")
+graph.add_edge("node_student_class_allocation", END)
+
+graph.add_edge("intent_node_class_teacher_allocation", "node_class_teacher_allocation")
+graph.add_edge("node_class_teacher_allocation", END)
 
 office_staff_graph = graph.compile()

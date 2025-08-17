@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from core.model.schema import MarkCreate,MarkUpdate
 from core.database.databse import get_db
-from core.database.databsetable.tables_users import Student
+from core.database.databsetable.tables_allocations import StudentClassAllocation
 from core.database.databsetable.tables_marks import Mark
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -13,21 +13,22 @@ router = APIRouter(prefix="/mark", tags=["mark"])
 def create_student_mark(mark: MarkCreate, db: Session = Depends(get_db)):
     new_id = generate_parent_id(db)
 
-    std_name = db.query(Student.name).filter(Student.id == mark.student_id).first()
-    if std_name:
-        std_name = std_name[0]
-
-    db_mark = Mark(**mark.dict(), id = new_id, student_name = std_name)
-    db.add(db_mark)
-    try:
-        db.commit()
-        db.refresh(db_mark)
-        return {"status": "mark list created", "mark":db_mark}
-    except SQLAlchemyError as e:
-        db.rollback()
-    # Return the SQL error details
-        response =  str(e.__cause__ or e)
-        return {"status": response}
+    std_cls_allo = db.query(StudentClassAllocation).filter(StudentClassAllocation.student_id == mark.student_id).first()
+    if std_cls_allo:
+        db_mark = Mark(**mark.dict(), id = new_id, student_name = std_cls_allo.student_name, 
+                       student_class = std_cls_allo.student_class, class_section = std_cls_allo.class_section)
+        db.add(db_mark)
+        try:
+            db.commit()
+            db.refresh(db_mark)
+            return {"status": "mark list created", "mark":db_mark}
+        except SQLAlchemyError as e:
+            db.rollback()
+        # Return the SQL error details
+            response =  str(e.__cause__ or e)
+            return {"status": response}
+    else:
+        return {"status" : "Student has not allocated in the class"}
     
     
 

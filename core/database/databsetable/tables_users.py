@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, String, TIMESTAMP, func
 from sqlalchemy import Column
 from core.database.databse import Base
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
@@ -38,7 +39,7 @@ class Student(Base):
     parentrelation = Column(String(15), nullable = False)
 
 class Teacher(Base):
-    __tablename__ = "Teacher"
+    __tablename__ = "teacher"
     id = Column(String(50), primary_key=True, index=True)
     name = Column(String(50), nullable=False)
     fathername = Column(String(50), nullable=False)

@@ -5,6 +5,9 @@ from core.graph.teachergraph.teacher_graph import teacher_graph
 from sqlalchemy.orm import Session
 from core.database.curd import save_chat, get_chat_history
 from core.database.databse import get_db
+import requests
+
+API = "http://127.0.0.1:8000"
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 sessions = {}
@@ -52,6 +55,10 @@ def chat(session_id: str, message: str, db: Session = Depends(get_db)):
     
     return {"reply": result['response_pd']}
 
+@router.post("/chat/bulk")
+def upload_bulk ():
+    url = f"{API}/bulk_subjecttermsplit"
+    r = requests.patch(url, json=p)
 
 @router.get("/history")
 def fetch_chat_history(session_id: str, db: Session = Depends(get_db)):

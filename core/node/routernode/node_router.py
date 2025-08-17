@@ -19,6 +19,7 @@ def router_node(state: ChatState) -> str:
     radio_action_on_person = state["radio_action_on_person"]
     print("new router node")
     router_value = str(role + "_" + radio_action_on_person.replace(" ", "_")).strip()
+    print(router_value)
     match router_value.lower():
         case "admin_office_staff":  
             return "intent_node_office_staff"
@@ -35,9 +36,9 @@ def router_node(state: ChatState) -> str:
         case "teacher_term_mark":
             return "intent_node_term_mark"
         case "admin_student_class_allocation":
-            return "intent_student_class_allocation"
+            return "intent_node_student_class_allocation"
         case "admin_class_teacher_allocation":
-            return "intent_class_teacher_allocation"
+            return "intent_node_class_teacher_allocation"
         case _: 
             print(" hello chat user case")
             return "chat_node"

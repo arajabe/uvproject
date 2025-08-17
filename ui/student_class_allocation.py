@@ -1,13 +1,5 @@
 import streamlit as st
-import uuid
-import requests
-import time
-from typing import TypedDict, List, Optional,Annotated
-import os, json, requests
-from pydantic import BaseModel, EmailStr,constr, StringConstraints
-import pandas
-from datetime import date
-from core.model.schema import ( StudentClassAllocation)
+from core.model.schema import ( StudentClassAllocationCreate, StudentClassAllocationUpdate, AuditDelete)
 from session_util import initialize_session_state
 
 initialize_session_state()
@@ -26,7 +18,7 @@ def student_class_allocation():
         
         if st.session_state["radio_action"] != "none":
             with col2:
-                st.session_state["radio_action_on_class_teacher"] = st.radio(
+                st.session_state["radio_action_on_regards"] = st.radio(
                 "Choose the  any one option",
                 ["none", "Student Class Allocation"],
                 horizontal=True
@@ -38,15 +30,30 @@ def student_class_allocation():
         
         msg_parts = ""
 
-        student_class_allocation = StudentClassAllocation.__annotations__
+        student_class_allocation_create = StudentClassAllocationCreate.__annotations__
+        student_class_allocation_update = StudentClassAllocationUpdate.__annotations__
+        audit_table_delete = AuditDelete.__annotations__
 
-        if st.session_state["radio_action"] in ["create", "update"] and st.session_state["radio_action_on_class_teacher"] == "Student Class Allocation":      
-            for field_name in student_class_allocation:
+        if st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_regards"] == "Student Class Allocation":      
+            for field_name in student_class_allocation_create:
                 st.session_state[field_name] = st.text_input(field_name.capitalize())
             
-            msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in student_class_allocation
+            msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in student_class_allocation_create
+                         if st.session_state.get(field_name, "").strip() != ""]
+        elif st.session_state["radio_action"] == "update" and st.session_state["radio_action_on_regards"] == "Student Class Allocation":      
+            for field_name in student_class_allocation_update:
+                st.session_state[field_name] = st.text_input(field_name.capitalize())
+            
+            msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in student_class_allocation_update
+                         if st.session_state.get(field_name, "").strip() != ""]
+            
+        elif st.session_state["radio_action"] == "delete" and st.session_state["radio_action_on_regards"] == "Student Class Allocation":      
+            for field_name in audit_table_delete:
+                st.session_state[field_name] = st.text_input(field_name.capitalize())
+            
+            msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in audit_table_delete
                          if st.session_state.get(field_name, "").strip() != ""]
 
-        st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "} {""}{st.session_state["radio_action_on_performance"]}{""} details as follows: {msg_parts}"
+        st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "} {""}{st.session_state["radio_action_on_regards"]}{""} details as follows: {msg_parts}"
 
         st.markdown(st.session_state['usermessage'])

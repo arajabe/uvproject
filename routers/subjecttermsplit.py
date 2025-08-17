@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from core.model.schema import SubjectTermSplitCreate
 from core.database.databse import get_db
-from core.database.databsetable.tables_users import Student
 from core.database.databsetable.tables_marks import SubjectTermSplit
+from core.database.databsetable.tables_allocations import StudentClassAllocation
 from sqlalchemy.exc import SQLAlchemyError
 
 
@@ -14,21 +14,32 @@ def create_student_subject_term_split(subject_term_split: SubjectTermSplitCreate
 
     new_id = generate_subject_term_split_id(db)
 
-    std_name = db.query(Student.name).filter(Student.id == subject_term_split.student_id).first()
-    if std_name:
-        std_name = std_name[0]    
-    db_subject_term_split = SubjectTermSplit(**subject_term_split.dict(), id = new_id, student_name =std_name)
-    db_subject_term_split.subject = subject_term_split.subject.capitalize()
-    db.add(db_subject_term_split)
-    try:
-        db.commit()
-        db.refresh(db_subject_term_split)
-        return {"status": "subject split mark list created", "mark": db_subject_term_split}
-    except SQLAlchemyError as e:
-        db.rollback()
-    # Return the SQL error details
-        response =  str(e.__cause__ or e)
-        return {"status": response}
+    std_cls_allo = ( db.query(StudentClassAllocation)
+                           .filter(StudentClassAllocation.student_id == subject_term_split.student_id)
+                        .first())
+
+    if not std_cls_allo:
+            return {"status": "Student class has not been allocated in the class"}
+    else:
+
+        db_subject_term_split = SubjectTermSplit(**subject_term_split.dict(), id=new_id, student_name=std_cls_allo.student_name,
+                                                student_class=std_cls_allo.student_class, class_section=std_cls_allo.class_section,)
+
+        # Ensure subject name is properly formatted
+        db_subject_term_split.subject = subject_term_split.subject.title()
+
+        db.add(db_subject_term_split)
+
+        try:
+            db.commit()
+            db.refresh(db_subject_term_split)
+            return {"status": "subject split mark list created","mark": db_subject_term_split,}
+        except SQLAlchemyError as e:
+            db.rollback()
+            return {"status": str(e.__cause__ or e)}
+
+
+
 
 @router.patch("/student/{student_id}/subject/{subject}/term/{term}")
 def update_student_subject_term_split(student_id: str, term: int, subject : str, subject_term_split: SubjectTermSplitCreate, db: Session = Depends(get_db)):

@@ -26,14 +26,14 @@ def inforelated():
         
         if st.session_state["radio_action"] != "none":
             with col2:
-                st.session_state["radio_action_on_person"] = st.radio(
+                st.session_state["radio_action_on_regards"] = st.radio(
                 "Choose person",
                 ["none","student", "parent", "teacher", "office staff"],
                 horizontal=True
             )
 
 
-        if (st.session_state["radio_action"] == "none" or st.session_state["radio_action_on_person"] == "none"):
+        if (st.session_state["radio_action"] == "none" and st.session_state["radio_action_on_regards"] == "none"):
             st.session_state["action"] = st.text_input("What is your request?", st.session_state["action"])
             st.session_state["action"] = st.session_state["action"].lower()
 
@@ -52,61 +52,61 @@ def inforelated():
 
         userdelete = UserDelete.__annotations__
 
-        if st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_person"] == "parent":      
+        if st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_regards"] == "parent":      
             for field_name in parent_create:
                 st.session_state[field_name] = st.text_input(field_name.capitalize())
             
             msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in parent_create]            
 
-        elif st.session_state["radio_action"] == "update" and st.session_state["radio_action_on_person"] == "parent":      
+        elif st.session_state["radio_action"] == "update" and st.session_state["radio_action_on_regards"] == "parent":      
             for field_name in parent_update:
                 st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
             msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in parent_update 
                          if st.session_state.get(field_name, "").strip() != ""]
         
-        elif st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_person"] == "student":
+        elif st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_regards"] == "student":
             for field_name in student_create:
                 st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
             msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in student_create
                          if st.session_state.get(field_name, "").strip() != ""]
             
-        elif st.session_state["radio_action"] == "update" and st.session_state["radio_action_on_person"] == "student":
+        elif st.session_state["radio_action"] == "update" and st.session_state["radio_action_on_regards"] == "student":
             for field_name in student_update:
                 st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
             msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in student_update
                          if st.session_state.get(field_name, "").strip() != ""]
             
-        elif st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_person"] == "teacher":
+        elif st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_regards"] == "teacher":
             for field_name in teacher_create:
                 st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
             msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in teacher_create
                          if st.session_state.get(field_name, "").strip() != ""]
             
-        elif st.session_state["radio_action"] == "update" and st.session_state["radio_action_on_person"] == "teacher":
+        elif st.session_state["radio_action"] == "update" and st.session_state["radio_action_on_regards"] == "teacher":
             for field_name in teacher_update:
                 st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
             msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in teacher_update
                          if st.session_state.get(field_name, "").strip() != ""]
             
-        elif st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_person"] == "office staff":
+        elif st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_regards"] == "office staff":
             for field_name in officestaff_create:
                 st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
             msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in officestaff_create
                          if st.session_state.get(field_name, "").strip() != ""]
             
-        elif st.session_state["radio_action"] == "update" and st.session_state["radio_action_on_person"] == "office staff":
+        elif st.session_state["radio_action"] == "update" and st.session_state["radio_action_on_regards"] == "office staff":
             for field_name in officestaff_update:
                 st.session_state[field_name] = st.text_input(field_name.capitalize(), "")
             msg_parts = [f"{field_name} is {st.session_state[field_name]}" for field_name in officestaff_update
                          if st.session_state.get(field_name, "").strip() != ""]
 
 
-        elif st.session_state["radio_action"] == "delete" and st.session_state["radio_action_on_person"] != "none":
+        elif st.session_state["radio_action"] == "delete" and st.session_state["radio_action_on_regards"] != "none":
             for field_name in userdelete:
                 st.session_state[field_name] = st.text_input(field_name.capitalize())
             msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in userdelete]
         
-        st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "}{st.session_state["radio_action_on_person"]} details as follows: {msg_parts}"
+        st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "}{st.session_state["radio_action_on_regards"]} details as follows: {msg_parts}"
 
         st.markdown(st.session_state['usermessage'])    
         

@@ -4,7 +4,7 @@ from langgraph.graph import StateGraph, END
 
 import os, json, requests
 import re
-from core.model.schema import ChatState, ClassTeacherAllocation
+from core.model.schema import ChatState, ClassTeacherAllocationCreate
 from llm.llm import llm
 
 
@@ -28,21 +28,21 @@ def intent_class_teacher_allocation(state: ChatState) -> ChatState:
         the message contains a direct mention of an intent
 
         Database: testdb
-        Table: ClassTeacherAllocation(id, teacher_id, teacher_class, class_section)
+        Table: ClassTeacherAllocation(id, teacher_id, teacher_class, class_section, rason)
 
         Valid intents:
-        Table: classteacherallocation(teacher_id, teacher_class, class_section)
+        Table: classteacherallocation(teacher_id, teacher_class, class_section, reason, class_teacher_allocation_id)
 
         Valid intents:
-        - create_class_teacher_allocation (requires teacher_id, teacher_class, class_section)
-        - delete_class_teacher_allocation (requires classteacherallocationid, reason)
-        - update_class_teacher_allocation (requires classteacherallocationid, reason, teacher_id/teacher_class/class_section if given)
+        - create_class_teacher_allocation (requires teacher_id, teacher_class, class_section, reason)
+        - delete_class_teacher_allocation (requires class_teacher_allocation_id, reason)
+        - update_class_teacher_allocation (requires class_teacher_allocation_id, reason, teacher_id/teacher_class/class_section if given)
 
-        Extract any parameters (teacher_id, teacher_class, class_section, reason, classteacherallocationid) mentioned.
+        Extract any parameters (teacher_id, teacher_class, class_section, reason, class_teacher_allocation_id) mentioned.
 
         Return **only** valid JSON, no extra text. Example:
         {{"intent": "create_class_teacher_allocation", "params": {{"teacher_id": TEA0001, "teacher_class": 10, "class_section" : "B" }}}}
-        {{"intent": "update_class_teacher_allocation", "params": {{"classteacherallocationid": "CTA0001", "teacher_id": TEA0001, "class_section" : "B" , "rason": "any}}}}
+        {{"intent": "update_class_teacher_allocation", "params": {{"class_teacher_allocation_id": "CTA0001", "teacher_id": TEA0001, "class_section" : "B" , "rason": "any}}}}
         """
   
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
@@ -75,10 +75,10 @@ def node_class_teacher_allocation(state: ChatState) -> ChatState:
 
         case "create_class_teacher_allocation":   
 
-            required_keys = list(ClassTeacherAllocation.model_fields.keys())       
+            required_keys = list(ClassTeacherAllocationCreate.model_fields.keys())       
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
                 res = requests.post(f"{API}/classteacherallocation/", json=parms_value)
-                reply = f"Created office staff {parms_value['name']}." if res.status_code == 200 else "Failed to create office staff."
+                reply = f"Created class teacher allocation" if res.status_code == 200 else "Failed to create class teacher allocation."
                 response_data = res.json()
             else:
                 reply = "data are inadequate to create class teacher allocation"
@@ -88,9 +88,9 @@ def node_class_teacher_allocation(state: ChatState) -> ChatState:
         
         case "delete_class_teacher_allocation":
 
-            if "classteacherallocationid" in parms_value:
-                res = requests.delete(f"{API}/classteacherallocation/{parms_value['classteacherallocationid']}")
-                reply = "office staff deleted." if res.status_code == 200 else "office staff not found."
+            if "class_teacher_allocation_id" in parms_value:
+                res = requests.delete(f"{API}/classteacherallocation/{parms_value['class_teacher_allocation_id']}")
+                reply = "class teacher allocation deleted." if res.status_code == 200 else "class teacher allocation not found."
                 response_data = res.json()
             else:
                 reply = "Need a class teacher allocation ID to delete."
@@ -99,9 +99,9 @@ def node_class_teacher_allocation(state: ChatState) -> ChatState:
         
         case "update_class_teacher_allocation":
 
-            if "classteacherallocationid" in parms_value:
-                res = requests.patch(f"{API}/officestaff/{parms_value['classteacherallocationid']}", json=parms_value)
-                reply = "office staff updated." if res.status_code == 200 else "Office staff not found."
+            if "class_teacher_allocation_id" in parms_value:
+                res = requests.patch(f"{API}/classteacherallocation/{parms_value['class_teacher_allocation_id']}", json=parms_value)
+                reply = "class teacher allocation updated." if res.status_code == 200 else "class teacher allocation id not found."
                 response_data = res.json()
             else:
                 reply = "Need class teacher allocation ID to update."

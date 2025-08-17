@@ -4,6 +4,7 @@ from core.model.schema import AssignementCreate, AssignementUpdate
 from core.database.databse import get_db
 from core.database.databsetable.tables_users import Student
 from core.database.databsetable.tables_marks import Mark, Assignement
+from core.database.databsetable.tables_allocations import StudentClassAllocation
 from sqlalchemy.exc import SQLAlchemyError
 
 
@@ -13,11 +14,27 @@ router = APIRouter(prefix="/assignement", tags=["assignement"])
 def create_student_assignement(assignement: AssignementCreate, db: Session = Depends(get_db)):
     new_id = generate_assignement_id(db)
 
-    std_name = db.query(Student.name).filter(Student.id == assignement.student_id).first()
-    if std_name:
-        std_name = std_name[0]
+    # Fetch student info and class allocation in one query
+    result = (
+        db.query(
+        Student.name,
+        StudentClassAllocation.student_class,
+        StudentClassAllocation.class_section
+        )
+        .join(StudentClassAllocation, Student.id == StudentClassAllocation.student_id)
+        .filter(Student.id == assignement.student_id)
+        .first()
+        )
 
-    db_assignement = Assignement(**assignement.dict(), id = new_id, student_name = std_name)
+    # Unpack or set defaults
+    if result:
+        std_name, std_class, std_class_sec = result
+    else:
+        std_name = std_class = std_class_sec = None
+
+    # Create the Assignement object
+    db_assignement = Assignement(**assignement.dict(), id=new_id,
+    student_name=std_name, student_class=std_class, class_section=std_class_sec)
     db.add(db_assignement)
     try:
         db.commit()

@@ -4,7 +4,7 @@ from langgraph.graph import StateGraph, END
 
 import os, json, requests
 import re
-from core.model.schema import ChatState, StudentClassAllocation
+from core.model.schema import ChatState, StudentClassAllocationCreate
 from llm.llm import llm
 
 
@@ -28,21 +28,21 @@ def intent_node_student_class_allocation(state: ChatState) -> ChatState:
         the message contains a direct mention of an intent
 
         Database: testdb
-        Table: StudentClassAllocation(id, name, email)
+        Table: StudentClassAllocation(id, student_id, student_class, class_section, reason)
 
         Valid intents:
-        Table: student class allocation(id, student_id, student_class, class_section)
+        Table: student class allocation(id, student_id, student_class, class_section, reason)
 
         Valid intents:
-        - create_student_class_allocation (requires student_id, student_class, class_section)
-        - delete_student_class_allocation (requires studentclassallocationid, reason)
-        - update_student_class_allocation (requires studentclassallocationid, reason, student_id/student_class/class_section if given)
+        - create_student_class_allocation (requires student_id, student_class, class_section, reason)
+        - delete_student_class_allocation (requires student_class_allocation_id, reason)
+        - update_student_class_allocation (requires student_class_allocationid, reason, student_id/student_class/class_section if given)
 
-        Extract any parameters (student_id, student_class, class_section, studentclassallocationid, reason) mentioned.
+        Extract any parameters (student_id, student_class, class_section, student_class_allocation_id, reason) mentioned.
 
         Return **only** valid JSON, no extra text. Example:
-        {{"intent": "create_student_class_allocation", "params": {{"student_id": "STUD0001", "student_class": 10}}}}
-        {{"intent": "update_student_class_allocation", "params": {{"student_id": "STUD0009", "studentclassallocationid": "SCA0001"}}}}
+        {{"intent": "create_student_class_allocation", "params": {{"student_id": "STUD0001", "student_class": 10, "reason" : "new student"}}}}
+        {{"intent": "update_student_class_allocation", "params": {{"student_id": "STUD0009", "student_class_allocation_id": "SCA0001"}}}}
         """
   
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
@@ -61,7 +61,7 @@ def intent_node_student_class_allocation(state: ChatState) -> ChatState:
 
 
 # --- Action Nodes (call FastAPI) ---
-def node_officestaff(state: ChatState) -> ChatState:
+def node_student_class_allocation(state: ChatState) -> ChatState:
 
     print("create node user")
 
@@ -75,10 +75,11 @@ def node_officestaff(state: ChatState) -> ChatState:
 
         case "create_student_class_allocation":   
 
-            required_keys = list(StudentClassAllocation.model_fields.keys())       
+            required_keys = list(StudentClassAllocationCreate.model_fields.keys())  
+
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
                 res = requests.post(f"{API}/studentclassallocation/", json=parms_value)
-                reply = f"Created student class allocation {parms_value['name']}." if res.status_code == 200 else "Failed to create student class allocation."
+                reply = f"Created student class allocation." if res.status_code == 200 else "Failed to create student class allocation."
                 response_data = res.json()
             else:
                 reply = "data are inadequate to create student class allocation"
@@ -88,8 +89,8 @@ def node_officestaff(state: ChatState) -> ChatState:
         
         case "delete_student_class_allocation":
 
-            if "studentclassallocationid" in parms_value:
-                res = requests.delete(f"{API}/studentclassallocation/{parms_value['studentclassallocationid']}")
+            if "student_class_allocation_id" in parms_value:
+                res = requests.delete(f"{API}/studentclassallocation/{parms_value['student_class_allocation_id']}")
                 reply = "student class allocation deleted." if res.status_code == 200 else "student class allocation not found."
                 response_data = res.json()
             else:
@@ -99,8 +100,8 @@ def node_officestaff(state: ChatState) -> ChatState:
         
         case "update_student_class_allocation":
 
-            if "studentclassallocationid" in parms_value:
-                res = requests.patch(f"{API}/studentclassallocation/{parms_value['studentclassallocationid']}", json=parms_value)
+            if "student_class_allocation_id" in parms_value:
+                res = requests.patch(f"{API}/studentclassallocation/{parms_value['student_class_allocation_id']}", json=parms_value)
                 reply = "student class allocation updated." if res.status_code == 200 else "student class allocation not found."
                 response_data = res.json()
             else:

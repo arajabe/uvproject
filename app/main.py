@@ -1,5 +1,7 @@
 from fastapi import FastAPI
-from routers import users, chat, student,teacher, parent, mark, performance,login, officestaff, assignement, subjecttermsplit
+from routers import (users, studentclassallocation,classteacherallocation,
+                     chat, student,teacher, parent, mark, 
+                     performance,login, officestaff, assignement, subjecttermsplit, bulk_subjecttermsplit)
 from fastapi.middleware.cors import CORSMiddleware
 from core.database.databse import Base, engine
 
@@ -34,6 +36,9 @@ app.include_router(login.router)
 app.include_router(officestaff.router)
 app.include_router(assignement.router)
 app.include_router(subjecttermsplit.router)
+app.include_router(studentclassallocation.router)
+app.include_router(classteacherallocation.router)
+app.include_router(bulk_subjecttermsplit.router)
 
 @app.get("/")
 def root():

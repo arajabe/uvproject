@@ -143,6 +143,7 @@ class SubjectTermSplitCreate(BaseModel):
     mark_section_B : int
     mark_section_C : int
     mark_section_D : int
+    abscent : str
 
 class SubjectTermSplitDelete(BaseModel):         
     student_id : str
@@ -161,12 +162,35 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
-class StudentClassAllocation(BaseModel):
+class StudentClassAllocationCreate(BaseModel):
     student_id : str
     student_class : int
     class_section : str
+    reason : str
 
-class ClassTeacherAllocation(BaseModel):
+class StudentClassAllocationUpdate(BaseModel):
+    student_class_allocation_id : str
+    student_id : Optional[str] = None
+    student_class : Optional[int] = None
+    class_section : Optional[str] = None
+    reason : str
+
+class ClassTeacherAllocationCreate(BaseModel):
     teacher_id : str
     teacher_class : int
-    class_section : int
+    class_section : str
+    reason : str
+
+class ClassTeacherAllocationUpdate(BaseModel):
+    teacher_id : Optional[str]
+    teacher_class : Optional[int]
+    class_section : Optional[str]
+    class_teacher_allocation_id : str
+    reason : str
+
+class AuditDelete(BaseModel):
+    id : str
+    reason : str
+
+class BulkSubjectTermSplit(BaseModel):
+    records: List[SubjectTermSplitCreate]
