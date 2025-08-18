@@ -55,11 +55,6 @@ def chat(session_id: str, message: str, db: Session = Depends(get_db)):
     
     return {"reply": result['response_pd']}
 
-@router.post("/chat/bulk")
-def upload_bulk ():
-    url = f"{API}/bulk_subjecttermsplit"
-    r = requests.patch(url, json=p)
-
 @router.get("/history")
 def fetch_chat_history(session_id: str, db: Session = Depends(get_db)):
     print("fetch_chat_history")

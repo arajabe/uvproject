@@ -14,9 +14,10 @@ from ui.performance_ui import performance
 from ui.inforelated_ui import inforelated
 from ui.display_ui import displayui
 from ui.markposting import markposting
-from ui.bulk_subject_term_split import bulk_subject_term_split
 from ui.class_teacher_allocation import class_teacher_allocation
 from ui.student_class_allocation import student_class_allocation
+from ui.bulk_upload_marks.bulk_mark_posting_router import bulk_mark_posting_router
+from ui.bulk_upload_admin.bulk_admin_router import bulk_admin_router
 
 initialize_session_state()
 API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
@@ -70,8 +71,11 @@ def dashboard():
                 student_class_allocation()
             case "Mark Posting":
                 markposting()
-            case "bulk":
-                bulk_subject_term_split()
+            case "bulk mark posting":
+                bulk_mark_posting_router()
+            case "bulk info and allocations":
+                bulk_admin_router()
+        
 
 
     session_mode(st.session_state['mode'])

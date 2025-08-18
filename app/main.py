@@ -1,9 +1,14 @@
 from fastapi import FastAPI
-from routers import (users, studentclassallocation,classteacherallocation,
-                     chat, student,teacher, parent, mark, 
-                     performance,login, officestaff, assignement, subjecttermsplit, bulk_subjecttermsplit)
+from routers import (chat, login)
 from fastapi.middleware.cors import CORSMiddleware
 from core.database.databse import Base, engine
+from routers.allocation import classteacherallocation, studentclassallocation
+from routers.analysis import performance
+from routers.bulkmarkposting import bulk_subjecttermsplit,bulk_assignement,bulk_term_mark
+from routers.info import officestaff, parent, student, teacher, users
+from routers.marks import assignement, mark, subjecttermsplit
+from routers.bulkallocations import bulk_class_teacher_allocations,bulk_student_class_allocations
+
 
 
 # Create tables
@@ -39,6 +44,10 @@ app.include_router(subjecttermsplit.router)
 app.include_router(studentclassallocation.router)
 app.include_router(classteacherallocation.router)
 app.include_router(bulk_subjecttermsplit.router)
+app.include_router(bulk_assignement.router)
+app.include_router(bulk_term_mark.router)
+app.include_router(bulk_class_teacher_allocations.router)
+app.include_router(bulk_student_class_allocations.router)
 
 @app.get("/")
 def root():

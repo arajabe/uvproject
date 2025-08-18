@@ -194,3 +194,24 @@ class AuditDelete(BaseModel):
 
 class BulkSubjectTermSplit(BaseModel):
     records: List[SubjectTermSplitCreate]
+
+class BulkAssignement(BaseModel):
+    records: List[AssignementCreate]
+
+class BulkTermMark(BaseModel):
+    records: List[MarkCreate]
+
+class BulkParent(BaseModel):
+    records : List[ParentCreate]
+class BulkStudent(BaseModel):
+    records : List[StudentCreate]
+class BulkTeacher(BaseModel):
+    records : List[TeacherCreate]
+
+class BulkOfficeStaff(BaseModel):
+    records : List[OfficeStaffCreate]
+class BulkStudentClassAllocation(BaseModel):
+    records : List[StudentClassAllocationCreate]
+class BulkClassTeacherAllocation(BaseModel):
+    records : List[ClassTeacherAllocationCreate]
+

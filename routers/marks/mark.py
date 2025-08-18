@@ -88,7 +88,7 @@ def delete_student_mark(student_id: str, term : int, db: Session = Depends(get_d
         response =  str(e.__cause__ or e)
         return {"status": response}
 
-def generate_parent_id(db: Session):
+def generate_mark_id(db: Session):
     last = db.query(Mark).order_by(Mark.id.desc()).first()
     if last:
         last_num = int(last.id[1:])  # Remove 'P' and convert to int

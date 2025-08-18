@@ -9,12 +9,11 @@ API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
 def displayui():
     try:
                 role_logged = st.session_state['roleendpointsrole']
-                
+                on_regard = st.session_state["radio_action_on_regards"].lower().replace(" ", "_")
                 res =""
-                if st.session_state['mode'] == "bulk":
+                if st.session_state['mode'] == "bulk mark posting" or "bulk info and allocations":
                     payload = {"records": st.session_state['records']}
-                    st.markdown(payload )
-                    res = requests.post(f"{API}/bulk_subject_term_split/bulk", json = payload)
+                    res = requests.post(f"{API}/{on_regard}/upload", json = payload)
                 else :
                     payload = {
                         "session_id": st.session_state["session_id"],
