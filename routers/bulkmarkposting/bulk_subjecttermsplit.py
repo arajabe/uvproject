@@ -33,9 +33,6 @@ def create_bulk_subject_term_split(bulk_data : BulkSubjectTermSplit, db: Session
             db_subject_term_split = SubjectTermSplit(
                 id=new_id ,
                 student_id=record.student_id,
-                student_name=std_cls_allo.student_name,
-                student_class=std_cls_allo.student_class,
-                class_section=std_cls_allo.class_section,
                 term=record.term,
                 subject=record.subject,
                 mark_section_A=record.mark_section_A,

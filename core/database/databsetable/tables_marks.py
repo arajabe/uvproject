@@ -12,10 +12,7 @@ from core.database.databse import Base
 class Mark(Base):
     __tablename__ = "termmark"          
     id = Column(String(50), primary_key=True, index=True)
-    student_id = Column(String(50), ForeignKey("studentclassallocation.student_id"), nullable=False)
-    student_name = Column(String(50), index=True)
-    student_class = Column(Integer, nullable=False)
-    class_section = Column(String(15), nullable=False)
+    student_id = Column(String(50), ForeignKey("studentclassallocation.student_id", ondelete="RESTRICT"), nullable=False)
     term = Column(Integer, nullable=False, index=True)
     language_1 = Column(Integer, nullable=False, index=True)
     language_2 = Column(Integer, nullable=False, index=True)
@@ -42,10 +39,7 @@ class Mark(Base):
 class Assignement(Base):
     __tablename__ = "assignement"          
     id = Column(String(50), primary_key=True, index=True)
-    student_id = Column(String(50), ForeignKey("studentclassallocation.student_id"), nullable=False)
-    student_name = Column(String(50), index=True)
-    student_class = Column(Integer, nullable=False)
-    class_section = Column(String(15), nullable=False)
+    student_id = Column(String(50), ForeignKey("studentclassallocation.student_id", ondelete="RESTRICT"), nullable=False)
     term = Column(Integer, nullable=False, index=True)
     period = Column(Integer, nullable=False, index=True)
     language_1 = Column(Integer, nullable=False, index=True)
@@ -56,8 +50,8 @@ class Assignement(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     __table_args__ = (
-        CheckConstraint('term >= 1 AND term <= 3', name='Assignemtn term is not in range'),
-        CheckConstraint('period >= 1 AND period <= 10', name='language_1 mark is not in range'),
+        CheckConstraint('term >= 1 AND term <= 3', name='Assignemnt term is not in range'),
+        CheckConstraint('period >= 1 AND period <= 10', name='assignement period is not in range'),
         CheckConstraint('language_1 BETWEEN 0 AND 10', name='language_1 assignement mark is not in range'),
         CheckConstraint('language_2 BETWEEN 0 AND 10', name='language 2 assignement mark is not in range'),
         CheckConstraint('maths BETWEEN 0 AND 10', name='maths assignement mark is not in range'),
@@ -72,10 +66,7 @@ class Assignement(Base):
 class SubjectTermSplit(Base):
     __tablename__ = "subject_term_split"          
     id = Column(String(50), primary_key=True, index=True)
-    student_id = Column(String(50),ForeignKey("studentclassallocation.student_id"), primary_key=True, nullable=False)
-    student_name = Column(String(50), index=True)
-    student_class = Column(Integer, nullable=False)
-    class_section = Column(String(15), nullable=False)
+    student_id = Column(String(50),ForeignKey("studentclassallocation.student_id", ondelete="RESTRICT"), nullable=False)
     term = Column(Integer, nullable=False, index=True)
     subject = Column(String(50), nullable=False)
     mark_section_A = Column(Integer, nullable=False, index=True)

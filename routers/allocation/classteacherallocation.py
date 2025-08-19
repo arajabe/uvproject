@@ -14,8 +14,7 @@ def create_class_teacher_allocation(class_teacher_allocation: ClassTeacherAlloca
     new_id = generate_class_teacher_allocation_id(db)
     tea_name = db.query(Teacher.name).filter(Teacher.id == class_teacher_allocation.teacher_id).first()
     if tea_name:
-        tea_name = tea_name[0]
-        db_class_teacher_allocation = ClassTeacherAllocation(**class_teacher_allocation.dict(), id = new_id, teacher_name = tea_name)
+        db_class_teacher_allocation = ClassTeacherAllocation(**class_teacher_allocation.dict(), id = new_id, reason = "new entry")
         db.add(db_class_teacher_allocation)
         try:
             db.commit()

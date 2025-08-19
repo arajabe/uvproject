@@ -34,7 +34,7 @@ def intent_node_student_class_allocation(state: ChatState) -> ChatState:
         Table: student class allocation(id, student_id, student_class, class_section, reason)
 
         Valid intents:
-        - create_student_class_allocation (requires student_id, student_class, class_section, reason)
+        - create_student_class_allocation (requires student_id, student_class, class_section)
         - delete_student_class_allocation (requires student_class_allocation_id, reason)
         - update_student_class_allocation (requires student_class_allocationid, reason, student_id/student_class/class_section if given)
 

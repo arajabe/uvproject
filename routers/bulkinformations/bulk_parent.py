@@ -19,18 +19,18 @@ def bulk_parent( bulk_data : BulkParent, db: Session = Depends(get_db)):
             
             new_id = generate_parent_id(db)
             
-            db_parent = Parent(**record.dict(), id=new_id , role = "parent"           )
+            db_parent = Parent(**record.dict(), id=new_id , role = "parent", reason = "New Entry")
             db.add(db_parent)
 
             try:
                  db.commit()
                  db.refresh(db_parent)
-                 saved_records.append(record)
+                 saved_records.append({"parent_id": db_parent.id, "parent_name": db_parent.fathername})
             except SQLAlchemyError as e:
                 db.rollback()
-                errors.append({"parent": record.name, "error": str(e.__cause__ or e)})            
+                errors.append({"parent": f"{record.fathername} record not created", "error": str(e.__cause__ or e)})            
             # saved_records.append(record) 
-    return {"reply": {"status": "completed", "errors" : errors}}
+    return {"reply": {"status": "completed", "errors" : errors if errors else "no error on given data", "saved records" : saved_records}}
  
 def generate_parent_id(db: Session):
     last = db.query(Parent).order_by(Parent.id.desc()).first()

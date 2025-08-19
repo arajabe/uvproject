@@ -29,7 +29,6 @@ class UserCreate(BaseModel):
     contactnumber: ContactNumberStr  # Valid 10-digit Indian number
     email: EmailStr
     aadhar: AadharStr
-    reason : str
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
@@ -49,15 +48,23 @@ class UserDelete(BaseModel):
     reason : str
 
 
-class StudentCreate(UserCreate):
+class StudentCreate(BaseModel):
     parentid: str
-    parentrelation : str
+    name: str
+    dateofbirth: str
+    email: EmailStr
+    aadhar: AadharStr
+    
 
-
-class StudentUpdate(UserUpdate):
+class StudentUpdate(BaseModel):
     studentid : str
+    name : Optional[str] = None 
     parentid: Optional[str] = None
+    dateofbirth: Optional[str] = None 
     parentrelation : Optional[str] = None
+    email: Optional[EmailStr] = None
+    aadhar : Optional[AadharStr] = None
+    reason : str
 
 class TeacherCreate(UserCreate):
     graduatedegree : str    
@@ -79,14 +86,34 @@ class OfficeStaffUpdate(UserUpdate):
     subject : Optional[str] = None
     role : str
 
-class ParentCreate(UserCreate):
-    fatheroccupation : str
-    motheroccupation : str
+class ParentCreate(BaseModel):
+    fathername: str
+    mothername: str
+    parentrelation : str
+    address: str
+    city: str
+    pincode: PincodeStr # 6-digit pincode
+    contactnumber: ContactNumberStr  # Valid 10-digit Indian number
+    alternate_contactnumber: ContactNumberStr  # Valid 10-digit Indian number
+    email: EmailStr
+    aadhar: AadharStr    
+    occupation : str 
 
-class ParentUpdate(UserUpdate):
+class ParentUpdate(BaseModel):
     parentid : str
-    fatheroccupation : Optional[str] = None
-    motheroccupation : Optional[str] = None
+    fathername: Optional[str] = None
+    mothername: Optional[str] = None
+    parentrelation : Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    pincode : Optional[PincodeStr] = None
+    contactnumber : Optional[ContactNumberStr] = None
+    alternate_contactnumber : Optional[ContactNumberStr] = None
+    email: Optional[EmailStr] = None
+    aadhar : Optional[AadharStr] = None       
+    occupation : Optional[str] = None
+    reason : str 
+
 
 class MarkCreate(BaseModel):
     student_id: str 
@@ -166,7 +193,6 @@ class StudentClassAllocationCreate(BaseModel):
     student_id : str
     student_class : int
     class_section : str
-    reason : str
 
 class StudentClassAllocationUpdate(BaseModel):
     student_class_allocation_id : str
@@ -179,7 +205,6 @@ class ClassTeacherAllocationCreate(BaseModel):
     teacher_id : str
     teacher_class : int
     class_section : str
-    reason : str
 
 class ClassTeacherAllocationUpdate(BaseModel):
     teacher_id : Optional[str]

@@ -19,18 +19,18 @@ def bulk_office_staff( bulk_data : BulkOfficeStaff, db: Session = Depends(get_db
             
             new_id = generate_officestaff_id(db)
             
-            db_office_staff = OfficeStaff(**record.dict(), id=new_id ,            )
+            db_office_staff = OfficeStaff(**record.dict(), id=new_id ,reason = "New Entry")
             db.add(db_office_staff)
 
             try:
                  db.commit()
                  db.refresh(db_office_staff)
-                 saved_records.append(record)
+                 saved_records.append({"office id": db_office_staff.id, "office staff name": db_office_staff.name})
             except SQLAlchemyError as e:
                 db.rollback()
                 errors.append({"office staff": record.name, "error": str(e.__cause__ or e)})            
             # saved_records.append(record) 
-    return {"reply": {"status": "completed", "errors" : errors}}
+    return {"reply": {"status": "completed", "errors" : errors if errors else "no error on given data", "saved records" : saved_records}}
  
 def generate_officestaff_id(db: Session):
     last = db.query(OfficeStaff).order_by(OfficeStaff.id.desc()).first()

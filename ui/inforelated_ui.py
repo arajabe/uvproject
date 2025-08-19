@@ -41,10 +41,10 @@ def inforelated():
 
         msg_parts = ""
         
-        parent_create = UserCreate.__annotations__ | ParentCreate.__annotations__
-        parent_update = UserUpdate.__annotations__ | ParentUpdate.__annotations__
-        student_create = UserCreate.__annotations__ | StudentCreate.__annotations__
-        student_update = UserUpdate.__annotations__ | StudentUpdate.__annotations__
+        parent_create = ParentCreate.__annotations__
+        parent_update = ParentUpdate.__annotations__
+        student_create = StudentCreate.__annotations__
+        student_update = StudentUpdate.__annotations__
         teacher_create = UserCreate.__annotations__ | TeacherCreate.__annotations__
         teacher_update = UserUpdate.__annotations__ | TeacherUpdate.__annotations__
         officestaff_create = UserCreate.__annotations__ | OfficeStaffCreate.__annotations__

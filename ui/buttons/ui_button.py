@@ -16,7 +16,7 @@ def button_upload():
                        # df["dateofbirth"] = pd.to_datetime(df["dateofbirth"], format="%d%m%Y", errors="coerce").dt.strftime("%Y-%m-%d")
 
                 # Convert numeric fields to string
-                for col in ["pincode", "contactnumber", "aadhar","dateofbirth"]:
+                for col in ["pincode", "contactnumber", "aadhar","dateofbirth", "alternate_contactnumber"]:
                         if col in df.columns:
                                 df[col] = df[col].astype(str)
                     

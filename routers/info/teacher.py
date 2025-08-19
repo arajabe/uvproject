@@ -11,7 +11,7 @@ router = APIRouter(prefix="/teacher", tags=["teacher"])
 @router.post("/")
 def create_teacher(teacher: TeacherCreate, db: Session = Depends(get_db)):
     new_id = generate_teacher_id(db)
-    db_teacher = Teacher(**teacher.dict(), id = new_id, role = "teacher")
+    db_teacher = Teacher(**teacher.dict(), id = new_id, role = "teacher", reason = "new entry")
     db.add(db_teacher)
     try:
         db.commit()

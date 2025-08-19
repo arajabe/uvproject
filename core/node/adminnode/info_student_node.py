@@ -24,11 +24,11 @@ def intent_node_student(state: ChatState) -> ChatState:
         The message contains a direct mention of an intent
 
         Valid intents:
-        - create_student (requires name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, parentid, parentrelation)
+        - create_student (requires parentid,name,dateofbirth,email,aadhar,reason)
         - delete_student (requires studentid, reason)
-        - update_student (requires studentid, name/fathername/mothername/dateofbirth/address/city/pincode/contactnumber/email/aadhar/reason/parentid/parentrelation if given)
+        - update_student (requires studentid, parentid/name/dateofbirth/email/aadhar/reason if given)
 
-        Extract any parameters (studentid, name, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, email, aadhar, reason, parentid, parentrelation) mentioned.
+        Extract any parameters (studentid, parentid, name, dateofbirth, email, aadhar, reason) mentioned.
 
         Return **only** valid JSON, no extra text. Example:
         {{"intent": "create_student", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
@@ -90,7 +90,7 @@ def node_student(state: ChatState) -> ChatState:
                     response_data = res.json()
                 else:
                     reply = "student ID to update."
-                    response_data = "student not deleted"
+                    response_data = "student not updated"
                 return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": response_data}
         case _:
               

@@ -20,17 +20,17 @@ def intent_node_parent(state: ChatState) -> ChatState:
 
         You are AI assistant, clarify the intent of {user_msg}.
 
-        Table: parent(name,email,fathername,mothername,dateofbirth,address,city,pincode,contactnumber,aadhar,reason,fatheroccupation,motheroccupation)
+        Table: parent(fathername,mothername,parentrelation,dateofbirth,address,city,pincode,contactnumber,alternate_contactnumber,email,aadhar,reason,occupation,reason)
 
         Rules:
         The message contains a direct mention of an intent
         
         Valid intents:
-        - create_parent (requires name, email, fathername, mothername, dateofbirth, address, city, pincode, contactnumber, aadhar, reason, fatheroccupation, motheroccupation)
+        - create_parent (requires fathername,mothername,parentrelation,dateofbirth,address,city,pincode,contactnumber,alternate_contactnumber,email,aadhar,reason,occupation,reason)
         - delete_parent (requires parentid, reason)
-        - update_parent (requires parentid and reason, name/fathername/mothername/dateofbirth/address/city/pincode/contactnumber/email/aadhar/fatheroccupation/motheroccupation if given)
+        - update_parent (requires parentid and reason, fathername/mothername/parentrelation/dateofbirth/address/city/pincode/contactnumber/alternate_contactnumber/email/aadhar/reason/occupation if given)
 
-        Extract any parameters (id,name,email,fathername,mothername,dateofbirth,address,city,pincode,contactnumber,aadhar,reason,fatheroccupation,motheroccupation) mentioned.
+        Extract any parameters (fathername,mothername,parentrelation,dateofbirth,address,city,pincode,contactnumber,alternate_contactnumber,email,aadhar,reason,occupation,reason) mentioned.
 
         Return **only** valid JSON, no extra text. Example:
         {{"intent": "create_parent", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
@@ -69,7 +69,7 @@ def node_parent(state: ChatState) -> ChatState:
             required_keys = list(ParentCreate.model_fields.keys())
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
                 res = requests.post(f"{API}/parent/", json=parms_value)
-                reply = f"Created parent {parms_value['name']}." if  res.status_code == 200 else "Failed to create parent."
+                reply = f"Created parent {parms_value['fathername']}." if  res.status_code == 200 else "Failed to create parent."
                 response_data = res.json()
             else:
                 reply = "Need name and email."

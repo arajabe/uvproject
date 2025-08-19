@@ -34,17 +34,16 @@ def create_bulk_class_teacher_allocation( bulk_data : BulkClassTeacherAllocation
             db_class_teacher_allocation = ClassTeacherAllocation(
                 id=new_id ,
                 teacher_id = record.teacher_id,
-                teacher_name=teacher.name,
                 teacher_class=record.teacher_class,
                 class_section=record.class_section,
-                reason = record.reason,
+                reason = "New Entry",
             )
             db.add(db_class_teacher_allocation)
 
             try:
                  db.commit()
                  db.refresh(db_class_teacher_allocation)
-                 saved_records.append(record)
+                 saved_records.append({"class teacher allocation id " : db_class_teacher_allocation.id, "teacher_id": record.teacher_id})
             except SQLAlchemyError as e:
                 db.rollback()
                 errors.append({"teacher_id": record.teacher_id, "error": str(e.__cause__ or e)})
@@ -57,7 +56,7 @@ def create_bulk_class_teacher_allocation( bulk_data : BulkClassTeacherAllocation
                 "student_id": record.teacher_id,
                 "error": str(e.__cause__ or e)
             })  
-    return {"reply": {"status": "completed", "errors" : errors}}
+    return {"reply": {"status": "completed", "errors" : errors if errors else "no error on given data", "saved data" : saved_records}}
  
 def generate_class_teacher_allocation_id(db: Session):
     last = db.query(ClassTeacherAllocation).order_by(ClassTeacherAllocation.id.desc()).first()

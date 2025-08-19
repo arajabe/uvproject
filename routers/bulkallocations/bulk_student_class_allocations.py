@@ -34,16 +34,17 @@ def create_bulk_student_class_allocation( bulk_data : BulkStudentClassAllocation
             db_student_class_allocation = StudentClassAllocation(
                 id=new_id ,
                 student_id = record.student_id,
-                student_name=student.name,
                 student_class=record.student_class,
                 class_section=record.class_section,
+                reason = "New Entry"
+
             )
             db.add(db_student_class_allocation)
 
             try:
                  db.commit()
                  db.refresh(db_student_class_allocation)
-                 saved_records.append(record)
+                 saved_records.append({"student allocation id": db_student_class_allocation.id, "student id": db_student_class_allocation.student_id})
             except SQLAlchemyError as e:
                 db.rollback()
                 errors.append({"student_id": record.student_id, "error": str(e.__cause__ or e)})
@@ -56,7 +57,7 @@ def create_bulk_student_class_allocation( bulk_data : BulkStudentClassAllocation
                 "student_id": record.student_id,
                 "error": str(e.__cause__ or e)
             })  
-    return {"reply": {"status": "completed", "errors" : errors}}
+    return {"reply": {"status": "completed", "errors" : errors if errors else "No error on gicen data", "saved data": saved_records}}
  
 def generate_student_class_allocation_id(db: Session):
     last = db.query(StudentClassAllocation).order_by(StudentClassAllocation.id.desc()).first()

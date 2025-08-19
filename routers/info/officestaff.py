@@ -12,11 +12,7 @@ router = APIRouter(prefix="/officestaff", tags=["users"])
 def create_officestaff(office: OfficeStaffCreate, db: Session = Depends(get_db)):
 
     new_id = generate_officestaff_id(db)
-    db_office= OfficeStaff(name=office.name, email=office.email, fathername = office.fathername,
-                         mothername = office.mothername, dateofbirth = office.dateofbirth, 
-                         address =office.address, city = office.city, pincode = office.pincode, 
-                         contactnumber = office.contactnumber, aadhar = office.aadhar, id = new_id, reason = office.reason,
-                         role = office.role, graduatedegree = office.graduatedegree,  subject = office.subject)
+    db_office= OfficeStaff(**office.dict(),id = new_id, reason = "new entry")
     db.add(db_office)
     try:
         db.commit()

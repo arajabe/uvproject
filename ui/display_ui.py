@@ -11,7 +11,8 @@ def displayui():
                 role_logged = st.session_state['roleendpointsrole']
                 on_regard = st.session_state["radio_action_on_regards"].lower().replace(" ", "_")
                 res =""
-                if st.session_state['mode'] == "bulk mark posting" or "bulk info and allocations":
+                st.markdown(st.session_state['mode'])
+                if st.session_state['mode'] in ["bulk mark posting", "bulk info and allocations"]:
                     payload = {"records": st.session_state['records']}
                     st.markdown(payload)
                     res = requests.post(f"{API}/{on_regard}/upload", json = payload)

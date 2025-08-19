@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from core.model.schema import ParentCreate, ParentUpdate
 from core.database.databse import get_db
-from core.database.databsetable.tables_users import Parent
+from core.database.databsetable.tables_users import Parent,Student
 from sqlalchemy.exc import SQLAlchemyError
 
 
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/parent", tags=["parent"])
 @router.post("/")
 def create_parent(parent: ParentCreate, db: Session = Depends(get_db)):
     new_id = generate_parent_id(db)
-    db_parent = Parent(**parent.dict(), id = new_id, role = 'parent')
+    db_parent = Parent(**parent.dict(), id = new_id, role = 'parent', reason = "new entry")
     db.add(db_parent)
     try:
         db.commit()
@@ -44,18 +44,26 @@ def update_parent(parent_id: str, parent: ParentUpdate, db: Session = Depends(ge
     if not db_parent:
         raise HTTPException(status_code=404, detail="Parent not found")
 
-    # Apply only provided fields
+    # Apply only provided fields to parent
     for key, value in parent.dict(exclude_none=True).items():
         setattr(db_parent, key, value)
 
+    # If you want to propagate certain fields to students (like fathername, mothername)
+    students = db.query(Student).filter(Student.parentid == parent_id).all()
+    for student in students:
+        for key in ["fathername", "mothername", "parentrelation","address", "city", "pincode", "contactnumber", "email", "occupation"]:
+            if key in parent.dict(exclude_none=True):
+                setattr(student, key, parent.dict(exclude_none=True)[key])
+
     try:
         db.commit()
-        db.refresh(db_parent)  # Optional, if you want updated object returned
-        return {"message": "Parent updated successfully", "parent updated": db_parent}
+        db.refresh(db_parent)
+        for student in students:
+            db.refresh(student)
+        return {"message": "Parent updated successfully", "parent": db_parent}
     except SQLAlchemyError as e:
         db.rollback()
-    # Return the SQL error details
-        response =  str(e.__cause__ or e)
+        response = str(e.__cause__ or e)
         return {"status": response}
 
 def generate_parent_id(db: Session):

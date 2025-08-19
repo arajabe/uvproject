@@ -21,8 +21,7 @@ class ClassSectionEnum(str, enum.Enum):
 class StudentClassAllocation(Base):
     __tablename__ = "studentclassallocation"
     id = Column(String(50), primary_key=True, index=True)
-    student_id = Column(String(50), ForeignKey("student.id"), primary_key=True, index=True)
-    student_name = Column(String(50), nullable=False)
+    student_id = Column(String(50), ForeignKey("student.id", ondelete="RESTRICT"), primary_key=True, index=True)
     student_class = Column(Integer, nullable=False)
     class_section = Column(String(50), nullable=False)
     reason = Column(String(50), nullable=False)
@@ -37,8 +36,7 @@ class StudentClassAllocation(Base):
 class ClassTeacherAllocation(Base):
     __tablename__ = "classteacherallocation"
     id = Column(String(50), primary_key=True, index=True)
-    teacher_id = Column(String(50), ForeignKey("teacher.id"), primary_key=True, index=True)
-    teacher_name = Column(String(50),nullable=False)
+    teacher_id = Column(String(50), ForeignKey("teacher.id", ondelete="RESTRICT"), primary_key=True, index=True)
     teacher_class = Column(Integer, CheckConstraint("teacher_class BETWEEN 1 AND 12"), nullable=False)
     class_section = Column(Enum(ClassSectionEnum), nullable=False)
     reason = Column(String(50), nullable=False)

@@ -34,7 +34,7 @@ def intent_class_teacher_allocation(state: ChatState) -> ChatState:
         Table: classteacherallocation(teacher_id, teacher_class, class_section, reason, class_teacher_allocation_id)
 
         Valid intents:
-        - create_class_teacher_allocation (requires teacher_id, teacher_class, class_section, reason)
+        - create_class_teacher_allocation (requires teacher_id, teacher_class, class_section)
         - delete_class_teacher_allocation (requires class_teacher_allocation_id, reason)
         - update_class_teacher_allocation (requires class_teacher_allocation_id, reason, teacher_id/teacher_class/class_section if given)
 

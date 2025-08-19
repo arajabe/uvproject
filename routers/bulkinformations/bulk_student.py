@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from core.model.schema import BulkStudent
 from core.database.databse import get_db
 from sqlalchemy.exc import SQLAlchemyError
-from core.database.databsetable.tables_users import  Student
+from core.database.databsetable.tables_users import  Student,Parent
 
 
 router = APIRouter(prefix="/student", tags=["bulk_student"])
@@ -17,19 +17,26 @@ def create_bulk_student( bulk_data : BulkStudent, db: Session = Depends(get_db))
     for record in bulk_data.records:
             
             new_id = generate_student_id(db)
-            
-            db_student = Student(**record.dict(), id=new_id, role = "student")
-            db.add(db_student)
+            parent = db.query(Parent).filter(Parent.id == record.parentid).first()
 
-            try:
-                 db.commit()
-                 db.refresh(db_student)
-                 saved_records.append(record)
-            except SQLAlchemyError as e:
-                db.rollback()
-                errors.append({"student": record.name, "error": str(e.__cause__ or e)})            
+            if parent:
+                    db_student = Student(**record.dict(), id = new_id, fathername = parent.fathername, 
+                         mothername = parent.mothername, address = parent.address, city = parent.city, 
+                         pincode = parent.pincode, contactnumber = parent.contactnumber,
+                         parentrelation = parent.parentrelation, role = "student", reason = "New entry")
+                    db.add(db_student)
+
+                    try:
+                        db.commit()
+                        db.refresh(db_student)
+                        saved_records.append({"student id" : db_student.id, "student_name" : db_student.name})
+                    except SQLAlchemyError as e:
+                        db.rollback()
+                        errors.append({"student": record.name, "error": str(e.__cause__ or e)})   
+            else:
+                        errors.append({"parent id": record.parentid, "error": "parent not found"})
             # saved_records.append(record) 
-    return {"reply": {"status": "completed", "errors" : errors}}
+    return {"reply": {"status": "completed", "errors" : errors if errors else "no error on given data", "saved records" : saved_records}}
  
 def generate_student_id(db: Session):
     last = db.query(Student).order_by(Student.id.desc()).first()

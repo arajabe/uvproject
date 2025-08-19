@@ -15,7 +15,7 @@ def create_student_class_allocation(student_class_allocation: StudentClassAlloca
     std_name = db.query(Student.name).filter(Student.id == student_class_allocation.student_id).first()
     if std_name:
         std_name = std_name[0]
-        db_student__class_allocation = StudentClassAllocation(**student_class_allocation.dict(), id = new_id, student_name = std_name)
+        db_student__class_allocation = StudentClassAllocation(**student_class_allocation.dict(), id = new_id, reason = "New entry")
         db.add(db_student__class_allocation)
         try:
             db.commit()
