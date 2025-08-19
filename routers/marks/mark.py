@@ -11,7 +11,7 @@ router = APIRouter(prefix="/mark", tags=["mark"])
 
 @router.post("/")
 def create_student_mark(mark: MarkCreate, db: Session = Depends(get_db)):
-    new_id = generate_parent_id(db)
+    new_id = generate_mark_id(db)
 
     std_cls_allo = db.query(StudentClassAllocation).filter(StudentClassAllocation.student_id == mark.student_id).first()
     if std_cls_allo:

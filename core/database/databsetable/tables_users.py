@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, String, TIMESTAMP, func
-from sqlalchemy import Column
+from sqlalchemy import Column,ForeignKey
 from core.database.databse import Base
 from sqlalchemy.orm import relationship
 
@@ -34,7 +34,7 @@ class Student(Base):
     aadhar = Column(String(17), nullable=False)
     reason = Column(String(50), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    parentid = Column(String(50), nullable= False)
+    parentid = Column(String(50),nullable= False)
     role = Column(String(15), nullable = False)
     parentrelation = Column(String(15), nullable = False)
 
@@ -56,6 +56,7 @@ class Teacher(Base):
     graduatedegree = Column(String(50), nullable=False) 
     subject = Column(String(50), nullable=False)
     role = Column(String(15), nullable= False)
+
 
 
 class Parent(Base):

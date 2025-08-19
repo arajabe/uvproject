@@ -203,6 +203,7 @@ class BulkTermMark(BaseModel):
 
 class BulkParent(BaseModel):
     records : List[ParentCreate]
+    
 class BulkStudent(BaseModel):
     records : List[StudentCreate]
 class BulkTeacher(BaseModel):

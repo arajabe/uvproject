@@ -13,6 +13,7 @@ def displayui():
                 res =""
                 if st.session_state['mode'] == "bulk mark posting" or "bulk info and allocations":
                     payload = {"records": st.session_state['records']}
+                    st.markdown(payload)
                     res = requests.post(f"{API}/{on_regard}/upload", json = payload)
                 else :
                     payload = {
