@@ -20,22 +20,23 @@ def inforelated():
         with col1:
             st.session_state["radio_action"] = st.columns(1)[0].radio(
                 "Choose action",
-                ["none","create", "update", "delete", "view"],
+                ["create", "update", "delete", "view"],
                 horizontal=True
             )
         
-        if st.session_state["radio_action"] != "none":
+        if st.session_state["radio_action"] in ["create", "update", "delete"]:
             with col2:
                 st.session_state["radio_action_on_regards"] = st.radio(
                 "Choose person",
                 ["none","student", "parent", "teacher", "office staff"],
                 horizontal=True
             )
-
-
-        if (st.session_state["radio_action"] == "none" and st.session_state["radio_action_on_regards"] == "none"):
-            st.session_state["action"] = st.text_input("What is your request?", st.session_state["action"])
-            st.session_state["action"] = st.session_state["action"].lower()
+        elif st.session_state["radio_action"] in ["view"]:
+            with col2:
+                st.session_state["radio_action_on_regards"] = st.radio(
+                "Choose person Information",
+                ["information"],
+                horizontal=True)
 
         
 
@@ -105,9 +106,11 @@ def inforelated():
             for field_name in userdelete:
                 st.session_state[field_name] = st.text_input(field_name.capitalize())
             msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in userdelete]
-        
-        st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "}{st.session_state["radio_action_on_regards"]} details as follows: {msg_parts}"
 
+        if (st.session_state["radio_action"] in ["create", "update", "delete"]):
+            st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "}{st.session_state["radio_action_on_regards"]} details as follows: {msg_parts}"
+        elif(st.session_state["radio_action"] in ["view"]):
+            st.session_state['usermessage'] = st.text_input("what is you question?", "what is student STUD0001 details?").lower()
         st.markdown(st.session_state['usermessage'])    
         
 

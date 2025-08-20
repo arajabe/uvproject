@@ -1,13 +1,4 @@
 import streamlit as st
-import uuid
-import requests
-import time
-from typing import TypedDict, List, Optional,Annotated
-import os, json, requests
-from pydantic import BaseModel, EmailStr,constr, StringConstraints
-import pandas
-from datetime import date
-from core.model.schema import UserCreate, UserUpdate
 from session_util import initialize_session_state
 from ui.sidebar_ui import sidebar
 from ui.performance_ui import performance
@@ -45,7 +36,6 @@ def dashboard():
 
     st.markdown(f"**Current Role:** `{role}`")
     st.markdown("### 💬 Chat History")
-    st.markdown(st.session_state["fathername"])
     #for user_msg, bot_reply in st.session_state.chat_history:
         #st.markdown(f"**You:** {user_msg}")
         #st.markdown(f"**Bot:** {bot_reply}")

@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph, END
 from core.model.schema import ChatState
-from core.node.adminnode import info_officestaff_node, info_parent_node, info_student_node, info_teacher_node
+from core.node.adminnode import info_officestaff_node, info_parent_node, info_student_node, info_teacher_node, info_chat_node
 from core.node.routernode import node_router
 from core.node.teachernode import teacher_assignement,teacher_term_mark,teacher_subject_term_mark_split
 from core.node.adminnode import info_class_teacher_allocation_node,info_student_class_allocation_node
@@ -38,6 +38,9 @@ graph.add_node("node_student_class_allocation", info_student_class_allocation_no
 graph.add_node("intent_node_class_teacher_allocation", info_class_teacher_allocation_node.intent_class_teacher_allocation)
 graph.add_node("node_class_teacher_allocation", info_class_teacher_allocation_node.node_class_teacher_allocation)
 
+graph.add_node("chat_node", info_chat_node.chat_node)
+graph.add_node("intent_node_admin_view", info_chat_node.intent_node_admin_view)
+
 graph.set_entry_point("entry_node")
 
 graph.add_conditional_edges("entry_node", node_router.router_node, {
@@ -50,6 +53,8 @@ graph.add_conditional_edges("entry_node", node_router.router_node, {
      "intent_node_subject_term_mark_split" : "intent_node_subject_term_mark_split",
      "intent_node_class_teacher_allocation" : "intent_node_class_teacher_allocation",
      "intent_node_student_class_allocation" : "intent_node_student_class_allocation",
+     "chat_node" : "chat_node",
+     "intent_node_admin_view" : "intent_node_admin_view",
 })
 
 
@@ -79,5 +84,9 @@ graph.add_edge("node_student_class_allocation", END)
 
 graph.add_edge("intent_node_class_teacher_allocation", "node_class_teacher_allocation")
 graph.add_edge("node_class_teacher_allocation", END)
+
+graph.add_edge("intent_node_admin_view", END)
+
+graph.add_edge("chat_node", END)
 
 office_staff_graph = graph.compile()

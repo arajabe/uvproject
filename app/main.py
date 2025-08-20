@@ -9,6 +9,7 @@ from routers.info import officestaff, parent, student, teacher, users
 from routers.marks import assignement, mark, subjecttermsplit
 from routers.bulkallocations import bulk_class_teacher_allocations,bulk_student_class_allocations
 from routers.bulkinformations import bulk_parent,bulk_officestaff,bulk_teacher,bulk_student
+from routers.infochat import info_chat
 
 
 
@@ -53,6 +54,7 @@ app.include_router(bulk_parent.router)
 app.include_router(bulk_officestaff.router)
 app.include_router(bulk_teacher.router)
 app.include_router(bulk_student.router)
+app.include_router(info_chat.router)
 
 @app.get("/")
 def root():

@@ -11,7 +11,7 @@ from llm.llm import llm
 API = "http://127.0.0.1:8000"
 
 def parent_node(state: ChatState) -> ChatState:
-
+    print("parent_node")
     return{"response" : "welcome to Performance Analysis"}
 
 def router_node(state: ChatState) -> str:
@@ -39,6 +39,8 @@ def router_node(state: ChatState) -> str:
             return "intent_node_student_class_allocation"
         case "admin_class_teacher_allocation":
             return "intent_node_class_teacher_allocation"
+        case "admin_information":
+            return "intent_node_admin_view"
         case _: 
             print(" hello chat user case")
             return "chat_node"

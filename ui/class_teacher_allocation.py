@@ -12,7 +12,7 @@ def class_teacher_allocation():
         with col1:
             st.session_state["radio_action"] = st.columns(1)[0].radio(
                 "Choose action",
-                ["none","create", "update", "delete", "view"],
+                ["create", "update", "delete", "view"],
                 horizontal=True
             )
         
@@ -23,10 +23,6 @@ def class_teacher_allocation():
                 ["none", "Class Teacher Allocation"],
                 horizontal=True
             )
-                
-        if (st.session_state["radio_action"] == "none"):
-            st.session_state["action"] = st.text_input("What is your request?", st.session_state["action"])
-            st.session_state["action"] = st.session_state["action"].lower()
         
         msg_parts = ""
 

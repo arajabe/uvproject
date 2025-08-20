@@ -16,8 +16,6 @@ USERS = {
     "parent_user": {"password": "parent123", "role": "parent"},
 }
 
-
-
 @router.post("/")
 def login(data: LoginRequest):
     user = USERS.get(data.username)
