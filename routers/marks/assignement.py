@@ -29,22 +29,20 @@ def create_student_assignement(assignement: AssignementCreate, db: Session = Dep
     # Unpack or set defaults
     if result:
         std_name, std_class, std_class_sec = result
-    else:
-        std_name = std_class = std_class_sec = None
 
     # Create the Assignement object
-    db_assignement = Assignement(**assignement.dict(), id=new_id,
-    student_name=std_name, student_class=std_class, class_section=std_class_sec)
-    db.add(db_assignement)
-    try:
-        db.commit()
-        db.refresh(db_assignement)
-        return {"status": "assignement list created", "created assignement": db_assignement}
-    except SQLAlchemyError as e:
-        db.rollback()
+        db_assignement = Assignement(**assignement.dict(), id=new_id)
+        db.add(db_assignement)
+        try:
+            db.commit()
+            db.refresh(db_assignement)
+            return {"status": "assignement list created", "created assignement": db_assignement}
+        except SQLAlchemyError as e:
+            db.rollback()
     # Return the SQL error details
-        response =  str(e.__cause__ or e)
-        return {"status": response}
+            response =  str(e.__cause__ or e)
+
+    return {"status": "student has not allocated to class"}
 
 @router.patch("/{student_id}/term/{term}/period/{period}")
 def update_student_mark(student_id: str, term: int, period : int, assignement_update: AssignementUpdate, db: Session = Depends(get_db)):

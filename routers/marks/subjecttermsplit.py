@@ -22,8 +22,7 @@ def create_student_subject_term_split(subject_term_split: SubjectTermSplitCreate
             return {"status": "Student class has not been allocated in the class"}
     else:
 
-        db_subject_term_split = SubjectTermSplit(**subject_term_split.dict(), id=new_id, student_name=std_cls_allo.student_name,
-                                                student_class=std_cls_allo.student_class, class_section=std_cls_allo.class_section,)
+        db_subject_term_split = SubjectTermSplit(**subject_term_split.dict(), id=new_id)
 
         # Ensure subject name is properly formatted
         db_subject_term_split.subject = subject_term_split.subject.title()

@@ -48,17 +48,14 @@ def create_bulk_subject_term_split(bulk_data : BulkTermMark, db: Session = Depen
                  saved_records.append(record)
             except SQLAlchemyError as e:
                 db.rollback()
-                errors.append({"student_id": record.student_id, "error": str(e.__cause__ or e)})
+                errors.append({"student_id": record.student_id, "term" : record.term, "error": str(e.__cause__ or e)})
             
             # saved_records.append(record)
 
         except SQLAlchemyError as e:
             db.rollback()
-            errors.append({
-                "student_id": record.student_id,
-                "error": str(e.__cause__ or e)
-            })  
-    return {"reply": {"status": "completed", "errors" : errors}}
+            errors.append({"student_id": record.student_id, "term" : record.term, "error": str(e.__cause__ or e)})  
+    return {"reply": {"status": "completed", "saved records" : saved_records, "errors" : errors if errors else "no error in given data"}}
  
 def generate_mark_id(db: Session):
     last = db.query(Mark).order_by(Mark.id.desc()).first()
@@ -66,5 +63,5 @@ def generate_mark_id(db: Session):
         last_num = int(last.id[1:])  # Remove 'P' and convert to int
         new_id = f"M{last_num + 1:05d}"
     else:
-        new_id = "M0001"
+        new_id = "M00001"
     return new_id

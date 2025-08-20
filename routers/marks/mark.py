@@ -15,8 +15,7 @@ def create_student_mark(mark: MarkCreate, db: Session = Depends(get_db)):
 
     std_cls_allo = db.query(StudentClassAllocation).filter(StudentClassAllocation.student_id == mark.student_id).first()
     if std_cls_allo:
-        db_mark = Mark(**mark.dict(), id = new_id, student_name = std_cls_allo.student_name, 
-                       student_class = std_cls_allo.student_class, class_section = std_cls_allo.class_section)
+        db_mark = Mark(**mark.dict(), id = new_id)
         db.add(db_mark)
         try:
             db.commit()

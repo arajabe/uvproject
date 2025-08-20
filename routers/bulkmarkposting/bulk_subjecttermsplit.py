@@ -46,20 +46,17 @@ def create_bulk_subject_term_split(bulk_data : BulkSubjectTermSplit, db: Session
             try:
                  db.commit()
                  db.refresh(db_subject_term_split)
-                 saved_records.append(record)
+                 saved_records.append({"student id": record.student_id, "term" : record.term})
             except SQLAlchemyError as e:
                 db.rollback()
-                errors.append({"student_id": record.student_id, "error": str(e.__cause__ or e)})
+                errors.append({"student id": record.student_id, "term" : record.term, "error": str(e.__cause__ or e)})
             
             # saved_records.append(record)
 
         except SQLAlchemyError as e:
             db.rollback()
-            errors.append({
-                "student_id": record.student_id,
-                "error": str(e.__cause__ or e)
-            })  
-    return {"reply": {"status": "completed", "errors" : errors}}
+            errors.append({"student id": record.student_id, "term" : record.term, "error": str(e.__cause__ or e)})  
+    return {"reply": {"status": "completed", "saved records": saved_records, "errors" : errors if errors else "no errors in given data"}}
  
 def generate_subject_term_split_id(db: Session):
     last = db.query(SubjectTermSplit).order_by(SubjectTermSplit.id.desc()).first()
