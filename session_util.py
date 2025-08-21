@@ -125,3 +125,7 @@ def initialize_session_state():
         st.session_state["radio_action_on_regards"] = ""
     if "records" not in st.session_state:
         st.session_state['records'] = ""
+    if "selected_field" not in st.session_state:
+        st.session_state["selected_field"] = ""
+    if "multiselect" not in st.session_state:
+        st.session_state["multiselect"] = ""

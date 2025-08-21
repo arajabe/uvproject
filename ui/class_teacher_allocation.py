@@ -7,7 +7,7 @@ API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint,
 
 def class_teacher_allocation():
         
-        col1, col2 = st.columns(2)  # example: 2 columns
+        col1, col2, col3 = st.columns(3)  # example: 2 columns
 
         with col1:
             st.session_state["radio_action"] = st.columns(1)[0].radio(
@@ -16,13 +16,26 @@ def class_teacher_allocation():
                 horizontal=True
             )
         
-        if st.session_state["radio_action"] != "none":
+        if st.session_state["radio_action"] in ["create", "update", "delete"]:
             with col2:
                 st.session_state["radio_action_on_regards"] = st.radio(
                 "Choose the  any one option",
                 ["none", "Class Teacher Allocation"],
                 horizontal=True
             )
+        elif st.session_state["radio_action"] in ["view"]:
+            with col3:
+                radio_selected = st.radio("select all fields", ["all","selected fields"])
+                if radio_selected is not "all":
+                    st.session_state["multiselect"] = st.multiselect(
+                    "Select fields:", ["id", "teacher_class", "class_section"])
+
+        selected = st.session_state["selected_field"]
+        if st.session_state["radio_action"] in ["view"]:
+            if radio_selected is "all":
+                st.session_state["selected_field"] = "*"
+            else:
+                st.session_state["selected_field"] = st.session_state["multiselect"]
         
         msg_parts = ""
 
@@ -50,8 +63,11 @@ def class_teacher_allocation():
             
             msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in audit_table_delete
                          if st.session_state.get(field_name, "").strip() != ""]
-
-        st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "} {""}{st.session_state["radio_action_on_regards"]}{""} details as follows: {msg_parts}"
-
-        st.markdown(st.session_state['usermessage'])
-        
+        if st.session_state["radio_action"] in ["create", "update", "delete"]:
+            st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "} {""}{st.session_state["radio_action_on_regards"]}{""} details as follows: {msg_parts}"
+            st.markdown(st.session_state['usermessage'])
+        if st.session_state["radio_action"] in ["view"]:
+            st.session_state["radio_action_on_regards"] = "information"
+            user_message = f"{st.text_input("what is you question?", "get details of class teacher allocation")}"
+            st.session_state['usermessage'] = f"select {st.session_state["selected_field"]} from table classteacherallocation where {user_message}"
+            st.markdown(st.session_state['usermessage'])

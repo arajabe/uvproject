@@ -25,15 +25,31 @@ def intent_node_admin_view(state : ChatState) -> ChatState:
     user_message = state["messages"][-1].content
     chat_prompt = f""" 
                 You are role is AI assistant and query with data base regards student information related tables.
-                you have to reply for the {user_message} accordingly
+                you have to reply for the {user_message} accordingly in sql language
 
                 RULE :
-                example : 1.what is student STUD0001 detaisl?
-                answer : you will response
-                example : 2. What is father name of teacher TEA0002?
-                ANSWER : DONT RESPONSE?
+                1. only sql query start with select
+                2. no other sql query
+
+                examples:
+                user_message : select * from table classteacherallocation where all teacher
+                your answer : select * from  "classteacherallocation";
+
+                user_message : select * from table classteacherallocation where get details of class teacher allocation
+                your answer : select * from  "classteacherallocation";
+
+                user_message : select [id] from table classteacherallocation where all teacher
+                your answer : select id from  "classteacherallocation";
+
+                user_message :select ['teacher_class'] from table classteacherallocation where teacher id TEA0001
+                Your answer : select teacher_class from classteacherallocation where teacher_id = "TEA0001"
+
+                user_message : select * from table classteacherallocation where teacher id TEA0003 teacher class 1
+                your answer : SELECT * from classteacherallocation where teacher_id = 'TEA0003' and teacher_class = '1';
                 """
     result = llm.invoke([HumanMessage(content = chat_prompt)])
-    res = requests.post(f"{API}/info_chat/get", params={"message" : user_message})
+    print("result content")
+    print(result.content)
+    res = requests.post(f"{API}/info_chat/get", params={"message" : result.content})
     response_data = res.json()
     return {**state, "messages": state["messages"] + [AIMessage(content="check the response")], "response" : response_data}

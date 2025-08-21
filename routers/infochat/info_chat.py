@@ -54,8 +54,8 @@ def base_info_chat(message: str):
         agent = create_sql_agent(llm=llm, toolkit=toolkit, verbose=True)
 
         # Inject rule-based system message into the query
-        full_prompt = f"{BASE_PROMPT}\n\nUser: {message}\nAssistant:"
-        res = agent.run(full_prompt)
+        # full_prompt = f"{BASE_PROMPT}\n\nUser: {message}\nAssistant:"
+        res = agent.run(message)
 
         return {"response": res}
 
