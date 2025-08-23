@@ -133,3 +133,5 @@ def initialize_session_state():
         st.session_state["table"] = ""
     if "exam" not in st.session_state:
         st.session_state["exam"] = ""
+    if "Change Password" not in st.session_state:
+        st.session_state["Change Password"] = ""

@@ -4,6 +4,9 @@ from core.model.schema import StudentCreate, StudentUpdate
 from core.database.databse import get_db
 from core.database.databsetable.tables_users import Student,Parent
 from sqlalchemy.exc import SQLAlchemyError
+from core.database.databsetable.tables_users import UserPassword
+from core.model.schema import Password
+from core.security.hashing import hash_password, verify_password 
 
 
 router = APIRouter(prefix="/student", tags=["student"])
@@ -21,7 +24,13 @@ def create_student(student: StudentCreate, db: Session = Depends(get_db)):
         try:
             db.commit()
             db.refresh(db_student)
-            return {"status": "student created", "student": db_student}
+            # 🔑 also create password record
+            default_pw = "welcome123"  # <-- or student.dateofbirth, or ask in UI
+            hashed_pw = hash_password(default_pw)
+            db_userpass = UserPassword(id=db_student.id, role="student", password=hashed_pw)
+            db.add(db_userpass)
+            db.commit()
+            return {"status": "student created", "student": db_student.id}
         except SQLAlchemyError as e:
             db.rollback()
     # Return the SQL error details

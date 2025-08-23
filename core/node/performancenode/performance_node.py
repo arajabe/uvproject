@@ -289,7 +289,7 @@ def performance_analysis_overall(df: pd.DataFrame, option: str):
     
 #df = pd.DataFrame(data)
 
-def performance_analysis(df: pd.DataFrame, option: str, student_id: str):
+def performance_analysis_individual(df: pd.DataFrame, option: str, student_id: str):
     print("option")
     if option == "total":
         # Average total per student

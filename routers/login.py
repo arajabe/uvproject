@@ -1,26 +1,31 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, EmailStr
-from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP, func
-from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from core.model.schema import LoginRequest
 from core.database.databse import get_db
-from core.database.databsetable.tables_users import Parent
+from sqlalchemy.orm import Session
+from core.database.databsetable.tables_users import UserPassword
+from core.security.hashing import hash_password, verify_password 
+from core.model.schema import PasswordChangeRequest
 
 router = APIRouter(prefix="/login", tags=["login"])
 
-# Dummy user store — use DB in production
-USERS = {
-    "admin_user": {"password": "admin123", "role": "admin"},
-    "teacher_user": {"password": "teach123", "role": "teacher"},
-    "student_user": {"password": "stud123", "role": "student"},
-    "parent_user": {"password": "parent123", "role": "parent"},
-}
-
 @router.post("/")
-def login(data: LoginRequest):
-    user = USERS.get(data.username)
-    print(user)
-    print(data.password)
-    if not user or user["password"] != data.password:
+def login(data: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(UserPassword).filter(UserPassword.id == data.username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not verify_password(data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    return {"username": data.username, "role": user["role"]}
+    return {"username": data.username, "role": user.role}
+@router.post("/change-password")
+def change_password(req: PasswordChangeRequest, db: Session = Depends(get_db)):
+    user = db.query(UserPassword).filter(UserPassword.id == req.username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not verify_password(req.old_password, user.password):
+        raise HTTPException(status_code=401, detail="Old password incorrect")
+
+    user.password = hash_password(req.new_password)
+    db.commit()
+    return {"message": "Password updated successfully"}

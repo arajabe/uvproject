@@ -20,6 +20,8 @@ def sidebar():
     with st.sidebar:
         st.markdown(f"**Logged in as:** `{st.session_state['username']}`")
         st.markdown(f"**Role:** `{st.session_state['logedin_role']}`")
+        if st.button("Change Password"):
+            st.session_state["Change Password"] = "Change Password"
         if st.button("Logout"):
             st.session_state['logged_in'] = False
             st.session_state['username'] = ""

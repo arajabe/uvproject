@@ -200,6 +200,11 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
+class Password(BaseModel):
+    id: str
+    password : str
+    role : str
+
 class StudentClassAllocationCreate(BaseModel):
     student_id : str
     student_class : int
@@ -251,4 +256,9 @@ class BulkStudentClassAllocation(BaseModel):
     records : List[StudentClassAllocationCreate]
 class BulkClassTeacherAllocation(BaseModel):
     records : List[ClassTeacherAllocationCreate]
+
+class PasswordChangeRequest(BaseModel):
+    username: str
+    old_password: str
+    new_password: str
 

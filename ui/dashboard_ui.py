@@ -9,6 +9,7 @@ from ui.class_teacher_allocation import class_teacher_allocation
 from ui.student_class_allocation import student_class_allocation
 from ui.bulk_upload_marks.bulk_mark_posting_router import bulk_mark_posting_router
 from ui.bulk_upload_admin.bulk_admin_router import bulk_admin_router
+from ui.change_password import change_password
 
 initialize_session_state()
 API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
@@ -65,11 +66,13 @@ def dashboard():
             case "bulk mark posting":
                 bulk_mark_posting_router()
             case "bulk info and allocations":
-                bulk_admin_router()
+                bulk_admin_router()    
+
+    if st.session_state["Change Password"] == "Change Password":
+        change_password()
+    else:
+        session_mode(st.session_state['mode'])
         
-
-
-    session_mode(st.session_state['mode'])
     if st.session_state['mode'] != "Performance":
         if st.button("Send", st.session_state['send']):
             displayui()

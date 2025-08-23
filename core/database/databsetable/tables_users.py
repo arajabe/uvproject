@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, String, TIMESTAMP, func
-from sqlalchemy import Column,ForeignKey
+from sqlalchemy import Column,ForeignKey,CheckConstraint
 from core.database.databse import Base
 from sqlalchemy.orm import relationship
 
@@ -101,3 +101,15 @@ class OfficeStaff(Base):
     role = Column(String(15), nullable = False)
     graduatedegree = Column(String(50), nullable=False) 
     subject = Column(String(50), nullable=False)
+
+class UserPassword(Base):
+    __tablename__ = "userpasssword"
+    id = Column(String(50), primary_key=True, index=True)
+    role  = Column(String(50), nullable=False)
+    password = Column(String(255), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+    __table_args__ = (
+        CheckConstraint("role IN ( 'student', 'parent', 'officestaff', 'teacher')", 
+                    name="user password"),)
+
