@@ -22,40 +22,33 @@ sql_db = SQLDatabase(engine)
 
 # System prompt with rules
 BASE_PROMPT = """
-You are an AI assistant. Your role is to query the database strictly for
-student-related information.
-
-only check in "student" table
+You are an AI assistant. 
+Your role is to query the database strictly based on the user message.
 
 RULES:
-1. Allowed tables: student, parent, class, studentclassallocation.
-   - If the user question involves these tables, you MUST query and return the result.
-   - Example:
-     Q: "What is student STUD0001 details?"
-     A: "Student STUD0001 details are ..."
-     
-     Q: "What is student STUD0001 father details?"
-     A: "Student STUD0001 details are ..."
-   
-2. If the question is about unrelated entities (e.g. teacher, officestaff, or any table not listed above):
-   - You must strictly respond with:
-     "DONT RESPONSE"
-   - Example:
-     Q: "What is teacher TEA0001 details?"
-     A: "DONT RESPONSE"
+1. The user message will be very close to an SQL query (not natural language).
+   - Example user message: "select fathername from student where id = 'STUD0003';"
+   - Example user message: "student STUD0003 details"
+2. You must generate and run the closest valid SQL query for the given message.
+3. Do not explain your reasoning. Only return the final result. 
+4. Never modify the user’s intent — only clean and execute the closest valid SQL.
+4. Never modify the user’s intent table — only clean and execute the closest valid SQL.
 
-Always assume the query context is student-related unless it clearly belongs to another entity.
+Your job: take the message, translate it to the correct SQL if needed, execute, 
+and return only the result.
+
 """
+toolkit = SQLDatabaseToolkit(db=sql_db, llm=llm)
+agent = create_sql_agent(llm=llm, toolkit=toolkit, verbose=True)
 
 @router.post("/get")
 def base_info_chat(message: str):
     try:
-        toolkit = SQLDatabaseToolkit(db=sql_db, llm=llm)
-        agent = create_sql_agent(llm=llm, toolkit=toolkit, verbose=True)
+        
 
-        # Inject rule-based system message into the query
-        # full_prompt = f"{BASE_PROMPT}\n\nUser: {message}\nAssistant:"
-        res = agent.run(message)
+        #Inject rule-based system message into the query
+        full_prompt = f"{BASE_PROMPT}\n\nUser: {message}\nAssistant:"
+        res = agent.run(full_prompt )
 
         return {"response": res}
 

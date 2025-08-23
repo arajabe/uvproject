@@ -2,12 +2,14 @@ from sqlalchemy.orm import Session
 from core.database.databse import get_db
 from langchain.schema import AIMessage,HumanMessage
 from langchain.prompts import ChatPromptTemplate
-from core.model.schema import ChatState
+from core.model.schema import ChatState,PerformanceState
 from llm.llm import llm
 import re,requests
 import json
 import pandas as pd
 from core.database.databsetable.tables_marks import Mark
+import pandas as pd
+import matplotlib.pyplot as plt
 
 API = "http://127.0.0.1:8000"
 
@@ -198,7 +200,7 @@ def intent_rank_node(state : ChatState):
     df = pd.read_sql("SELECT * FROM termmark", get_db)
 
 
-def intent_chat_node(state : ChatState) -> ChatState:
+def intent_chat_node_old(state : ChatState) -> ChatState:
     db = next(get_db()) 
     df = pd.read_sql("SELECT * FROM termmark", db.bind)
     subject_cols = ["language_1", "language_2", "maths", "science", "social_science"]
@@ -208,16 +210,12 @@ def intent_chat_node(state : ChatState) -> ChatState:
 
     # Rank by total within each term
     df["rank_total"] = df.groupby("term")["total"].rank(ascending=False, method="min")
-    print("rank_total")
-    print(df)
 
     y = ""
     # Rank by each subject within term
     for subject in subject_cols:
         df[f"rank_{subject}"] = df.groupby("term")[subject].rank(ascending=False, method="min")
     y = df.to_markdown()
-    print(" hello df")
-    print()
 
     # Term-wise performance summary
     term_summary = df.groupby("term")[subject_cols + ["total", "average"]].mean().reset_index()
@@ -229,7 +227,7 @@ def intent_chat_node(state : ChatState) -> ChatState:
     # print(df.to_csv("student_performance_ranked.csv", index=False)
    # print(df[df["term"] == 1][["student_id", "term", "total", "rank_total"]].sort_values(["term", "rank_total"]))
     df = df[["student_id", "term", "total", "rank_total"]].sort_values(["term", "rank_total"])
-    print(df[df["student_id"] == 24])
+
     prompt = f"""Here is the average subject performance by term:
         {term_summary.to_markdown(index=False)}
 
@@ -240,7 +238,108 @@ def intent_chat_node(state : ChatState) -> ChatState:
     
     x= df[df["student_id"] == 20].to_markdown(index=False)
     
-    print("mark down")
-
-    print(x)
     return {"messages" : state["messages"] + [AIMessage(content= response.content)], "response_pd" : y}
+
+def intent_chat_node(state : PerformanceState) -> PerformanceState:
+    db = next(get_db()) 
+    table = state["exam"].strip().lower()
+    df = pd.read_sql(f"SELECT * FROM {table}", db.bind)
+    print("data frame")
+    print(state["performance_request"].lower())
+    option = state["performance_request"].lower()
+    result = performance_analysis_overall(df, option)
+    print("result")
+    print(result)
+    result_md = result.to_markdown(index=False)
+
+    return {"messages" : state["messages"] + [AIMessage(content= "performance on total")], "response_pd" : result_md}
+
+def performance_analysis_overall(df: pd.DataFrame, option: str):
+    print("performance_analysis option")
+    print(option)
+    if option == "overall_total":
+        # Average total per student
+        return df.groupby("student_id")["total"].mean().reset_index(name="avg_total")
+
+    elif option == "overall_subject":
+        # Subject-wise average
+        subjects = ["language_1", "language_2", "maths", "science", "social_science"]
+        return df[subjects].mean().reset_index(name="avg_score")
+
+    elif option == "overall_trend":
+        # Student performance trend across terms
+        return df.groupby(["student_id", "term"])["total"].mean().reset_index()
+
+    elif option == "overall_rank":
+        # Rank students within each term
+        df["rank"] = df.groupby("term")["total"].rank(method="dense", ascending=False)
+        return df[["term", "student_id", "total", "rank"]].sort_values(["term", "rank"])
+
+    elif option == "overall_strength_weakness":
+        # Best and weakest subject per student
+        subjects = ["language_1", "language_2", "maths", "science", "social_science"]
+        best = df.melt(id_vars=["student_id", "term"], value_vars=subjects,
+                       var_name="subject", value_name="score")
+        best_sub = best.loc[best.groupby(["student_id", "term"])["score"].idxmax()]
+        worst_sub = best.loc[best.groupby(["student_id", "term"])["score"].idxmin()]
+        return {"best_subject": best_sub, "worst_subject": worst_sub}
+
+    else:
+        return "Invalid option!"
+    
+#df = pd.DataFrame(data)
+
+def performance_analysis(df: pd.DataFrame, option: str, student_id: str):
+    print("option")
+    if option == "total":
+        # Average total per student
+        return df.groupby("student_id")["total"].mean().reset_index(name="avg_total")
+
+    elif option == "subject":
+        # Subject-wise average across all students
+        subjects = ["language_1", "language_2", "maths", "science", "social_science"]
+        return df[subjects].mean().reset_index(name="avg_score")
+
+    elif option == "trend":
+        # Student performance trend across terms
+        return df.groupby(["student_id", "term"])["total"].mean().reset_index()
+
+    elif option == "rank":
+        # Rank students within each term
+        df["rank"] = df.groupby("term")["total"].rank(method="dense", ascending=False)
+        return df[["term", "student_id", "total", "rank"]].sort_values(["term", "rank"])
+
+    elif option == "strength_weakness":
+        # Best and weakest subject per student
+        subjects = ["language_1", "language_2", "maths", "science", "social_science"]
+        best = df.melt(id_vars=["student_id", "term"], value_vars=subjects,
+                       var_name="subject", value_name="score")
+        best_sub = best.loc[best.groupby(["student_id", "term"])["score"].idxmax()]
+        worst_sub = best.loc[best.groupby(["student_id", "term"])["score"].idxmin()]
+        return {"best_subject": best_sub, "worst_subject": worst_sub}
+
+    elif option == "compare":
+        if not student_id:
+            return "❌ Please provide a student_id for comparison"
+
+        # Overall average of all students
+        overall_avg = df.groupby("student_id")["total"].mean().reset_index(name="avg_total")
+        
+        # Find this student's performance
+        student_perf = overall_avg[overall_avg["student_id"] == student_id]
+        
+        # Class average
+        class_avg = overall_avg["avg_total"].mean()
+
+        # Rank
+        overall_avg["rank"] = overall_avg["avg_total"].rank(method="dense", ascending=False)
+        student_rank = overall_avg[overall_avg["student_id"] == student_id]
+
+        return {
+            "student_performance": student_perf,
+            "class_average": class_avg,
+            "student_rank": student_rank
+        }
+
+    else:
+        return "Invalid option!"

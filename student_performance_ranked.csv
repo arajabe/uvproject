@@ -1,8 +1,3 @@
-id,student_id,student_name,term,language_1_status,language_1,language_2_status,language_2,maths_status,maths,science_status,science,social_science_status,social_science,total,overall_status,timestamp,average,rank_total,rank_language_1,rank_language_2,rank_maths,rank_science,rank_social_science
-M00001,STUD0003,,1,pass,89,pass,89,pass,89,pass,89,pass,89,445,pass,2025-08-11 19:59:21,89.0,4.0,4.0,4.0,4.0,4.0,4.0
-M00003,STUD0004,,1,pass,89,pass,89,pass,89,pass,89,pass,89,445,pass,2025-08-11 20:01:25,89.0,4.0,4.0,4.0,4.0,4.0,4.0
-M00004,STUD0005,,1,pass,99,pass,99,pass,99,pass,99,pass,99,495,pass,2025-08-11 20:09:08,99.0,1.0,1.0,1.0,1.0,1.0,1.0
-M00005,STUD0006,,1,pass,99,pass,99,pass,99,pass,99,pass,99,495,pass,2025-08-11 20:10:37,99.0,1.0,1.0,1.0,1.0,1.0,1.0
-M00006,STUD0007,,1,pass,99,pass,99,pass,99,pass,99,pass,99,495,pass,2025-08-11 20:26:36,99.0,1.0,1.0,1.0,1.0,1.0,1.0
-M00007,STUD0008,,1,pass,78,pass,78,pass,78,pass,78,fail,10,322,fail,2025-08-12 00:07:27,64.4,7.0,6.0,6.0,6.0,6.0,7.0
-M00009,STUD0010,,1,pass,77,pass,77,pass,77,pass,77,pass,77,385,pass,2025-08-12 03:45:18,77.0,6.0,7.0,7.0,7.0,7.0,6.0
+id,student_id,term,language_1,language_2,maths,science,social_science,total,timestamp,average,rank_total,rank_language_1,rank_language_2,rank_maths,rank_science,rank_social_science
+M00002,STUD0011,2,10,10,99,99,99,317,2025-08-20 14:11:34,63.4,1.0,1.0,1.0,1.0,1.0,1.0
+M00003,STUD0013,2,10,10,99,99,99,317,2025-08-20 14:28:15,63.4,1.0,1.0,1.0,1.0,1.0,1.0

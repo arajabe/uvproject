@@ -18,6 +18,17 @@ class ChatState(TypedDict):
     role: str
     radio_action_on_person: str
 
+class PerformanceState(TypedDict):
+    messages: List
+    intent: str
+    params: dict
+    response : json
+    response_pd : str
+    role: str
+    performance_request : str
+    exam : str
+    
+
 class UserCreate(BaseModel):
     name: str
     fathername: str

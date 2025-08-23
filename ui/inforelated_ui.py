@@ -1,12 +1,4 @@
 import streamlit as st
-import uuid
-import requests
-import time
-from typing import TypedDict, List, Optional,Annotated
-import os, json, requests
-from pydantic import BaseModel, EmailStr,constr, StringConstraints
-import pandas
-from datetime import date
 from core.model.schema import UserCreate, UserUpdate, ParentCreate, OfficeStaffCreate, OfficeStaffUpdate, ParentUpdate, UserDelete, StudentCreate, StudentUpdate, TeacherCreate, TeacherUpdate
 from session_util import initialize_session_state
 
@@ -15,7 +7,7 @@ API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint,
 
 def inforelated():
         
-        col1, col2 = st.columns(2)  # example: 2 columns
+        col1, col2, col3 = st.columns(3)  # example: 2 columns
 
         with col1:
             st.session_state["radio_action"] = st.columns(1)[0].radio(
@@ -24,19 +16,63 @@ def inforelated():
                 horizontal=True
             )
         
-        if st.session_state["radio_action"] in ["create", "update", "delete"]:
+        if st.session_state["radio_action"] in ["create", "update", "delete", "view"]:
             with col2:
                 st.session_state["radio_action_on_regards"] = st.radio(
                 "Choose person",
-                ["none","student", "parent", "teacher", "office staff"],
-                horizontal=True
-            )
-        elif st.session_state["radio_action"] in ["view"]:
-            with col2:
-                st.session_state["radio_action_on_regards"] = st.radio(
-                "Choose person Information",
-                ["information"],
-                horizontal=True)
+                ["none","student", "parent", "teacher", "office staff"], horizontal=True)
+        
+        student_fields = ["id","name","fathername","mothername","dateofbirth","address","city","pincode","contactnumber",
+                            "email", "aadhar","reason","parentid","parentrelation"]
+        parent_fields = ["id","fathername","mothername","dateofbirth","address","city","pincode","contactnumber",
+                            "email", "aadhar","reason","parentrelation", "occupation"]
+        teacher_fields = ["id","fathername","mothername","dateofbirth","address","city","pincode","contactnumber",
+                            "email", "aadhar","reason","subject", "graduatedegree"]
+        radio_selected = ""
+        
+        def selected_person (value):
+            match value:
+                case "student": 
+                    with col3:
+                        st.session_state["table"] = "student"
+                        radio_selected = st.radio("select fields", ["all","select fields"])
+                        if radio_selected is not "all":
+                            st.session_state["multiselect"] = st.multiselect(
+                                "Select required fields:", student_fields)
+                            
+                case "parent": 
+                    with col3:
+                        st.session_state["table"] = "parent"
+                        radio_selected = st.radio("select fields", ["all","selected fields"])
+                        if radio_selected is not "all":
+                            st.session_state["multiselect"] = st.multiselect(
+                                "Select required fields:", parent_fields)
+                            
+                case "teacher": 
+                    with col3:
+                        st.session_state["table"] = "teacher"
+                        radio_selected = st.radio("select fields", ["all","selected fields"])
+                        if radio_selected is not "all":
+                            st.session_state["multiselect"] = st.multiselect(
+                                "Select rquired fields:", teacher_fields)
+                            
+                case "office staff": 
+                    with col3:
+                        st.session_state["table"] = "officestaff"
+                        radio_selected = st.radio("select fields", ["all","selected fields"])
+                        if radio_selected is not "all":
+                            st.session_state["multiselect"] = st.multiselect(
+                                "Select required fields:", teacher_fields)                        
+
+    
+        if st.session_state["radio_action"] in ["view"]:
+            selected_person(st.session_state["radio_action_on_regards"])
+            if radio_selected is "all":
+                st.session_state["selected_field"] = "*"
+            else:
+                st.session_state["selected_field"] = st.session_state["multiselect"]
+
+        not_required_words =  ["create", "update", "delete", "change", "transfer", "password", "alter", "drop","add", "addition", "deletion"]
 
         
 
@@ -109,9 +145,15 @@ def inforelated():
 
         if (st.session_state["radio_action"] in ["create", "update", "delete"]):
             st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "}{st.session_state["radio_action_on_regards"]} details as follows: {msg_parts}"
-        elif(st.session_state["radio_action"] in ["view"]):
-            st.session_state['usermessage'] = st.text_input("what is you question?", "what is student STUD0001 details?").lower()
-        st.markdown(st.session_state['usermessage'])    
+        if st.session_state["radio_action"] in ["view"]:
+            st.session_state["radio_action_on_regards"] = "information"
+            user_message = f"{st.text_input("what is you question?", "")}"
+            if any(word in user_message.lower() for word in not_required_words):
+                st.session_state['usermessage'] = ""
+                st.markdown(st.session_state['usermessage'])
+            else:
+                st.session_state['usermessage'] = f"select {st.session_state["selected_field"]} from table {st.session_state["table"]} where {user_message}"
+                st.markdown(st.session_state['usermessage'])   
         
 
         

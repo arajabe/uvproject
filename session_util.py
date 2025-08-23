@@ -129,3 +129,7 @@ def initialize_session_state():
         st.session_state["selected_field"] = ""
     if "multiselect" not in st.session_state:
         st.session_state["multiselect"] = ""
+    if "tabel" not in st.session_state:
+        st.session_state["table"] = ""
+    if "exam" not in st.session_state:
+        st.session_state["exam"] = ""

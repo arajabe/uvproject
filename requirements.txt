@@ -13,3 +13,4 @@ streamlit==1.24.1
 langchain
 langchain_community
 langchain_experimental
+matplotlib

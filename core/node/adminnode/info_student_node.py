@@ -6,7 +6,7 @@ import os, json, requests
 import re
 from core.model.schema import ChatState, StudentCreate
 from llm.llm import llm
-
+from core.node.utillity.utility import parse_raw_output
 
 API = "http://127.0.0.1:8000"
 
@@ -47,19 +47,21 @@ def intent_node_student(state: ChatState) -> ChatState:
     print("raw_output") 
     print(raw_output)
 
-    try:
-        parsed = json.loads(raw_output)
-        print(parsed)
-    except:
-        parsed = {"intent": "chat", "params": {}}
-    return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
+
+    #try:
+        #parsed = json.loads(raw_output)
+        #print(parsed)
+    #except:
+        #parsed = {"intent": "chat", "params": {}}
+    return parse_raw_output(raw_output, state)
 
 # --- Action Nodes (call FastAPI) ---
 
 def node_student(state: ChatState) -> ChatState:
     parms_value = state["params"]
     intent_value = state["intent"]
-
+    print("node_student")
+    print(intent_value)
     match intent_value:
 
         case "create_student":
@@ -96,3 +98,4 @@ def node_student(state: ChatState) -> ChatState:
               
               response_data = "student not created deleted or updated"
               return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": response_data}
+        

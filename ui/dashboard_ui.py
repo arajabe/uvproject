@@ -36,6 +36,7 @@ def dashboard():
 
     st.markdown(f"**Current Role:** `{role}`")
     st.markdown("### 💬 Chat History")
+
     #for user_msg, bot_reply in st.session_state.chat_history:
         #st.markdown(f"**You:** {user_msg}")
         #st.markdown(f"**Bot:** {bot_reply}")
@@ -69,8 +70,7 @@ def dashboard():
 
 
     session_mode(st.session_state['mode'])
-      
-
-    if st.button("Send", st.session_state['send']):
-        displayui()
-            
+    if st.session_state['mode'] != "Performance":
+        if st.button("Send", st.session_state['send']):
+            displayui()
+    

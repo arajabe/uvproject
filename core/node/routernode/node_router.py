@@ -39,7 +39,7 @@ def router_node(state: ChatState) -> str:
             return "intent_node_student_class_allocation"
         case "admin_class_teacher_allocation":
             return "intent_node_class_teacher_allocation"
-        case "admin_information":
+        case "admin_information" | "teacher_information":
             return "intent_node_admin_view"
         case _: 
             print(" hello chat user case")
