@@ -6,9 +6,8 @@ import os, json, requests
 import re
 from core.model.schema import ChatState, OfficeStaffCreate
 from llm.llm import llm
+from config import API_URL
 
-
-API = "http://127.0.0.1:8000"
 
 def chat_node(state : ChatState) -> ChatState:
     message = state["messages"][-1].content
@@ -75,7 +74,7 @@ def intent_node_admin_view(state : ChatState) -> ChatState:
     print("result content")
     print(raw_output)
     if raw_output is not "not allowed":
-        res = requests.post(f"{API}/info_chat/get", params={"message" : raw_output})
+        res = requests.post(f"{API_URL}/info_chat/get", params={"message" : raw_output})
         response_data = res.json()
         return {**state, "messages": state["messages"] + [AIMessage(content="check the response")], "response" : response_data}
     else:

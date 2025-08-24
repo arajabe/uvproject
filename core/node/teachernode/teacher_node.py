@@ -1,12 +1,9 @@
-from langchain_groq.chat_models import ChatGroq
 from langchain.schema import HumanMessage, AIMessage
-from langgraph.graph import StateGraph, END
 from llm.llm import llm
-import os, json, requests
+import json, requests
 import re
 from core.model.schema import ChatState
-
-API = "http://127.0.0.1:8000"
+from config import API_URL
 
 def intent_node(state:ChatState) -> ChatState:
     msg = state["messages"][-1].content
@@ -292,7 +289,7 @@ def intent_node_create_mark(state: ChatState) -> ChatState:
 
     if "student_id" in p and "term" in p and "language_1" in p and "language_2" in p and "maths" in p and "science" in p and "social_science" in p:
         
-        r = requests.post(f"{API}/mark/", json={"student_id": p["student_id"], "term" : p["term"], "language_1": p["language_1"], "language_2" : p["language_2"],
+        r = requests.post(f"{API_URL}/mark/", json={"student_id": p["student_id"], "term" : p["term"], "language_1": p["language_1"], "language_2" : p["language_2"],
                                                 "maths" : p["maths"], "science": p["science"], "social_science" : p["social_science"]})
         reply = f"Created mark {p['student_id']}." if r.status_code == 200 else "Failed to create mark list."
     else:
@@ -309,7 +306,7 @@ def intent_node_create_assignement(state: ChatState) -> ChatState:
 
     if "student_id" in p and "term" in p and "language_1" in p and "language_2" in p and "maths" in p and "science" in p and "social_science" in p:
         
-        r = requests.post(f"{API}/assignement/", json= p )
+        r = requests.post(f"{API_URL}/assignement/", json= p )
         reply = f"Created assigngment {p['student_id']}." if r.status_code == 200 else "Failed to create assigngment list."
     else:
         reply = "Need all marks with subject "
@@ -325,7 +322,7 @@ def intent_node_create_subject_term_split(state: ChatState) -> ChatState:
 
     if "student_id" in p and "term" in p and "subject" in p:
         
-        r = requests.post(f"{API}/subjecttermsplit/", json= p )
+        r = requests.post(f"{API_URL}/subjecttermsplit/", json= p )
         reply = f"Created assigngment {p['student_id']}." if r.status_code == 200 else "Failed to create assigngment list."
     else:
         reply = "Need all marks with subject "
@@ -340,7 +337,7 @@ def intent_node_update_mark(state: ChatState) -> ChatState:
 
     # Check required params
     if "student_id" in p and "term" in p:
-        url = f"{API}/mark/{p['student_id']}/{p['term']}"
+        url = f"{API_URL}/mark/{p['student_id']}/{p['term']}"
 
         # Only include non-None fields in PATCH
         payload = {key: p[key] for key in [
@@ -376,7 +373,7 @@ def intent_node_update_assignement(state: ChatState) -> ChatState:
     print(p)
     # Check required params
     if "student_id" in p and "term" in p and "period" in p: 
-        url = f"{API}/assignement/{p['student_id']}/term/{p['term']}/period/{p['period']}"
+        url = f"{API_URL}/assignement/{p['student_id']}/term/{p['term']}/period/{p['period']}"
 
         # Only include non-None fields in PATCH
         payload = {key: p[key] for key in [
@@ -411,7 +408,7 @@ def intent_node_update_subject_term_split(state: ChatState) -> ChatState:
     print("intent_node_update_subject_term_split")
     # Check required params
     if "student_id" in p and "term" in p:
-        url = f"{API}/subjecttermsplit/{p['student_id']}/{p['subject']}/{p['term']}"
+        url = f"{API_URL}/subjecttermsplit/{p['student_id']}/{p['subject']}/{p['term']}"
 
         r = requests.patch(url, json=p)
 
@@ -435,7 +432,7 @@ def intent_node_update_subject_term_split(state: ChatState) -> ChatState:
 def intent_node_delete_mark(state: ChatState) -> ChatState:
     p = state["params"]
     if "student_id" in p:
-        r = requests.delete(f"{API}/mark/{p['student_id']}/{p['term']}")
+        r = requests.delete(f"{API_URL}/mark/{p['student_id']}/{p['term']}")
         reply = "mark list deleted." if r.status_code == 200 else "student list not found."
     else:
         reply = "Need a student ID to delete mark list"
@@ -444,7 +441,7 @@ def intent_node_delete_mark(state: ChatState) -> ChatState:
 def intent_node_delete_assignement(state: ChatState) -> ChatState:
     p = state["params"]
     if "student_id" in p:
-        r = requests.delete(f"{API}/assignement/{p['student_id']}/term/{p['term']}/period/{p['period']}")
+        r = requests.delete(f"{API_URL}/assignement/{p['student_id']}/term/{p['term']}/period/{p['period']}")
         reply = "mark list deleted." if r.status_code == 200 else "student list not found."
     else:
         reply = "Need a student ID to delete mark list"
@@ -453,7 +450,7 @@ def intent_node_delete_assignement(state: ChatState) -> ChatState:
 def intent_node_delete_subject_term_split(state: ChatState) -> ChatState:
     p = state["params"]
     if "student_id" in p:
-        r = requests.delete(f"{API}/subjecttermsplit/{p['student_id']}/{p["subject"]}/{p['term']}")
+        r = requests.delete(f"{API_URL}/subjecttermsplit/{p['student_id']}/{p["subject"]}/{p['term']}")
         reply = "mark list deleted." if r.status_code == 200 else "student list not found."
     else:
         reply = "Need a student ID to delete mark list"

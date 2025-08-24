@@ -5,9 +5,7 @@ from core.graph.graph.graph_performance import graph_performance
 from sqlalchemy.orm import Session
 from core.database.curd import save_chat, get_chat_history
 from core.database.databse import get_db
-import requests
-
-API = "http://127.0.0.1:8000"
+from config import API_URL
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 sessions = {}

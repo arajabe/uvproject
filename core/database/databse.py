@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine,MetaData
 from sqlalchemy.orm import sessionmaker, declarative_base
-
-DATABASE_URL = "mysql+pymysql://root:Nannilam123@127.0.0.1/testdb"
+from config import DATABASE_URL
 
 engine = create_engine(DATABASE_URL, echo=True, future=True)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)

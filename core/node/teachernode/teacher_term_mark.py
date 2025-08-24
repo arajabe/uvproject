@@ -1,12 +1,9 @@
-from langchain_groq.chat_models import ChatGroq
 from langchain.schema import HumanMessage, AIMessage
-from langgraph.graph import StateGraph, END
 from llm.llm import llm
-import os, json, requests
+import json, requests
 import re
 from core.model.schema import ChatState, MarkCreate
-
-API = "http://127.0.0.1:8000"
+from config import API_URL
 
 def intent_node_term_mark(state:ChatState) -> ChatState:
     msg = state["messages"][-1].content
@@ -71,7 +68,7 @@ def node_term_mark(state: ChatState) -> ChatState:
         case "create_mark":
             required_keys = list(MarkCreate.model_fields.keys())
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
-                res = requests.post(f"{API}/mark/", json= parms_value)
+                res = requests.post(f"{API_URL}/mark/", json= parms_value)
                 reply = f"Created mark {parms_value['student_id']}." if res.status_code == 200 else "Failed to create mark list."
                 respond_data = res.json()
                 return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : respond_data}
@@ -83,7 +80,7 @@ def node_term_mark(state: ChatState) -> ChatState:
         case "update_mark":
             required_keys = ["student_id","term"]
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
-                res = requests.patch(f"{API}/mark/{parms_value['student_id']}/{parms_value['term']}", json = parms_value)
+                res = requests.patch(f"{API_URL}/mark/{parms_value['student_id']}/{parms_value['term']}", json = parms_value)
                 reply= "Term marks is updated" if res.status_code ==200 else "Term mark is not updated" 
                 response_data = res.json()
                 return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response":response_data}
@@ -94,7 +91,7 @@ def node_term_mark(state: ChatState) -> ChatState:
         case "delete_mark":
             required_keys = ["student_id","term"]
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
-                res = requests.delete(f"{API}/mark/{parms_value['student_id']}/{parms_value['term']}")
+                res = requests.delete(f"{API_URL}/mark/{parms_value['student_id']}/{parms_value['term']}")
                 reply = "mark list deleted." if res.status_code == 200 else "student list not found."
                 response_data = res.json()
                 return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": response_data}

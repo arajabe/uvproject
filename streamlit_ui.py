@@ -12,10 +12,6 @@ from ui.login_ui import login_screen
 from session_util import initialize_session_state
 from ui.dashboard_ui import dashboard
 
-
-
-API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
-
 initialize_session_state()
 
 if not st.session_state.logged_in:

@@ -2,19 +2,9 @@ import streamlit as st
 import requests
 import requests
 from session_util import initialize_session_state
+from config import API_URL
 
 initialize_session_state()
-
-USERS = {
-    "admin_user": {"password": "admin123", "role": "admin"},
-    "teacher_user": {"password": "teach123", "role": "teacher"},
-    "student_user": {"password": "stud123", "role": "student"},
-    "parent_user": {"password": "parent123", "role": "parent"},
-}
-
-
-API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
-
 
 # -------------------------------
 # Login Form
@@ -28,7 +18,7 @@ def login_screen():
 
     if st.button("Login"):
         try:
-            response = requests.post(f"{API}/login", json={
+            response = requests.post(f"{API_URL}/login", json={
                 "username": username,
                 "password": password
             })
@@ -41,7 +31,7 @@ def login_screen():
 
                 # Optionally fetch chat history
                 try:
-                    res = requests.get(f"{API}/chat/history/", params={"session_id": st.session_state["session_id"]})
+                    res = requests.get(f"{API_URL}/chat/history/", params={"session_id": st.session_state["session_id"]})
                     if res.ok:
                         st.session_state['chat_history'] = [(item["user"], item["bot"]) for item in res.json()]
                 except:

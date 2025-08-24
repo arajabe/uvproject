@@ -1,14 +1,5 @@
-from langchain_groq.chat_models import ChatGroq
-from langchain.schema import HumanMessage, AIMessage
-from langgraph.graph import StateGraph, END
-
-import os, json, requests
-import re
 from core.model.schema import ChatState
 from llm.llm import llm
-
-
-API = "http://127.0.0.1:8000"
 
 def parent_node(state: ChatState) -> ChatState:
     print("parent_node")
@@ -21,7 +12,7 @@ def router_node(state: ChatState) -> str:
     router_value = str(role + "_" + radio_action_on_person.replace(" ", "_")).strip()
     print(router_value)
     match router_value.lower():
-        case "admin_office_staff":  
+        case "admin_office_staff" | "officestaff_office_staff":  
             return "intent_node_office_staff"
         case "admin_parent":
             return "intent_node_parent"

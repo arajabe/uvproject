@@ -3,8 +3,7 @@ from llm.llm import llm
 import os, json, requests
 import re
 from core.model.schema import ChatState, SubjectTermSplitCreate
-
-API = "http://127.0.0.1:8000"
+from config import API_URL
 
 def intent_node_subject_term_mark_split(state:ChatState) -> ChatState:
     print("intent_node_subject_term_split")
@@ -71,7 +70,7 @@ def node_subject_term_mark_split(state: ChatState) -> ChatState:
     match intent_value:
         case "create_subject_term_split":
             if all(parms_value.get(key) not in (None, "") for key in required_keys):        
-                res = requests.post(f"{API}/subjecttermsplit/", json= parms_value )
+                res = requests.post(f"{API_URL}/subjecttermsplit/", json= parms_value )
                 reply = f"Created subject term split mark {parms_value['student_id']}." if res.status_code == 200 else "Failed to create subject term split mark."
                 response_data = res.json()
                 return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : response_data}
@@ -82,7 +81,7 @@ def node_subject_term_mark_split(state: ChatState) -> ChatState:
         
         case "update_subject_term_split":
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
-                res = requests.patch(f"{API}/subjecttermsplit/student/{parms_value['student_id']}/subject/{parms_value['subject']}/term/{parms_value['term']}", 
+                res = requests.patch(f"{API_URL}/subjecttermsplit/student/{parms_value['student_id']}/subject/{parms_value['subject']}/term/{parms_value['term']}", 
                                      json = parms_value)
                 reply =  "Subject term mark is updated" if res.status_code == 200 else "Subject term mark is not updated"
                 response_data = res.json()
@@ -96,7 +95,7 @@ def node_subject_term_mark_split(state: ChatState) -> ChatState:
         case "delete_subject_term_split":
                 required_keys = ["student_id","subject","term"]
                 if all(parms_value.get(key) not in (None, "") for key in required_keys):
-                    res = requests.delete(f"{API}/subjecttermsplit/student/{parms_value['student_id']}/subject/{parms_value["subject"]}/term/{parms_value['term']}")
+                    res = requests.delete(f"{API_URL}/subjecttermsplit/student/{parms_value['student_id']}/subject/{parms_value["subject"]}/term/{parms_value['term']}")
                     reply = "subject term split mark deleted." if res.status_code == 200 else "subject term split mark is not deleted."
                     response_data = res.json()
                     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": response_data}

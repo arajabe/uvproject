@@ -2,9 +2,9 @@ import streamlit as st
 import requests
 import time
 from session_util import initialize_session_state
+from config import API_URL
 
 initialize_session_state()
-API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
 
 def displayui():
     try:
@@ -15,7 +15,7 @@ def displayui():
                 if st.session_state['mode'] in ["bulk mark posting", "bulk info and allocations"]:
                     payload = {"records": st.session_state['records']}
                     st.markdown(payload)
-                    res = requests.post(f"{API}/{on_regard}/upload", json = payload)
+                    res = requests.post(f"{API_URL}/{on_regard}/upload", json = payload)
                 else :
                     payload = {
                         "session_id": st.session_state["session_id"],
@@ -24,7 +24,7 @@ def displayui():
                         "radio_action_on_person" : st.session_state["radio_action_on_regards"]
                     }
                     st.markdown(st.session_state['mode'])
-                    res = requests.post(f"{API}/chat/", params= payload)  
+                    res = requests.post(f"{API_URL}/chat/", params= payload)  
                 data = res.json()
                 if res.status_code == 200:
                     st.success("Message sent successfully.")

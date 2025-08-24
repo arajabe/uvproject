@@ -18,6 +18,7 @@ dependencies = [
     "passlib>=1.7.4",
     "pydantic[email]>=2.11.7",
     "pymysql>=1.1.1",
+    "python-dotenv>=1.1.1",
     "requests>=2.32.4",
     "sqlalchemy>=2.0.42",
     "streamlit>=1.47.1",

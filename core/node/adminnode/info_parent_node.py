@@ -1,15 +1,9 @@
-from langchain_groq.chat_models import ChatGroq
 from langchain.schema import HumanMessage, AIMessage
-from langgraph.graph import StateGraph, END
-
-import os, json, requests
+import json, requests
 import re
 from core.model.schema import ChatState, ParentCreate
 from llm.llm import llm
-
-
-API = "http://127.0.0.1:8000"
-
+from config import API_URL
 
 # --- Node 1: Intent Analysis ---
 
@@ -68,7 +62,7 @@ def node_parent(state: ChatState) -> ChatState:
         case "create_parent" :
             required_keys = list(ParentCreate.model_fields.keys())
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
-                res = requests.post(f"{API}/parent/", json=parms_value)
+                res = requests.post(f"{API_URL}/parent/", json=parms_value)
                 reply = f"Created parent {parms_value['fathername']}." if  res.status_code == 200 else "Failed to create parent."
                 response_data = res.json()
             else:
@@ -78,7 +72,7 @@ def node_parent(state: ChatState) -> ChatState:
         
         case "delete_parent":
             if "parentid" in parms_value:
-                res = requests.delete(f"{API}/parent/{parms_value['parentid']}")
+                res = requests.delete(f"{API_URL}/parent/{parms_value['parentid']}")
                 reply = "parent deleted." if res.status_code == 200 else "parent not found."
                 response_data = res.json()
             else:
@@ -87,7 +81,7 @@ def node_parent(state: ChatState) -> ChatState:
             return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": response_data}
         case "update_parent":
             if "parentid" in parms_value:
-                res = requests.patch(f"{API}/parent/{parms_value['parentid']}", json=parms_value)
+                res = requests.patch(f"{API_URL}/parent/{parms_value['parentid']}", json=parms_value)
                 reply = "parent updated." if res.status_code == 200 else "parent not found."
                 response_data = res.json()
             else:

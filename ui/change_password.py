@@ -1,18 +1,10 @@
 import streamlit as st
-import uuid
 import requests
-import time
-from typing import TypedDict, List, Optional,Annotated
-import os, json, requests
-from pydantic import BaseModel, EmailStr,constr, StringConstraints
-import pandas
-from datetime import date
-from core.model.schema import UserCreate, UserUpdate
+import requests
 from session_util import initialize_session_state
+from config import API_URL
 
 initialize_session_state()
-
-API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
 
 def change_password():
 
@@ -41,7 +33,7 @@ def change_password():
             "new_password": new_password
         }
         try:
-            response = requests.post(f"{API}/login/change-password", json=payload)
+            response = requests.post(f"{API_URL}/login/change-password", json=payload)
 
             if response.status_code == 200:
                 st.success("✅ Password changed successfully! Please login again.")

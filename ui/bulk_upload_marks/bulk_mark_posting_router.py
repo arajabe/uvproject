@@ -6,7 +6,6 @@ from ui.bulk_upload_marks.bulk_assignement_upload import bulk_assignement
 from ui.bulk_upload_marks.bulk_term_mark_upload import bulk_term_mark
 
 initialize_session_state()
-API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint,
 
 def bulk_mark_posting_router():
         

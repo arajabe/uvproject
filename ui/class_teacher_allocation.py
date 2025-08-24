@@ -3,7 +3,6 @@ from core.model.schema import (ClassTeacherAllocationCreate, ClassTeacherAllocat
 from session_util import initialize_session_state
 
 initialize_session_state()
-API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint,
 
 def class_teacher_allocation():
         

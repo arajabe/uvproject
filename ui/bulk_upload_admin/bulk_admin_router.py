@@ -9,7 +9,6 @@ from ui.bulk_upload_admin.bulk_student_class_allocation_upload import bulk_stude
 from ui.bulk_upload_admin.bulk_class_teacher_allocation_upload import bulk_class_teacher_allocation_upload
 
 initialize_session_state()
-API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint,
 
 def bulk_admin_router():
         

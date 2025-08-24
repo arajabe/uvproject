@@ -1,15 +1,9 @@
-from langchain_groq.chat_models import ChatGroq
 from langchain.schema import HumanMessage, AIMessage
-from langgraph.graph import StateGraph, END
-
-import os, json, requests
+import json, requests
 import re
 from core.model.schema import ChatState, ClassTeacherAllocationCreate
 from llm.llm import llm
-
-
-API = "http://127.0.0.1:8000"
-
+from config import API_URL
 
 # --- Node 1: Intent Analysis ---
 def intent_class_teacher_allocation(state: ChatState) -> ChatState:
@@ -77,7 +71,7 @@ def node_class_teacher_allocation(state: ChatState) -> ChatState:
 
             required_keys = list(ClassTeacherAllocationCreate.model_fields.keys())       
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
-                res = requests.post(f"{API}/classteacherallocation/", json=parms_value)
+                res = requests.post(f"{API_URL}/classteacherallocation/", json=parms_value)
                 reply = f"Created class teacher allocation" if res.status_code == 200 else "Failed to create class teacher allocation."
                 response_data = res.json()
             else:
@@ -89,7 +83,7 @@ def node_class_teacher_allocation(state: ChatState) -> ChatState:
         case "delete_class_teacher_allocation":
 
             if "class_teacher_allocation_id" in parms_value:
-                res = requests.delete(f"{API}/classteacherallocation/{parms_value['class_teacher_allocation_id']}")
+                res = requests.delete(f"{API_URL}/classteacherallocation/{parms_value['class_teacher_allocation_id']}")
                 reply = "class teacher allocation deleted." if res.status_code == 200 else "class teacher allocation not found."
                 response_data = res.json()
             else:
@@ -100,7 +94,7 @@ def node_class_teacher_allocation(state: ChatState) -> ChatState:
         case "update_class_teacher_allocation":
 
             if "class_teacher_allocation_id" in parms_value:
-                res = requests.patch(f"{API}/classteacherallocation/{parms_value['class_teacher_allocation_id']}", json=parms_value)
+                res = requests.patch(f"{API_URL}/classteacherallocation/{parms_value['class_teacher_allocation_id']}", json=parms_value)
                 reply = "class teacher allocation updated." if res.status_code == 200 else "class teacher allocation id not found."
                 response_data = res.json()
             else:

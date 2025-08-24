@@ -12,8 +12,6 @@ from session_util import initialize_session_state
 
 initialize_session_state()
 
-API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
-
 def sidebar():
 
         # Sidebar role display
@@ -36,7 +34,8 @@ def sidebar():
         "admin": ["None", "Info Related", "Performance", "Class Teacher Allocation", "Student Allocation", "bulk info and allocations"],
         "teacher": ["None", "Mark Posting", "Performance", "bulk mark posting"],
         "student": ["None", "Performance"],
-        "parent": ["None", "Performance"]
+        "parent": ["None", "Performance"],
+        "officestaff" :["None", "Info Related"]
     }
 
     st.session_state['mode'] = st.sidebar.selectbox("Select Option", role_options.get(role, []))

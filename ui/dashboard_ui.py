@@ -12,7 +12,6 @@ from ui.bulk_upload_admin.bulk_admin_router import bulk_admin_router
 from ui.change_password import change_password
 
 initialize_session_state()
-API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
 
 def dashboard():      
 
@@ -47,6 +46,7 @@ def dashboard():
         "teacher": "teacher",
         "student": "performance",
         "parent": "performance",
+        "officestaff" : "officestaff"
     }
     
     st.session_state['roleendpointsrole'] = role_endpoints[st.session_state['logedin_role']]

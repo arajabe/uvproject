@@ -10,8 +10,7 @@ import pandas as pd
 from core.database.databsetable.tables_marks import Mark
 import pandas as pd
 import matplotlib.pyplot as plt
-
-API = "http://127.0.0.1:8000"
+from config import API_URL
 
 def intent_node_performance_initial(state : ChatState) -> ChatState:
     msg = state["messages"][-1].content
@@ -188,7 +187,7 @@ def intent_node_mark_list(state : ChatState) -> ChatState:
     print("payload")
     print(p)
    
-    r = requests.post(f"{API}/performance/", json = p)  
+    r = requests.post(f"{API_URL}/performance/", json = p)  
 
     print("requests")
     print(r.json())

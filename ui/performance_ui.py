@@ -1,14 +1,8 @@
 import streamlit as st
-import uuid
 import requests
-import time
-from typing import TypedDict, List, Optional,Annotated
-import os, json, requests
-from pydantic import BaseModel, EmailStr,constr, StringConstraints
-import pandas
-from datetime import date
-from core.model.schema import UserCreate, UserUpdate
+import requests
 from session_util import initialize_session_state
+from config import API_URL
 
 initialize_session_state()
 
@@ -69,7 +63,7 @@ def performance():
     elif st.button("Get Performance"):
             try:
                 res = requests.post(
-                    f"{API}/chat/performance",
+                    f"{API_URL}/chat/performance",
                     params={
                         "session_id": st.session_state["session_id"],
                         "message": st.session_state.msg,

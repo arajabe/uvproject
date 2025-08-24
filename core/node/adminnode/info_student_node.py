@@ -1,14 +1,10 @@
-from langchain_groq.chat_models import ChatGroq
 from langchain.schema import HumanMessage, AIMessage
-from langgraph.graph import StateGraph, END
-
-import os, json, requests
+import requests
 import re
 from core.model.schema import ChatState, StudentCreate
 from llm.llm import llm
 from core.node.utillity.utility import parse_raw_output
-
-API = "http://127.0.0.1:8000"
+from config import API_URL
 
 # --- Node 1: Intent Analysis ---
 def intent_node_student(state: ChatState) -> ChatState:
@@ -67,7 +63,7 @@ def node_student(state: ChatState) -> ChatState:
         case "create_student":
             required_keys = list(StudentCreate.model_fields.keys())
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
-                    res = requests.post(f"{API}/student/", json=parms_value)
+                    res = requests.post(f"{API_URL}/student/", json=parms_value)
                     reply = f"Created student {parms_value['name']}." if res.status_code == 200 else "Failed to create student."
                     response_data = res.json()
             else:
@@ -77,7 +73,7 @@ def node_student(state: ChatState) -> ChatState:
         
         case "delete_student":
             if "studentid" in parms_value:
-                    res = requests.delete(f"{API}/student/{parms_value['studentid']}")
+                    res = requests.delete(f"{API_URL}/student/{parms_value['studentid']}")
                     reply = "student deleted." if res.status_code == 200 else "student not found."
                     response_data = res.json()
             else:
@@ -87,7 +83,7 @@ def node_student(state: ChatState) -> ChatState:
         
         case "update_student":
                 if "studentid" in parms_value:
-                    res = requests.patch(f"{API}/student/{parms_value['studentid']}", json=parms_value)
+                    res = requests.patch(f"{API_URL}/student/{parms_value['studentid']}", json=parms_value)
                     reply = "student updated." if res.status_code == 200 else "student not found."
                     response_data = res.json()
                 else:

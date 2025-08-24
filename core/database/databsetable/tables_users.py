@@ -110,6 +110,16 @@ class UserPassword(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     __table_args__ = (
-        CheckConstraint("role IN ( 'student', 'parent', 'officestaff', 'teacher')", 
+        CheckConstraint("role IN ('student', 'parent', 'officestaff', 'teacher', 'admin')", 
                     name="user password"),)
+class UserPasswordNew(Base):
+    __tablename__ = "userpassswordnew"
+    id = Column(String(50), primary_key=True, index=True)
+    role  = Column(String(50), nullable=False)
+    password = Column(String(255), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+    __table_args__ = (
+        CheckConstraint("role IN ('student', 'parent', 'officestaff', 'teacher', 'admin')", 
+                    name="user password new"),)
 

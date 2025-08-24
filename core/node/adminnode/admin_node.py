@@ -1,14 +1,9 @@
-from langchain_groq.chat_models import ChatGroq
 from langchain.schema import HumanMessage, AIMessage
-from langgraph.graph import StateGraph, END
-
-import os, json, requests
+import json, requests
 import re
 from core.model.schema import ChatState
 from llm.llm import llm
-
-
-API = "http://127.0.0.1:8000"
+from config import API_URL
 
 def intent_node(state:ChatState) -> ChatState:
     msg = state["messages"][-1].content
@@ -280,7 +275,7 @@ def create_node_officestaff(state: ChatState) -> ChatState:
     print("create node user ")
     p = state["params"]
     if "name" in p and "email" in p:
-        r = requests.post(f"{API}/officestaff/", json=p)
+        r = requests.post(f"{API_URL}/officestaff/", json=p)
         reply = f"Created office staff {p['name']}." if r.status_code == 200 else "Failed to create office staff."
     else:
         reply = "Need name and email."
@@ -289,7 +284,7 @@ def create_node_officestaff(state: ChatState) -> ChatState:
 def create_node_student(state: ChatState) -> ChatState:
     p = state["params"]
     if "name" in p and "email" in p:
-        r = requests.post(f"{API}/student/", json=p)
+        r = requests.post(f"{API_URL}/student/", json=p)
         reply = f"Created student {p['name']}." if r.status_code == 200 else "Failed to create student."
     else:
         reply = "Need name and email."
@@ -298,7 +293,7 @@ def create_node_student(state: ChatState) -> ChatState:
 def create_node_parent(state: ChatState) -> ChatState:
     p = state["params"]
     if "name" in p and "email" in p:
-            r = requests.post(f"{API}/parent/", json=p)
+            r = requests.post(f"{API_URL}/parent/", json=p)
             reply = f"Created parent {p['name']}." if r.status_code == 200 else "Failed to create parent."
     else:
             reply = "Need name and email."
@@ -309,7 +304,7 @@ def create_node_teacher(state: ChatState) -> ChatState:
     print("i am create_node_teacher")
     print(p)
     if "name" in p and "email" in p:
-        r = requests.post(f"{API}/teacher/", json=p)
+        r = requests.post(f"{API_URL}/teacher/", json=p)
         reply = f"Created teacher {p['name']}." if r.status_code == 200 else "Failed to create teacher."
     else:
         reply = "Need name and email."
@@ -318,7 +313,7 @@ def create_node_teacher(state: ChatState) -> ChatState:
 def delete_node_officestaff(state: ChatState) -> ChatState:
     p = state["params"]
     if "officestaffid" in p:
-        r = requests.delete(f"{API}/officestaff/{p['officestaffid   ']}")
+        r = requests.delete(f"{API_URL}/officestaff/{p['officestaffid   ']}")
         reply = "office staff deleted." if r.status_code == 200 else "office staff not found."
     else:
         reply = "Need a officestaff ID to delete."
@@ -327,7 +322,7 @@ def delete_node_officestaff(state: ChatState) -> ChatState:
 def delete_node_student(state: ChatState) -> ChatState:
     p = state["params"]
     if "studentid" in p:
-        res = requests.delete(f"{API}/student/{p['studentid']}")
+        res = requests.delete(f"{API_URL}/student/{p['studentid']}")
         reply = "student deleted." if r.status_code == 200 else "student not found."
         response_data = res.json()
     else:
@@ -338,7 +333,7 @@ def delete_node_student(state: ChatState) -> ChatState:
 def delete_node_parent(state: ChatState) -> ChatState:
     p = state["params"]
     if "parentid" in p:
-        res = requests.delete(f"{API}/parent/{p['parentid']}")
+        res = requests.delete(f"{API_URL}/parent/{p['parentid']}")
         reply = "parent deleted." if res.status_code == 200 else "parent not found."
         response_data = res.json()
 
@@ -350,7 +345,7 @@ def delete_node_parent(state: ChatState) -> ChatState:
 def delete_node_teacher(state: ChatState) -> ChatState:
     p = state["params"]
     if "teacherid" in p:
-        r = requests.delete(f"{API}/teacher/{p['teacherid']}")
+        r = requests.delete(f"{API_URL}/teacher/{p['teacherid']}")
         reply = "teacher deleted." if r.status_code == 200 else "teacher not found."
     else:
         reply = "Need a teacher ID to delete."
@@ -359,7 +354,7 @@ def delete_node_teacher(state: ChatState) -> ChatState:
 def update_node_officestaff(state: ChatState) -> ChatState:
     p = state["params"]
     if "officestaffid" in p:
-        r = requests.patch(f"{API}/officestaff/{p['officestaffid']}", json=p)
+        r = requests.patch(f"{API_URL}/officestaff/{p['officestaffid']}", json=p)
         reply = "office staff updated." if r.status_code == 200 else "User not found."
     else:
         reply = "Need office staff ID to update."
@@ -368,7 +363,7 @@ def update_node_officestaff(state: ChatState) -> ChatState:
 def update_node_student(state: ChatState) -> ChatState:
     p = state["params"]
     if "studentid" in p:
-        r = requests.patch(f"{API}/student/{p['studentid']}", json=p)
+        r = requests.patch(f"{API_URL}/student/{p['studentid']}", json=p)
         reply = "student updated." if r.status_code == 200 else "student not found."
     else:
         reply = "student ID to update."
@@ -377,7 +372,7 @@ def update_node_student(state: ChatState) -> ChatState:
 def update_node_parent(state: ChatState) -> ChatState:
     p = state["params"]
     if "parentid" in p:
-        res = requests.patch(f"{API}/parent/{p['parentid']}", json=p)
+        res = requests.patch(f"{API_URL}/parent/{p['parentid']}", json=p)
         reply = "parent updated." if res.status_code == 200 else "parent not found."
         response_data = res.json()
     else:
@@ -389,7 +384,7 @@ def update_node_parent(state: ChatState) -> ChatState:
 def update_node_teacher(state: ChatState) -> ChatState:
     p = state["params"]
     if "teacherid" in p:
-        r = requests.patch(f"{API}/teacher/{p['teacherid']}", json=p)
+        r = requests.patch(f"{API_URL}/teacher/{p['teacherid']}", json=p)
         reply = "teacher updated." if r.status_code == 200 else "teacher not found."
     else:
         reply = "student ID to update."

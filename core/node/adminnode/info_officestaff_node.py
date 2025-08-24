@@ -1,14 +1,9 @@
-from langchain_groq.chat_models import ChatGroq
 from langchain.schema import HumanMessage, AIMessage
-from langgraph.graph import StateGraph, END
-
-import os, json, requests
+import json, requests
 import re
 from core.model.schema import ChatState, OfficeStaffCreate
 from llm.llm import llm
-
-
-API = "http://127.0.0.1:8000"
+from config import API_URL
 
 
 # --- Node 1: Intent Analysis ---
@@ -78,7 +73,7 @@ def node_officestaff(state: ChatState) -> ChatState:
 
             required_keys = list(OfficeStaffCreate.model_fields.keys())       
             if all(parms_value.get(key) not in (None, "") for key in required_keys):
-                res = requests.post(f"{API}/officestaff/", json=parms_value)
+                res = requests.post(f"{API_URL}/officestaff/", json=parms_value)
                 reply = f"Created office staff {parms_value['name']}." if res.status_code == 200 else "Failed to create office staff."
                 response_data = res.json()
             else:
@@ -90,7 +85,7 @@ def node_officestaff(state: ChatState) -> ChatState:
         case "delete_officestaff":
 
             if "officestaffid" in parms_value:
-                res = requests.delete(f"{API}/officestaff/{parms_value['officestaffid']}")
+                res = requests.delete(f"{API_URL}/officestaff/{parms_value['officestaffid']}")
                 reply = "office staff deleted." if res.status_code == 200 else "office staff not found."
                 response_data = res.json()
             else:
@@ -101,7 +96,7 @@ def node_officestaff(state: ChatState) -> ChatState:
         case "update_officestaff":
 
             if "officestaffid" in parms_value:
-                res = requests.patch(f"{API}/officestaff/{parms_value['officestaffid']}", json=parms_value)
+                res = requests.patch(f"{API_URL}/officestaff/{parms_value['officestaffid']}", json=parms_value)
                 reply = "office staff updated." if res.status_code == 200 else "Office staff not found."
                 response_data = res.json()
             else:
