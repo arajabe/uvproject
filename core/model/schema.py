@@ -229,9 +229,11 @@ class ClassTeacherAllocationUpdate(BaseModel):
     class_teacher_allocation_id : str
     reason : str
 
-class AuditDelete(BaseModel):
-    id : str
-    reason : str
+class AuditTableSchema(BaseModel):
+    status : str
+    table_field : str
+    old_value : str
+    new_value : str
 
 class BulkSubjectTermSplit(BaseModel):
     records: List[SubjectTermSplitCreate]

@@ -10,6 +10,7 @@ from routers.marks import assignement, mark, subjecttermsplit
 from routers.bulkallocations import bulk_class_teacher_allocations,bulk_student_class_allocations
 from routers.bulkinformations import bulk_parent,bulk_officestaff,bulk_teacher,bulk_student
 from routers.infochat import info_chat
+from core.middleware.audit_middleware import AuditMiddleware
 
 
 
@@ -32,6 +33,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# app.add_middleware(AuditMiddleware)
+
 app.include_router(users.router)
 app.include_router(chat.router)
 app.include_router(student.router)

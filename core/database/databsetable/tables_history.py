@@ -1,9 +1,5 @@
 from datetime import datetime
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy import CheckConstraint,UniqueConstraint
-from sqlalchemy import Computed
-from sqlalchemy import Column, Date
+from sqlalchemy import Column
 from core.database.databse import Base
 from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP, func, Text, DateTime
 

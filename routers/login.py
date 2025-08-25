@@ -5,12 +5,15 @@ from sqlalchemy.orm import Session
 from core.database.databsetable.tables_users import UserPasswordNew
 from core.security.hashing import hash_password, verify_password 
 from core.model.schema import PasswordChangeRequest
+from core.utils.audit_events import set_audit_user
+
 
 router = APIRouter(prefix="/login", tags=["login"])
 
 @router.post("/")
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(UserPasswordNew).filter(UserPasswordNew.id == data.username).first()
+    set_audit_user(data.username)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 

@@ -5,6 +5,7 @@ from core.database.databse import get_db
 from core.database.databsetable.tables_allocations import ClassTeacherAllocation
 from sqlalchemy.exc import SQLAlchemyError
 from core.database.databsetable.tables_users import Teacher
+from core.database.databsetable.tables_audit import Audit
 
 
 router = APIRouter(prefix="/classteacherallocation", tags=["classteacherallocation"])
@@ -13,6 +14,7 @@ router = APIRouter(prefix="/classteacherallocation", tags=["classteacherallocati
 def create_class_teacher_allocation(class_teacher_allocation: ClassTeacherAllocationCreate, db: Session = Depends(get_db)):
     new_id = generate_class_teacher_allocation_id(db)
     tea_name = db.query(Teacher.name).filter(Teacher.id == class_teacher_allocation.teacher_id).first()
+    db_audit = db.query(Audit)
     if tea_name:
         db_class_teacher_allocation = ClassTeacherAllocation(**class_teacher_allocation.dict(), id = new_id, reason = "new entry")
         db.add(db_class_teacher_allocation)
