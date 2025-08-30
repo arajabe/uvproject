@@ -4,7 +4,7 @@ from core.model.schema import ParentCreate, ParentUpdate
 from core.database.databse import get_db
 from core.database.databsetable.tables_users import Parent,Student
 from sqlalchemy.exc import SQLAlchemyError
-from core.database.databsetable.tables_users import UserPassword
+from core.database.databsetable.tables_users import UserPasswordNew
 from core.model.schema import Password
 from core.security.hashing import hash_password, verify_password 
 
@@ -22,7 +22,7 @@ def create_parent(parent: ParentCreate, db: Session = Depends(get_db)):
         # 🔑 also create password record
         default_pw = "welcome123"  # <-- or student.dateofbirth, or ask in UI
         hashed_pw = hash_password(default_pw)
-        db_userpass = UserPassword(id=db_parent.id, role='parent', password=hashed_pw)
+        db_userpass = UserPasswordNew(id=db_parent.id, role='parent', password=hashed_pw)
         db.add(db_userpass)
         db.commit()
         return {"status": "parent created", "parent": db_parent.id}

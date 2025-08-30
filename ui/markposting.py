@@ -2,7 +2,7 @@ import streamlit as st
 from core.model.schema import ( MarkCreate, MarkDelete,
                                AssignementCreate, AssignementUpdate, AssignementDelete, 
                                SubjectTermSplitCreate, SubjectTermSplitDelete)
-from session_util import initialize_session_state
+from ui.session import initialize_session_state
 
 initialize_session_state()
 
@@ -13,7 +13,7 @@ def markposting():
         with col1:
             st.session_state["radio_action"] = st.columns(1)[0].radio(
                 "Choose action",
-                ["none","create", "update", "delete", "view"],
+                ["create", "update", "delete", "view"],
                 horizontal=True
             )
         
@@ -147,17 +147,17 @@ def markposting():
                          if st.session_state.get(field_name, "").strip() != ""]
             
         if st.session_state["radio_action"] in ["create", "update", "delete"]:                
-            st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "} {""}{st.session_state["radio_action_on_regards"]}{""} details as follows: {msg_parts}"
+            st.session_state['usermessage'] = f"{st.session_state['radio_action']} {st.session_state['radio_action_on_regards']} details as follows: {msg_parts}"
 
             st.markdown(st.session_state['usermessage'])
 
         elif st.session_state["radio_action"] in ["view"]:
             st.session_state["radio_action_on_regards"] = "information"
-            user_message = f"{st.text_input("what is you question?", "")}"
+            user_message = f"{st.text_input('what is you question?', '')}"
             if any(word in user_message.lower() for word in not_required_words):
                 st.session_state['usermessage'] = ""
                 st.markdown(st.session_state['usermessage'])
             else:
-                st.session_state['usermessage'] = f"select {st.session_state["selected_field"]} from table {st.session_state["table"]} where {user_message}"
+                st.session_state['usermessage'] = f"select {st.session_state['selected_field']} from table {st.session_state['table']} where {user_message}"
                 st.markdown(st.session_state['usermessage'])
         

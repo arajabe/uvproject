@@ -34,15 +34,13 @@ Message: {msg}
 Intent:
 """.strip()
     result = llm.invoke([HumanMessage(content=prompt)])
-    print("intent_node_performance_initial")
-    print(result.content)
     # routing logic
     
     return{** state, "messages":state["messages"], "intent": result.content}
 
 def router_node(state: ChatState) -> str:
     x = str(state["intent"]).strip().lower()
-    print("router node")
+
     match x:
         case "mark_list" : return "intent_node_mark_list"
         case "performance": return "intent_node_performance"
@@ -61,15 +59,11 @@ def intent_node_performance(state: ChatState) -> ChatState:
             """
     result = llm.invoke([HumanMessage(content=prompt)])
 
-    print(result)
     raw_output = result.content.strip()
 
     # Clean any accidental code block markers (like ```json ... ```)
     raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip() 
-    
 
-    print("raw output")
-    print(raw_output)
     parsed = json.loads(raw_output)
 
     student_id = parsed.get("params", {}).get("student_id")
@@ -167,31 +161,20 @@ def intent_node_mark_list(state : ChatState) -> ChatState:
         {{"params": {{"student_id": 25, "subject": [maths,science], "term":[1,2]. "other":[rank,total]}}}}  
 """
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
-    print(ai_resp)
 
     raw_output = ai_resp.content.strip()
 
     # Clean any accidental code block markers (like ```json ... ```)
     raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip() 
-    
 
-    print("raw output")
-    print(raw_output)
     p = json.loads(raw_output)
 
     # Only include non-None fields in PATCH
     payload = {key: p[key] for key in [
             "term", "student_id", "subject"
         ] if key in p and p[key] is not None}
-    
-    print("payload")
-    print(p)
-   
+
     r = requests.post(f"{API_URL}/performance/", json = p)  
-
-    print("requests")
-    print(r.json())
-
 
     return {"messages" : state["messages"] + [AIMessage(content= "i am intent_node_mark_list")], "response" : r.json()}
 
@@ -222,7 +205,6 @@ def intent_chat_node_old(state : ChatState) -> ChatState:
     # Save final table with rankings
     df.to_csv("student_performance_ranked.csv", index=False)
 
-    print("term_summary")
     # print(df.to_csv("student_performance_ranked.csv", index=False)
    # print(df[df["term"] == 1][["student_id", "term", "total", "rank_total"]].sort_values(["term", "rank_total"]))
     df = df[["student_id", "term", "total", "rank_total"]].sort_values(["term", "rank_total"])
@@ -243,19 +225,14 @@ def intent_chat_node(state : PerformanceState) -> PerformanceState:
     db = next(get_db()) 
     table = state["exam"].strip().lower()
     df = pd.read_sql(f"SELECT * FROM {table}", db.bind)
-    print("data frame")
-    print(state["performance_request"].lower())
     option = state["performance_request"].lower()
     result = performance_analysis_overall(df, option)
-    print("result")
-    print(result)
     result_md = result.to_markdown(index=False)
 
     return {"messages" : state["messages"] + [AIMessage(content= "performance on total")], "response_pd" : result_md}
 
 def performance_analysis_overall(df: pd.DataFrame, option: str):
-    print("performance_analysis option")
-    print(option)
+
     if option == "overall_total":
         # Average total per student
         return df.groupby("student_id")["total"].mean().reset_index(name="avg_total")
@@ -289,7 +266,7 @@ def performance_analysis_overall(df: pd.DataFrame, option: str):
 #df = pd.DataFrame(data)
 
 def performance_analysis_individual(df: pd.DataFrame, option: str, student_id: str):
-    print("option")
+
     if option == "total":
         # Average total per student
         return df.groupby("student_id")["total"].mean().reset_index(name="avg_total")

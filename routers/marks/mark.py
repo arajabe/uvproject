@@ -58,7 +58,6 @@ def update_student_mark(student_id: str, term: int, mark: MarkUpdate, db: Sessio
 @router.delete("/{student_id}/{term}")
 def delete_student_mark(student_id: str, term : int, db: Session = Depends(get_db)):
     db_mark = db.query(Mark).filter(Mark.student_id == student_id, Mark.term == term).first()
-    print("db_mark", db_mark)
     if not db_mark:
         raise HTTPException(404, "student not found")
     try:
@@ -74,7 +73,6 @@ def delete_student_mark(student_id: str, term : int, db: Session = Depends(get_d
 @router.get("/{student_id}/{term}")
 def delete_student_mark(student_id: str, term : int, db: Session = Depends(get_db)):
     db_mark = db.query(Mark).filter(Mark.student_id == student_id, Mark.term == term).first()
-    print("db_mark", db_mark)
     if not db_mark:
         raise HTTPException(404, "student not found")
     get_mark = db.get(db_mark)

@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import requests
-from session_util import initialize_session_state
+from ui.session import initialize_session_state
 from config import API_URL
 
 initialize_session_state()

@@ -7,11 +7,9 @@ from config import API_URL
 
 # --- Node 1: Intent Analysis ---
 def intent_class_teacher_allocation(state: ChatState) -> ChatState:
-    print("intent_class_teacher_allocation")
     user_msg = state["messages"][-1].content
     role = state["role"]
     radio_action_on_person = state["radio_action_on_person"]
-    print(role+ "_" + radio_action_on_person.replace(" ", "_"))
     prompt = f"""
 
         You are AI assistant, clarify the intent of {user_msg} and work with testdb database.
@@ -48,7 +46,6 @@ def intent_class_teacher_allocation(state: ChatState) -> ChatState:
 
     try:
         parsed = json.loads(raw_output)
-        print(parsed)
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
@@ -57,12 +54,7 @@ def intent_class_teacher_allocation(state: ChatState) -> ChatState:
 # --- Action Nodes (call FastAPI) ---
 def node_class_teacher_allocation(state: ChatState) -> ChatState:
 
-    print("create node class_teacher_allocation")
-
     intent_value = str(state["intent"]).strip().lower()
-
-    print(intent_value)
-
     parms_value = state["params"]
 
     match intent_value:        

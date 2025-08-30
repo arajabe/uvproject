@@ -29,7 +29,6 @@ def create_bulk_student_class_allocation( bulk_data : BulkStudentClassAllocation
                 continue
             
             new_id = generate_student_class_allocation_id(db)
-            print(new_id)
             
             db_student_class_allocation = StudentClassAllocation(
                 id=new_id ,

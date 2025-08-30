@@ -1,6 +1,6 @@
 import streamlit as st
 from core.model.schema import UserCreate, UserUpdate, ParentCreate, OfficeStaffCreate, OfficeStaffUpdate, ParentUpdate, UserDelete, StudentCreate, StudentUpdate, TeacherCreate, TeacherUpdate
-from session_util import initialize_session_state
+from ui.session import initialize_session_state
 
 initialize_session_state()
 
@@ -19,7 +19,7 @@ def inforelated():
             with col2:
                 st.session_state["radio_action_on_regards"] = st.radio(
                 "Choose person",
-                ["none","student", "parent", "teacher", "office staff"], horizontal=True)
+                ["student", "parent", "teacher", "office staff"], horizontal=True)
         
         student_fields = ["id","name","fathername","mothername","dateofbirth","address","city","pincode","contactnumber",
                             "email", "aadhar","reason","parentid","parentrelation"]
@@ -143,16 +143,15 @@ def inforelated():
             msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in userdelete]
 
         if (st.session_state["radio_action"] in ["create", "update", "delete"]):
-            st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "}{st.session_state["radio_action_on_regards"]} details as follows: {msg_parts}"
+            st.session_state['usermessage'] = f"{st.session_state['radio_action']} {st.session_state['radio_action_on_regards']} details as follows: {msg_parts}"
         if st.session_state["radio_action"] in ["view"]:
             st.session_state["radio_action_on_regards"] = "information"
-            user_message = f"{st.text_input("what is you question?", "")}"
+            user_message = f"{st.text_input('Enter ID as example student STUD0001 and all or select fields', '')}"
             if any(word in user_message.lower() for word in not_required_words):
                 st.session_state['usermessage'] = ""
-                st.markdown(st.session_state['usermessage'])
             else:
-                st.session_state['usermessage'] = f"select {st.session_state["selected_field"]} from table {st.session_state["table"]} where {user_message}"
-                st.markdown(st.session_state['usermessage'])   
+                st.session_state['usermessage'] = f"select {st.session_state['selected_field']} from table {st.session_state['table']} where {user_message}"
+
         
 
         

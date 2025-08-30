@@ -28,7 +28,6 @@ def create_bulk_subject_term_split(bulk_data : BulkSubjectTermSplit, db: Session
                 continue
             
             new_id = generate_subject_term_split_id(db)
-            print(new_id)
             
             db_subject_term_split = SubjectTermSplit(
                 id=new_id ,

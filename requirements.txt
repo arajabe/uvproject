@@ -9,7 +9,7 @@ streamlit
 requests
 langchain_groq
 tabulate
-streamlit==1.24.1
+streamlit>=1.30.0
 langchain
 langchain_community
 langchain_experimental
@@ -17,3 +17,17 @@ matplotlib
 passlib
 bcrypt
 python-dotenv
+pydantic
+email-validator
+cryptography
+pytesseract==0.3.13
+streamlit_autorefresh
+tesseract
+opencv-python
+Pillow
+opencv-contrib-python
+opencv-python-headless
+rapidfuzz
+fuzzywuzzy
+easyocr
+psycopg2

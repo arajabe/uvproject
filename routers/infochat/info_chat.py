@@ -1,22 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from core.model.schema import AssignementCreate, AssignementUpdate
-from core.database.databse import get_db
-from core.database.databsetable.tables_users import Student
-from core.database.databsetable.tables_marks import Mark, Assignement
-from core.database.databsetable.tables_allocations import StudentClassAllocation
+from fastapi import APIRouter
 from sqlalchemy.exc import SQLAlchemyError
-from langchain_experimental.sql import SQLDatabaseChain
 from llm.llm import llm
 from langchain_community.utilities.sql_database import SQLDatabase
-from sqlalchemy import create_engine,MetaData
+from sqlalchemy import create_engine
 from core.database.databse import get_db
-from langchain.agents import create_sql_agent
-from langchain.agents.agent_toolkits import SQLDatabaseToolkit
+from langchain_community.agent_toolkits.sql.base import create_sql_agent
+from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
+from config import DATABASE_URL
+from langchain.agents import AgentExecutor
 
 router = APIRouter(prefix="/info_chat", tags=["info chat"])
 
-DATABASE_URL = "mysql+pymysql://root:Nannilam123@127.0.0.1/testdb"
+# DATABASE_URL = "mysql+pymysql://root:Nannilam123@127.0.0.1/testdb"
 engine = create_engine(DATABASE_URL, echo=True, future=True)
 sql_db = SQLDatabase(engine)
 
@@ -39,21 +34,33 @@ and return only the result.
 
 """
 toolkit = SQLDatabaseToolkit(db=sql_db, llm=llm)
-agent = create_sql_agent(llm=llm, toolkit=toolkit, verbose=True)
+agent: AgentExecutor = create_sql_agent(llm=llm, toolkit=toolkit, verbose=True)
 
 @router.post("/get")
 def base_info_chat(message: str):
-    try:
-        
+    max_attempts = 2
+    attempt = 0
+    last_response = None
 
-        #Inject rule-based system message into the query
-        full_prompt = f"{BASE_PROMPT}\n\nUser: {message}\nAssistant:"
-        res = agent.run(full_prompt )
+    full_prompt = f"{BASE_PROMPT}\n\nUser: {message}\nAssistant:"
 
-        return {"response": res}
+    while attempt < max_attempts:
+        try:
+            res = agent.run(full_prompt)
+            logger.info(f"Agent success on attempt {attempt + 1}: {res}")
+            return {"response": res}
+        except Exception as e:
+            # Only handle LLM output parsing errors
+            if "Could not parse LLM output" in str(e):
+                attempt += 1
+                last_response = f"Attempt {attempt} failed: {str(e)}"
+                logger.warning(f"Parsing error on attempt {attempt}: {str(e)}")
+            else:
+                # Other errors, immediately return
+                logger.error(f"Unexpected error: {str(e)}")
+                return {"response": f"Unexpected error: {str(e)}"}
 
-    except SQLAlchemyError as e:
-        return {"response": f"Database error: {str(e)}"}
-    except Exception as e:
-        return {"response": f"Unexpected error: {str(e)}"}
+    # After 2 attempts, return last error
+    logger.error(f"Agent failed after {max_attempts} attempts: {last_response}")
+    return {"response": last_response}
     

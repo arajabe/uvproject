@@ -29,8 +29,7 @@ def create_bulk_class_teacher_allocation( bulk_data : BulkClassTeacherAllocation
                 continue
             
             new_id = generate_class_teacher_allocation_id(db)
-            print(new_id)
-            
+
             db_class_teacher_allocation = ClassTeacherAllocation(
                 id=new_id ,
                 teacher_id = record.teacher_id,

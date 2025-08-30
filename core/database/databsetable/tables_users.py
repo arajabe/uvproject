@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, String, TIMESTAMP, func
+from sqlalchemy import create_engine, String, TIMESTAMP, func, Boolean
 from sqlalchemy import Column,ForeignKey,CheckConstraint
 from core.database.databse import Base
 from sqlalchemy.orm import relationship
@@ -16,7 +16,7 @@ class User(Base):
     pincode = Column(String(6), nullable=False)
     contactnumber = Column(String(10), nullable=False)
     email = Column(String(50), nullable=False)
-    aadhar = Column(String(17), nullable=False)
+    aadhar = Column(String(17), primary_key=True, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
 class Student(Base):
@@ -31,7 +31,7 @@ class Student(Base):
     pincode = Column(String(6), nullable=False)
     contactnumber = Column(String(10), nullable=False)
     email = Column(String(50), nullable=False)
-    aadhar = Column(String(17), nullable=False)
+    aadhar = Column(String(17), primary_key=True, nullable=False)
     reason = Column(String(50), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     parentid = Column(
@@ -56,7 +56,7 @@ class Teacher(Base):
     pincode = Column(String(6), nullable=False)
     contactnumber = Column(String(10), nullable=False)
     email = Column(String(50), nullable=False)
-    aadhar = Column(String(17), nullable=False)
+    aadhar = Column(String(17), primary_key=True, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     reason = Column(String(50), nullable=False)
     graduatedegree = Column(String(50), nullable=False) 
@@ -77,7 +77,7 @@ class Parent(Base):
     contactnumber = Column(String(10), nullable=False)
     alternate_contactnumber = Column(String(10), nullable=False)
     email = Column(String(50), nullable=False)
-    aadhar = Column(String(17), nullable=False)    
+    aadhar = Column(String(17), primary_key=True, nullable=False)    
     occupation = Column(String(50), nullable=False)
     role = Column(String(15), nullable = False)
     reason = Column(String(50), nullable=False)
@@ -95,7 +95,7 @@ class OfficeStaff(Base):
     pincode = Column(String(6), nullable=False)
     contactnumber = Column(String(10), nullable=False)
     email = Column(String(50), nullable=False)
-    aadhar = Column(String(17), nullable=False)
+    aadhar = Column(String(17), primary_key=True, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     reason = Column(String(15), nullable = False)
     role = Column(String(15), nullable = False)
@@ -107,6 +107,7 @@ class UserPassword(Base):
     id = Column(String(50), primary_key=True, index=True)
     role  = Column(String(50), nullable=False)
     password = Column(String(255), nullable=False)
+    is_logged_in = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     __table_args__ = (
@@ -117,6 +118,7 @@ class UserPasswordNew(Base):
     id = Column(String(50), primary_key=True, index=True)
     role  = Column(String(50), nullable=False)
     password = Column(String(255), nullable=False)
+    is_logged_in = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     __table_args__ = (

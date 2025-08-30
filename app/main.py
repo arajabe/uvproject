@@ -10,8 +10,13 @@ from routers.marks import assignement, mark, subjecttermsplit
 from routers.bulkallocations import bulk_class_teacher_allocations,bulk_student_class_allocations
 from routers.bulkinformations import bulk_parent,bulk_officestaff,bulk_teacher,bulk_student
 from routers.infochat import info_chat
-from core.middleware.audit_middleware import AuditMiddleware
+from routers.logging_config import setup_logger
+import logging
+import uvicorn
 
+# Setup logging for backend
+#logger = setup_logger("backend")
+logger = logging.getLogger("backend")
 
 
 # Create tables
@@ -61,6 +66,14 @@ app.include_router(bulk_student.router)
 app.include_router(info_chat.router)
 app.include_router(password.router)
 
+
+
+
 @app.get("/")
 def root():
+    logger.info("Root endpoint hit")
     return {"status": "running"}
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("🚀 Backend started and logging initialized!")

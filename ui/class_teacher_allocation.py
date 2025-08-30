@@ -1,6 +1,6 @@
 import streamlit as st
-from core.model.schema import (ClassTeacherAllocationCreate, ClassTeacherAllocationUpdate, AuditDelete)
-from session_util import initialize_session_state
+from core.model.schema import (ClassTeacherAllocationCreate, ClassTeacherAllocationUpdate)
+from ui.session import initialize_session_state
 
 initialize_session_state()
 
@@ -19,7 +19,7 @@ def class_teacher_allocation():
             with col2:
                 st.session_state["radio_action_on_regards"] = st.radio(
                 "Choose the  any one option",
-                ["none", "Class Teacher Allocation"],
+                ["Class Teacher Allocation"],
                 horizontal=True
             )
         elif st.session_state["radio_action"] in ["view"]:
@@ -41,7 +41,6 @@ def class_teacher_allocation():
 
         class_teacher_allocation_create = ClassTeacherAllocationCreate.__annotations__
         class_teacher_allocation_update = ClassTeacherAllocationUpdate.__annotations__
-        audit_table_delete = AuditDelete.__annotations__
 
         if st.session_state["radio_action"] == "create" and st.session_state["radio_action_on_regards"] == "Class Teacher Allocation":      
             for field_name in class_teacher_allocation_create:
@@ -56,22 +55,16 @@ def class_teacher_allocation():
             
             msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in class_teacher_allocation_update
                          if st.session_state.get(field_name, "").strip() != ""]
-            
-        elif st.session_state["radio_action"] == "delete" and st.session_state["radio_action_on_regards"] == "Class Teacher Allocation":      
-            for field_name in audit_table_delete:
-                st.session_state[field_name] = st.text_input(field_name.capitalize())
-            
-            msg_parts = [f"{field_name}:{st.session_state[field_name]}" for field_name in audit_table_delete
-                         if st.session_state.get(field_name, "").strip() != ""]
+
         if st.session_state["radio_action"] in ["create", "update", "delete"]:
-            st.session_state['usermessage'] = f"{st.session_state["radio_action"]}{" "} {""}{st.session_state["radio_action_on_regards"]}{""} details as follows: {msg_parts}"
+            st.session_state['usermessage'] = f"{st.session_state['radio_action']} {st.session_state['radio_action_on_regards']} details as follows: {msg_parts}"
             st.markdown(st.session_state['usermessage'])
         if st.session_state["radio_action"] in ["view"]:
             st.session_state["radio_action_on_regards"] = "information"
-            user_message = f"{st.text_input("what is you question?", "")}"
+            user_message = f"{st.text_input('what is you question?', '')}"
             if any(word in user_message.lower() for word in not_required_words):
                 st.session_state['usermessage'] = ""
                 st.markdown(st.session_state['usermessage'])
             else:
-                st.session_state['usermessage'] = f"select {st.session_state["selected_field"]} from table classteacherallocation where {user_message}"
+                st.session_state['usermessage'] = f"select {st.session_state['selected_field']} from table classteacherallocation where {user_message}"
                 st.markdown(st.session_state['usermessage'])

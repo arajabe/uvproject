@@ -7,12 +7,11 @@ from config import API_URL
 
 # --- Node 1: Intent Analysis ---
 def intent_node_teacher(state: ChatState) -> ChatState:
- 
-    print("i am intent node teacher")
+
     user_msg = state["messages"][-1].content
     role = state["role"]
     radio_action_on_person = state["radio_action_on_person"]
-    print(role, "   ", radio_action_on_person)
+
     prompt = f"""
 
         You are AI assistant, clarify the intent of {user_msg} and work with testdb database.
@@ -38,11 +37,7 @@ def intent_node_teacher(state: ChatState) -> ChatState:
         {{"intent": "delete_teacher", "params": {{"teacherid": "10", reason="transfer"}}}}
 
         """
-    print("before create_node invoke")
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
-   
-    print("after create_node invoke")
-
     raw_output = ai_resp.content.strip()
 
     # Clean any accidental code block markers (like ```json ... ```)
@@ -50,7 +45,6 @@ def intent_node_teacher(state: ChatState) -> ChatState:
 
     try:
         parsed = json.loads(raw_output)
-        print(parsed)
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}

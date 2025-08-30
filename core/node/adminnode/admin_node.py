@@ -27,7 +27,6 @@ def intent_node(state:ChatState) -> ChatState:
 
     # Clean any accidental code block markers (like ```json ... ```)
     raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()    
-    print(raw_output)
     try:
         parsed = json.loads(raw_output)
     except:
@@ -36,21 +35,17 @@ def intent_node(state:ChatState) -> ChatState:
 
 def router_node(state: ChatState) -> str:
     x = str(state["intent"]).strip().lower()
-    print("router node")
-    print(x)
     match x:
         case "officestaff": return "intent_node_officestaff"
         case "student": return "intent_node_student"
         case "parent": return "intent_node_parent"
         case "teacher": return "intent_node_teacher"
         case _: 
-            print(" hello chat user case")
             return "chat_node"
     
     
 def intent_node_teacher(state: ChatState) -> ChatState:
  
-    print("i am intent node teacher")
     user_msg = state["messages"][-1].content
     prompt = f"""
 
@@ -77,10 +72,7 @@ def intent_node_teacher(state: ChatState) -> ChatState:
         {{"intent": "delete_teacher", "params": {{"teacherid": "10", reason="transfer"}}}}
 
         """
-    print("before create_node invoke")
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
-   
-    print("after create_node invoke")
 
     raw_output = ai_resp.content.strip()
 
@@ -89,14 +81,14 @@ def intent_node_teacher(state: ChatState) -> ChatState:
 
     try:
         parsed = json.loads(raw_output)
-        print(parsed)
+    
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
 
 # --- Node 1: Intent Analysis ---
 def intent_node_officestaff(state: ChatState) -> ChatState:
-    print("i am intent node user")
+
     user_msg = state["messages"][-1].content
     prompt = f"""
 
@@ -125,10 +117,7 @@ def intent_node_officestaff(state: ChatState) -> ChatState:
         {{"intent": "create_officestaff", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
         {{"intent": "create_officestaff", "params": {{"name": "Bob", "email": "bob@x.com", "parentid": 10}}}}
         """
-    print("before create_node invoke")
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
-   
-    print("after create_node invoke")
 
     raw_output = ai_resp.content.strip()
 
@@ -137,14 +126,13 @@ def intent_node_officestaff(state: ChatState) -> ChatState:
 
     try:
         parsed = json.loads(raw_output)
-        print(parsed)
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
 
 # --- Node 1: Intent Analysis ---
 def intent_node_student(state: ChatState) -> ChatState:
-    print("intent_node_student")
+
     user_msg = state["messages"][-1].content
     create_prompt = f"""
 
@@ -167,27 +155,22 @@ def intent_node_student(state: ChatState) -> ChatState:
         {{"intent": "create_student", "params": {{"name": "Bob", "email": "bob@x.com", "studentid": 10}}}}
         {{"intent": "delete_student", "params": {{"studentid": 10, reason: "transfer"}}}}
         """
-    print("before create_node invoke")
+
     ai_resp = llm.invoke([HumanMessage(content=create_prompt)])
    
-    print("after create_node invoke")
 
     raw_output = ai_resp.content.strip()
 
     # Clean any accidental code block markers (like ```json ... ```)
     raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()   
-    print("raw_output") 
-    print(raw_output)
 
     try:
         parsed = json.loads(raw_output)
-        print(parsed)
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
 
 def intent_node_parent(state: ChatState) -> ChatState:
-    print("intent_node_parent")
     user_msg = state["messages"][-1].content
     prompt = f"""
 
@@ -209,21 +192,17 @@ def intent_node_parent(state: ChatState) -> ChatState:
         {{"intent": "create_parent", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
         {{"intent": "create_parent", "params": {{"name": "Bob", "email": none "parentid": "10}}}}
         """
-    print("before create_node invoke")
+    
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
-   
-    print("after create_node invoke")
 
     raw_output = ai_resp.content.strip()
 
     # Clean any accidental code block markers (like ```json ... ```)
     raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()   
-    print("raw_output") 
-    print(raw_output)
 
     try:
         parsed = json.loads(raw_output)
-        print(parsed)
+
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
@@ -232,7 +211,7 @@ def intent_node_parent(state: ChatState) -> ChatState:
 
 # --- Node 2: Router ---
 def router_node_officestaff(state: ChatState) -> str:
-    print("router_node_user")
+    
     x = str(state["intent"]).strip().lower()
     match x:
         case "create_officestaff": return "create_node_officestaff"
@@ -250,7 +229,6 @@ def router_node_student(state: ChatState) -> str:
 
 
 def router_node_parent(state: ChatState) -> str:
-    print("router node parent")
     x = str(state["intent"]).strip().lower()
     match x:
         case "create_parent": return "create_node_parent"
@@ -261,7 +239,6 @@ def router_node_parent(state: ChatState) -> str:
 
 def router_node_teacher(state: ChatState) -> str:
 
-    print("routher node teacher")
     x = str(state["intent"]).strip().lower()
     match x:
         case "create_teacher": return "create_node_teacher"
@@ -272,7 +249,6 @@ def router_node_teacher(state: ChatState) -> str:
 # --- Action Nodes (call FastAPI) ---
 def create_node_officestaff(state: ChatState) -> ChatState:
 
-    print("create node user ")
     p = state["params"]
     if "name" in p and "email" in p:
         r = requests.post(f"{API_URL}/officestaff/", json=p)
@@ -301,8 +277,6 @@ def create_node_parent(state: ChatState) -> ChatState:
 
 def create_node_teacher(state: ChatState) -> ChatState:
     p = state["params"]
-    print("i am create_node_teacher")
-    print(p)
     if "name" in p and "email" in p:
         r = requests.post(f"{API_URL}/teacher/", json=p)
         reply = f"Created teacher {p['name']}." if r.status_code == 200 else "Failed to create teacher."
@@ -392,6 +366,5 @@ def update_node_teacher(state: ChatState) -> ChatState:
 
 def chat_node(state: ChatState) -> ChatState:
     ai_reply = llm.invoke(state["messages"]).content
-    print("chat node")
     #return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": AIMessage(content=ai_reply)}
     return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": {"hello":"This is irrelevant chat. we will assist you with student performance"}}

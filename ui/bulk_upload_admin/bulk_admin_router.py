@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from session_util import initialize_session_state
+from ui.session import initialize_session_state
 from ui.bulk_upload_admin.bulk_student_info_upload import bulk_student_info_upload
 from ui.bulk_upload_admin.bulk_parent_info_upload import bulk_parent_info_upload
 from ui.bulk_upload_admin.bulk_officestaff_info_upload import bulk_officestaff_info_upload

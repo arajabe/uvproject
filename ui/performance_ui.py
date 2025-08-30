@@ -1,12 +1,10 @@
 import streamlit as st
 import requests
 import requests
-from session_util import initialize_session_state
+from ui.session import initialize_session_state
 from config import API_URL
 
 initialize_session_state()
-
-API = "http://127.0.0.1:8000"  # Adjust to your FastAPI endpoint
 
 def performance():
 
@@ -18,7 +16,7 @@ def performance():
         if any(word in msg.lower() for word in ["create", "update", "delete","password","adition", "modification", "deletion"]):
             return False
         return True
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
 
     # Step 1: Exam selection
     with col1:
@@ -35,7 +33,7 @@ def performance():
         # Only for admin/teacher → choose overall/individual
         if role in ["admin", "teacher"]:
             with col2:
-                rodio_bt = st.radio("Select any one", ["overall", "individual"], horizontal=True)
+                rodio_bt = st.radio("Select any one", ["overall", "individual"], horizontal= False)
 
         # Step 3: Action options
         with col3:

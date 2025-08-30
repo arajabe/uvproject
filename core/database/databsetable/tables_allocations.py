@@ -25,6 +25,7 @@ class StudentClassAllocation(Base):
     student_class = Column(Integer, nullable=False)
     class_section = Column(String(50), nullable=False)
     reason = Column(String(50), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
 
     student = relationship("Student", backref="student class allocation")
 
@@ -40,6 +41,7 @@ class ClassTeacherAllocation(Base):
     teacher_class = Column(Integer, CheckConstraint("teacher_class BETWEEN 1 AND 12"), nullable=False)
     class_section = Column(Enum(ClassSectionEnum), nullable=False)
     reason = Column(String(50), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
 
     teacher = relationship("Teacher", backref="classteacherallocation")
 

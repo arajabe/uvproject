@@ -56,7 +56,6 @@ def intent_node(state:ChatState) -> ChatState:
 
     # Clean any accidental code block markers (like ```json ... ```)
     raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()    
-    print(raw_output)
     try:
         parsed = json.loads(raw_output)
     except:
@@ -65,15 +64,12 @@ def intent_node(state:ChatState) -> ChatState:
 
 def router_node(state: ChatState) -> str:
     x = str(state["intent"]).strip().lower()
-    print("router node")
-    print(x)
     match x:
         case "term mark": return "intent_node_mark"
         case "assignement": return "intent_node_assignement"
         case "pratical": return "intent_node_pratical"
         case "subject_term_split" : return "intent_node_subject_term_split"
         case _: 
-            print(" hello chat user case")
             return "chat_node"
 
 
@@ -119,8 +115,6 @@ Extract any parameters (student_id, term, language_1, language_2, maths, science
 """.strip()
     
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
-    print("intent node")
-    print(ai_resp.content)
     # routing logic
     
     raw_output = ai_resp.content.strip()
@@ -130,8 +124,6 @@ Extract any parameters (student_id, term, language_1, language_2, maths, science
 
     try:
         parsed = json.loads(raw_output)
-        print("student_id, term, language_1, language_2, maths, science. social_science")
-        print(parsed)
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
@@ -188,7 +180,6 @@ Extract any parameters (student_id, period, term, language_1, language_2, maths,
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
 
 def intent_node_subject_term_split(state:ChatState) -> ChatState:
-    print("intent_node_subject_term_split")
     msg = state["messages"][-1].content
     prompt = f"""
 You are an intent classification assistant. Your job is to classify a user message into one of the intent categories.
@@ -244,48 +235,39 @@ Extract any parameters (student_id, term, subject, mark_section_A, mark_section_
 
 def router_node_mark(state: ChatState) -> str:
     x = str(state["intent"]).strip().lower()
-    print("router node")
     match x:
         case "create_mark" : return "intent_node_create_mark"
         case "update_mark": return "intent_node_update_mark"
         case "delete_mark": return "intent_node_delete_mark"
         case _: 
-            print(" hello chat mark router")
             return "chat_node_initial"
         
 def router_node_assignement(state: ChatState) -> str:
     x = str(state["intent"]).strip().lower()
-    print("router node")
     match x:
         case "create_assignement" : return "intent_node_create_assignement"
         case "update_assignement": return "intent_node_update_assignement"
         case "delete_assignement": return "intent_node_delete_assignement"
         case _: 
-            print(" hello chat mark router")
             return "chat_node_initial"
         
 def router_node_subject_term_split(state: ChatState) -> str:
     x = str(state["intent"]).strip().lower()
-    print("router_node_subject_term_split")
-    print(x)
     match x:
         case "create_subject_term_split" : return "intent_node_create_subject_term_split"
         case "update_subject_term_split": return "intent_node_update_subject_term_split"
         case "delete_subject_term_split": return "intent_node_delete_subject_term_split"
         case _: 
-            print(" hello chat mark router")
             return "chat_node_initial"
     
     
 def chat_node_initial(state: ChatState) -> ChatState:
     ai_reply = llm.invoke(state["messages"]).content
-    print("chat node")
     #return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": AIMessage(content=ai_reply)}
     return {**state, "messages": state["messages"] + [AIMessage(content=ai_reply)], "response": "chat_node_initial"}
 
 def intent_node_create_mark(state: ChatState) -> ChatState:
     p = state["params"]
-    print("create node mark node")
 
     if "student_id" in p and "term" in p and "language_1" in p and "language_2" in p and "maths" in p and "science" in p and "social_science" in p:
         
@@ -294,15 +276,11 @@ def intent_node_create_mark(state: ChatState) -> ChatState:
         reply = f"Created mark {p['student_id']}." if r.status_code == 200 else "Failed to create mark list."
     else:
         reply = "Need all marks with subject "
-    
-    print("r.json()")
-    print(r)
 
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
 
 def intent_node_create_assignement(state: ChatState) -> ChatState:
     p = state["params"]
-    print("create node mark node")
 
     if "student_id" in p and "term" in p and "language_1" in p and "language_2" in p and "maths" in p and "science" in p and "social_science" in p:
         
@@ -310,15 +288,11 @@ def intent_node_create_assignement(state: ChatState) -> ChatState:
         reply = f"Created assigngment {p['student_id']}." if r.status_code == 200 else "Failed to create assigngment list."
     else:
         reply = "Need all marks with subject "
-    
-    print("r.json()")
-    print(r)
-
+ 
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
 
 def intent_node_create_subject_term_split(state: ChatState) -> ChatState:
     p = state["params"]
-    print("intent_node_create_subject_term_split")
 
     if "student_id" in p and "term" in p and "subject" in p:
         
@@ -326,10 +300,6 @@ def intent_node_create_subject_term_split(state: ChatState) -> ChatState:
         reply = f"Created assigngment {p['student_id']}." if r.status_code == 200 else "Failed to create assigngment list."
     else:
         reply = "Need all marks with subject "
-    
-    print("r.json()")
-    print(r)
-
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : r.json()}
 
 def intent_node_update_mark(state: ChatState) -> ChatState:
@@ -369,8 +339,7 @@ def intent_node_update_mark(state: ChatState) -> ChatState:
     
 def intent_node_update_assignement(state: ChatState) -> ChatState:
     p = state["params"]
-    print("intent_node_update_assignement")
-    print(p)
+
     # Check required params
     if "student_id" in p and "term" in p and "period" in p: 
         url = f"{API_URL}/assignement/{p['student_id']}/term/{p['term']}/period/{p['period']}"
@@ -405,7 +374,7 @@ def intent_node_update_assignement(state: ChatState) -> ChatState:
     
 def intent_node_update_subject_term_split(state: ChatState) -> ChatState:
     p = state["params"]
-    print("intent_node_update_subject_term_split")
+ 
     # Check required params
     if "student_id" in p and "term" in p:
         url = f"{API_URL}/subjecttermsplit/{p['student_id']}/{p['subject']}/{p['term']}"

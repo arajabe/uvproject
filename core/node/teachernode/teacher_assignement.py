@@ -59,10 +59,6 @@ Extract any parameters (student_id, period, term, language_1, language_2, maths,
 def node_assignement(state: ChatState) -> ChatState:
     parms_value = state["params"]
     intent_value = state["intent"]
-
-    print("cintent_node_create_assignement")
-    print(intent_value)
-
     match intent_value:
 
         case "create_assignement":

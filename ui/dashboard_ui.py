@@ -1,5 +1,5 @@
 import streamlit as st
-from session_util import initialize_session_state
+from ui.session import initialize_session_state
 from ui.sidebar_ui import sidebar
 from ui.performance_ui import performance
 from ui.inforelated_ui import inforelated
@@ -10,6 +10,7 @@ from ui.student_class_allocation import student_class_allocation
 from ui.bulk_upload_marks.bulk_mark_posting_router import bulk_mark_posting_router
 from ui.bulk_upload_admin.bulk_admin_router import bulk_admin_router
 from ui.change_password import change_password
+from ui.application_ui import application
 
 initialize_session_state()
 
@@ -25,17 +26,10 @@ def dashboard():
     role = st.session_state['logedin_role']
 
     st.markdown(
-    "<h1 style='font-size: 20px;'> LangGraph Chatbot (FastAPI-backed) Login</h1>",
+    "<h1 style='font-size: 20px;'> Academic Performance Management Platform </h1>",
     unsafe_allow_html=True
     )
 
-    st.markdown(
-    "<h1 style='font-size: 20px;'>"f"**Current Role:** `{role}`"" Login</h1>",
-    unsafe_allow_html=True
-)
-
-    st.markdown(f"**Current Role:** `{role}`")
-    st.markdown("### 💬 Chat History")
 
     #for user_msg, bot_reply in st.session_state.chat_history:
         #st.markdown(f"**You:** {user_msg}")
@@ -67,6 +61,8 @@ def dashboard():
                 bulk_mark_posting_router()
             case "bulk info and allocations":
                 bulk_admin_router()    
+            case "Application Form":
+                application()
 
     if st.session_state["Change Password"] == "Change Password":
         change_password()

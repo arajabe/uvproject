@@ -2,15 +2,12 @@ from core.model.schema import ChatState
 from llm.llm import llm
 
 def parent_node(state: ChatState) -> ChatState:
-    print("parent_node")
     return{"response" : "welcome to Performance Analysis"}
 
 def router_node(state: ChatState) -> str:
     role = state["role"]
     radio_action_on_person = state["radio_action_on_person"]
-    print("new router node")
     router_value = str(role + "_" + radio_action_on_person.replace(" ", "_")).strip()
-    print(router_value)
     match router_value.lower():
         case "admin_office_staff" | "officestaff_office_staff":  
             return "intent_node_office_staff"
@@ -33,6 +30,5 @@ def router_node(state: ChatState) -> str:
         case "admin_information" | "teacher_information":
             return "intent_node_admin_view"
         case _: 
-            print(" hello chat user case")
             return "chat_node"
         

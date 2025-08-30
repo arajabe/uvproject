@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from session_util import initialize_session_state
+from ui.session import initialize_session_state
 
 initialize_session_state()
 

@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import time
-from session_util import initialize_session_state
+from ui.session import initialize_session_state
 from config import API_URL
 
 initialize_session_state()
@@ -11,10 +11,8 @@ def displayui():
                 role_logged = st.session_state['roleendpointsrole']
                 on_regard = st.session_state["radio_action_on_regards"].lower().replace(" ", "_")
                 res =""
-                st.markdown(st.session_state['mode'])
                 if st.session_state['mode'] in ["bulk mark posting", "bulk info and allocations"]:
                     payload = {"records": st.session_state['records']}
-                    st.markdown(payload)
                     res = requests.post(f"{API_URL}/{on_regard}/upload", json = payload)
                 else :
                     payload = {
@@ -23,13 +21,11 @@ def displayui():
                         "role" : st.session_state['roleendpointsrole'],
                         "radio_action_on_person" : st.session_state["radio_action_on_regards"]
                     }
-                    st.markdown(st.session_state['mode'])
                     res = requests.post(f"{API_URL}/chat/", params= payload)  
                 data = res.json()
                 if res.status_code == 200:
                     st.success("Message sent successfully.")
                     st.markdown(f"**Bot:** {data.get('reply', '(No reply found)')}")
-                    st.table(data.get('reply', '(No reply found)'))
                     st.session_state["reset_flag"] = True
                     st.session_state['mode'] = 'None'
 

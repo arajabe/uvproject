@@ -11,8 +11,8 @@ class Audit(Base):
     table_name = Column(String(50), index = True)
     status = Column(String(50), index = True)
     field_name = Column(String(50), index = True)
-    old_value = Column(String(255), index = True)
-    new_value = Column(String(225), index = True)
+    old_value = Column(String(500), index = True)
+    new_value = Column(String(500), index = True)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
 

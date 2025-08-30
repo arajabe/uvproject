@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from session_util import initialize_session_state
+from ui.session import initialize_session_state
 from ui.bulk_upload_marks.bulk_subject_term_split_upload import bulk_subject_term_split
 from ui.bulk_upload_marks.bulk_assignement_upload import bulk_assignement
 from ui.bulk_upload_marks.bulk_term_mark_upload import bulk_term_mark

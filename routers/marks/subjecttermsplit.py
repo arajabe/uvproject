@@ -92,7 +92,7 @@ def delete_student_subject_term_split(student_id: str, subject : str, term : int
         SubjectTermSplit.term == term,
         SubjectTermSplit.subject == subject
     ).first()
-    print("db_mark", db_subject_term_split)
+    
     if not db_subject_term_split:
         raise HTTPException(404, "student not found")
     get_mark = db.get(db_subject_term_split)

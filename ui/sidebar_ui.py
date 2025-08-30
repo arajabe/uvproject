@@ -1,14 +1,7 @@
 import streamlit as st
-import uuid
+from ui.session import initialize_session_state
 import requests
-import time
-from typing import TypedDict, List, Optional,Annotated
-import os, json, requests
-from pydantic import BaseModel, EmailStr,constr, StringConstraints
-import pandas
-from datetime import date
-from core.model.schema import UserCreate, UserUpdate
-from session_util import initialize_session_state
+from config import API_URL
 
 initialize_session_state()
 
@@ -21,21 +14,24 @@ def sidebar():
         if st.button("Change Password"):
             st.session_state["Change Password"] = "Change Password"
         if st.button("Logout"):
-            st.session_state['logged_in'] = False
-            st.session_state['username'] = ""
-            st.session_state['logedin_role'] = None
-            st.session_state.chat_history = []
-            st.rerun()
+            res = requests.post(f"{API_URL}/login/logout", params={
+                "username": st.session_state['username']})
+            if (res.status_code ==200):
+                st.session_state['logged_in'] = False
+                st.session_state['username'] = ""
+                st.session_state['logedin_role'] = None
+                st.session_state.chat_history = []
+                st.rerun()
     
     role = st.session_state['logedin_role']
 
         # Role-based options
     role_options = {
-        "admin": ["None", "Info Related", "Performance", "Class Teacher Allocation", "Student Allocation", "bulk info and allocations"],
-        "teacher": ["None", "Mark Posting", "Performance", "bulk mark posting"],
-        "student": ["None", "Performance"],
-        "parent": ["None", "Performance"],
-        "officestaff" :["None", "Info Related"]
+        "admin": ["Info Related", "Performance", "Class Teacher Allocation", "Student Allocation", "bulk info and allocations", "Application Form"],
+        "teacher": ["Mark Posting", "Performance", "bulk mark posting"],
+        "student": ["Performance"],
+        "parent": ["Performance"],
+        "officestaff" :["Info Related"]
     }
 
     st.session_state['mode'] = st.sidebar.selectbox("Select Option", role_options.get(role, []))

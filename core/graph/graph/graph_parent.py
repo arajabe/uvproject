@@ -89,4 +89,4 @@ graph.add_edge("intent_node_admin_view", END)
 
 graph.add_edge("chat_node", END)
 
-office_staff_graph = graph.compile()
+parent_graph = graph.compile()

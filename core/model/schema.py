@@ -1,9 +1,6 @@
 from typing import TypedDict, List, Optional,Annotated
-import os, json, requests
+import json
 from pydantic import BaseModel, EmailStr,constr, StringConstraints, Field
-import pandas
-from datetime import date
-
 
 ContactNumberStr = Annotated[str, StringConstraints(pattern=r'^\d{10}$')] # Valid 10-digit Indian number
 PincodeStr = Annotated[str, StringConstraints(pattern=r'^\d{6}$')] # validate 6-digit pincode

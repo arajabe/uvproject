@@ -14,10 +14,15 @@ def chat_node(state : ChatState) -> ChatState:
     chat_prompt = f""" 
                 You are role is AI assistant and query with data base regards student information related tables.
                 you have to reply for the {message} accordingly
+
+                Exmaple : 
+
+                message : None
+                your answer : Welcome to Academic Performance Management Platform
                 """
     result = llm.invoke([HumanMessage(content = chat_prompt)])
 
-    reply = "welcome to information customer care"
+    reply = ""
     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : result.content}
 
 def intent_node_admin_view(state : ChatState) -> ChatState:
@@ -71,8 +76,6 @@ def intent_node_admin_view(state : ChatState) -> ChatState:
     # Clean any accidental code block markers (like ```json ... ```)
     raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()
     raw_output = f"{raw_output}"
-    print("result content")
-    print(raw_output)
     if raw_output is not "not allowed":
         res = requests.post(f"{API_URL}/info_chat/get", params={"message" : raw_output})
         response_data = res.json()

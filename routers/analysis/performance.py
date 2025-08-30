@@ -35,9 +35,6 @@ def get_performance(payload: RequestPayload, db: Session = Depends(get_db)):
                 row_data[subject] = "subject not found"
         result.append(row_data)
 
-    print("result performance")
-    print(result)
-
     return {
         "student_id": student_id,
         "results": result

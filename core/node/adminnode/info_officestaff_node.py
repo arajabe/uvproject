@@ -8,11 +8,9 @@ from config import API_URL
 
 # --- Node 1: Intent Analysis ---
 def intent_node_officestaff(state: ChatState) -> ChatState:
-    print("intent_node_officestaff")
     user_msg = state["messages"][-1].content
     role = state["role"]
     radio_action_on_person = state["radio_action_on_person"]
-    print(role+ "_" + radio_action_on_person.replace(" ", "_"))
     prompt = f"""
 
         You are AI assistant, clarify the intent of {user_msg} and work with testdb database.
@@ -50,7 +48,6 @@ def intent_node_officestaff(state: ChatState) -> ChatState:
 
     try:
         parsed = json.loads(raw_output)
-        print(parsed)
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}
@@ -59,11 +56,7 @@ def intent_node_officestaff(state: ChatState) -> ChatState:
 # --- Action Nodes (call FastAPI) ---
 def node_officestaff(state: ChatState) -> ChatState:
 
-    print("create node user")
-
     intent_value = str(state["intent"]).strip().lower()
-
-    print(intent_value)
 
     parms_value = state["params"]
 

@@ -8,7 +8,6 @@ from config import API_URL
 
 # --- Node 1: Intent Analysis ---
 def intent_node_student(state: ChatState) -> ChatState:
-    print("intent_node_student")
     user_msg = state["messages"][-1].content
     create_prompt = f"""
 
@@ -28,25 +27,18 @@ def intent_node_student(state: ChatState) -> ChatState:
 
         Return **only** valid JSON, no extra text. Example:
         {{"intent": "create_student", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
-        {{"intent": "create_student", "params": {{"name": "Bob", "email": "bob@x.com", "studentid": 10}}}}
-        {{"intent": "delete_student", "params": {{"studentid": 10, reason: "transfer"}}}}
+        {{"intent": "create_student", "params": {{"name": "Bob", "email": "bob@x.com", "studentid": STUD10}}}}
+        {{"intent": "delete_student", "params": {{"studentid": STUD10, reason: "transfer"}}}}
         """
-    print("before create_node invoke")
     ai_resp = llm.invoke([HumanMessage(content=create_prompt)])
-   
-    print("after create_node invoke")
-
     raw_output = ai_resp.content.strip()
 
     # Clean any accidental code block markers (like ```json ... ```)
     raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()   
-    print("raw_output") 
-    print(raw_output)
-
-
+   
     #try:
         #parsed = json.loads(raw_output)
-        #print(parsed)
+
     #except:
         #parsed = {"intent": "chat", "params": {}}
     return parse_raw_output(raw_output, state)
@@ -56,8 +48,7 @@ def intent_node_student(state: ChatState) -> ChatState:
 def node_student(state: ChatState) -> ChatState:
     parms_value = state["params"]
     intent_value = state["intent"]
-    print("node_student")
-    print(intent_value)
+
     match intent_value:
 
         case "create_student":
@@ -72,6 +63,7 @@ def node_student(state: ChatState) -> ChatState:
             return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response" : response_data}
         
         case "delete_student":
+            
             if "studentid" in parms_value:
                     res = requests.delete(f"{API_URL}/student/{parms_value['studentid']}")
                     reply = "student deleted." if res.status_code == 200 else "student not found."

@@ -4,7 +4,7 @@ from core.model.schema import UserCreate, UserUpdate
 from core.database.databse import get_db
 from core.database.databsetable.tables_users import User
 from sqlalchemy.exc import SQLAlchemyError
-from core.database.databsetable.tables_users import UserPassword
+from core.database.databsetable.tables_users import UserPasswordNew
 from core.model.schema import Password
 from core.security.hashing import hash_password, verify_password 
 
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.post("/")
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    print("create_user(user: UserCreate, db: Session = Depends(get_db))")
+
     new_id = generate_user_id(db)
     db_user = User(name=user.name, email=user.email, fathername = user.fathername,
                          mothername = user.mothername, dateofbirth = user.dateofbirth, 
@@ -26,7 +26,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
          # 🔑 also create password record
         default_pw = "welcome123"  # <-- or student.dateofbirth, or ask in UI
         hashed_pw = hash_password(default_pw)
-        db_userpass = UserPassword(id=db_user.id, role='parent', password=hashed_pw)
+        db_userpass = UserPasswordNew(id=db_user.id, role='parent', password=hashed_pw)
         db.add(db_userpass)
         db.commit() 
         return {"status": "user created", "user": db_user.id}

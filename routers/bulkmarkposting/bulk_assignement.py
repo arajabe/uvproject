@@ -29,7 +29,6 @@ def create_bulk_subject_term_split( bulk_data : BulkAssignement, db: Session = D
                 continue
             
             new_id = generate_assignement_id(db)
-            print(new_id)
             
             db_assignement = Assignement(
                 id=new_id ,

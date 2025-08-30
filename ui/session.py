@@ -12,7 +12,6 @@ from core.model.schema import (
     TeacherCreate, TeacherUpdate,
     ClassTeacherAllocationCreate,ClassTeacherAllocationUpdate,
     StudentClassAllocationCreate,StudentClassAllocationUpdate,
-    AuditDelete
 )
 
 def initialize_session_state():
@@ -102,9 +101,6 @@ def initialize_session_state():
         if field_name not in st.session_state:
             st.session_state[field_name] = ""
     for field_name in StudentClassAllocationUpdate.__annotations__:
-        if field_name not in st.session_state:
-            st.session_state[field_name] = ""
-    for field_name in AuditDelete.__annotations__:
         if field_name not in st.session_state:
             st.session_state[field_name] = ""
 

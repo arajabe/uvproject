@@ -62,7 +62,6 @@ Extract any parameters (student_id, term, language_1, language_2, maths, science
 def node_term_mark(state: ChatState) -> ChatState:
     parms_value = state["params"]
     intent_value = state["intent"]
-    print("node_term_mark")
 
     match intent_value:
         case "create_mark":

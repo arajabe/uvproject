@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
-import requests
-from session_util import initialize_session_state
+from ui.session import initialize_session_state
 from config import API_URL
 
 initialize_session_state()
@@ -12,7 +11,7 @@ initialize_session_state()
 def login_screen():
     st.title("🔐 Login")
 
-    username = st.text_input("Username")
+    username = st.text_input("User_Id")
     password = st.text_input("Password", type="password")
     
 
@@ -39,6 +38,8 @@ def login_screen():
 
                 st.success(f"Welcome, {data['username']}!")
                 st.rerun()
+            elif response.status_code == 403:
+                st.error(f"Anouther user logged in for the account {username}")
             else:
                 st.error("Login failed. Invalid credentials.")
 

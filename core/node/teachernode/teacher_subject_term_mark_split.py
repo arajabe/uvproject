@@ -6,7 +6,6 @@ from core.model.schema import ChatState, SubjectTermSplitCreate
 from config import API_URL
 
 def intent_node_subject_term_mark_split(state:ChatState) -> ChatState:
-    print("intent_node_subject_term_split")
     msg = state["messages"][-1].content
     prompt = f"""
 You are an intent classification assistant. Your job is to classify a user message into one of the intent categories.
@@ -63,7 +62,6 @@ Extract any parameters (student_id, term, subject, mark_section_A, mark_section_
 def node_subject_term_mark_split(state: ChatState) -> ChatState:
     parms_value = state["params"]
     intent_value = state["intent"]
-    print("intent_node_create_subject_term_split")
 
     required_keys = list(SubjectTermSplitCreate.model_fields.keys())
 
@@ -95,7 +93,7 @@ def node_subject_term_mark_split(state: ChatState) -> ChatState:
         case "delete_subject_term_split":
                 required_keys = ["student_id","subject","term"]
                 if all(parms_value.get(key) not in (None, "") for key in required_keys):
-                    res = requests.delete(f"{API_URL}/subjecttermsplit/student/{parms_value['student_id']}/subject/{parms_value["subject"]}/term/{parms_value['term']}")
+                    res = requests.delete(f"{API_URL}/subjecttermsplit/student/{parms_value['student_id']}/subject/{parms_value['subject']}/term/{parms_value['term']}")
                     reply = "subject term split mark deleted." if res.status_code == 200 else "subject term split mark is not deleted."
                     response_data = res.json()
                     return {**state, "messages": state["messages"] + [AIMessage(content=reply)], "response": response_data}

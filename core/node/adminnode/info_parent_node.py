@@ -8,7 +8,7 @@ from config import API_URL
 # --- Node 1: Intent Analysis ---
 
 def intent_node_parent(state: ChatState) -> ChatState:
-    print("intent_node_parent")
+
     user_msg = state["messages"][-1].content
     prompt = f"""
 
@@ -30,21 +30,15 @@ def intent_node_parent(state: ChatState) -> ChatState:
         {{"intent": "create_parent", "params": {{"name": "Bob", "email": "bob@x.com"}}}}
         {{"intent": "create_parent", "params": {{"name": "Bob", "email": none "parentid": "10}}}}
         """
-    print("before create_node invoke")
     ai_resp = llm.invoke([HumanMessage(content=prompt)])
    
-    print("after create_node invoke")
-
     raw_output = ai_resp.content.strip()
 
     # Clean any accidental code block markers (like ```json ... ```)
     raw_output = re.sub(r"^```(json)?|```$", "", raw_output).strip()   
-    print("raw_output") 
-    print(raw_output)
 
     try:
         parsed = json.loads(raw_output)
-        print(parsed)
     except:
         parsed = {"intent": "chat", "params": {}}
     return {**state, "intent": parsed.get("intent", "chat"), "params": parsed.get("params", {})}

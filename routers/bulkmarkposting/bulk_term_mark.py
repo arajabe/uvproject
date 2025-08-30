@@ -28,7 +28,6 @@ def create_bulk_subject_term_split(bulk_data : BulkTermMark, db: Session = Depen
                 continue
             
             new_id = generate_mark_id(db)
-            print(new_id)
             
             db_mark = Mark(
                 id=new_id ,

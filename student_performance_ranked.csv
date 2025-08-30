@@ -1,3 +1,0 @@
-id,student_id,term,language_1,language_2,maths,science,social_science,total,timestamp,average,rank_total,rank_language_1,rank_language_2,rank_maths,rank_science,rank_social_science
-M00002,STUD0011,2,10,10,99,99,99,317,2025-08-20 14:11:34,63.4,1.0,1.0,1.0,1.0,1.0,1.0
-M00003,STUD0013,2,10,10,99,99,99,317,2025-08-20 14:28:15,63.4,1.0,1.0,1.0,1.0,1.0,1.0
