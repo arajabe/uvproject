@@ -13,6 +13,7 @@ from core.model.schema import (
     ClassTeacherAllocationCreate,ClassTeacherAllocationUpdate,
     StudentClassAllocationCreate,StudentClassAllocationUpdate,
 )
+import time
 
 def initialize_session_state():
 
@@ -131,3 +132,13 @@ def initialize_session_state():
         st.session_state["exam"] = ""
     if "Change Password" not in st.session_state:
         st.session_state["Change Password"] = ""
+
+    if "last_active" not in st.session_state:
+        st.session_state["last_active"] = time.time()
+    if "term" not in st.session_state:
+        st.session_state["term"] = ""
+    if "period" not in st.session_state:
+        st.session_state["period"] = "1"
+    if "student_id" not in st.session_state:
+        st.session_state["student_id"] = "1"
+    

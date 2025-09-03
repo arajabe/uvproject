@@ -11,6 +11,7 @@ from ui.bulk_upload_marks.bulk_mark_posting_router import bulk_mark_posting_rout
 from ui.bulk_upload_admin.bulk_admin_router import bulk_admin_router
 from ui.change_password import change_password
 from ui.application_ui import application
+import time
 
 initialize_session_state()
 
@@ -46,6 +47,7 @@ def dashboard():
     st.session_state['roleendpointsrole'] = role_endpoints[st.session_state['logedin_role']]
 
     def session_mode(value):
+        st.session_state["last_active"] = time.time()
         match value:
             case "Performance":
                 performance()

@@ -24,6 +24,11 @@ class PerformanceState(TypedDict):
     role: str
     performance_request : str
     exam : str
+    period : str
+    term : str
+    username : str
+    status : str
+    student_id : str
     
 
 class UserCreate(BaseModel):

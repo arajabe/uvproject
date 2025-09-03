@@ -29,7 +29,7 @@ def displayui():
                     st.session_state["reset_flag"] = True
                     st.session_state['mode'] = 'None'
 
-                    if st.button("Reset" , key = "reset on sucess"):                           
+                    if st.button("Reset" , key = "reset on sucess"):                         
                         st.rerun()
                         st.session_state['usermessage'] = "how can i help you" 
 

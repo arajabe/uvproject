@@ -2,8 +2,23 @@ import streamlit as st
 from ui.session import initialize_session_state
 import requests
 from config import API_URL
+import time
+from ui.session_timeout import show_session_timer
 
 initialize_session_state()
+
+def logout_user():
+        res = requests.post(f"{API_URL}/login/logout", params={
+                "username": st.session_state['username']})
+        if (res.status_code ==200):
+            st.session_state['logged_in'] = False
+            st.session_state['username'] = ""
+            st.session_state['logedin_role'] = None
+            st.session_state.chat_history = []
+            st.rerun()
+            
+if show_session_timer == 0:
+            logout_user()
 
 def sidebar():
 
@@ -14,14 +29,7 @@ def sidebar():
         if st.button("Change Password"):
             st.session_state["Change Password"] = "Change Password"
         if st.button("Logout"):
-            res = requests.post(f"{API_URL}/login/logout", params={
-                "username": st.session_state['username']})
-            if (res.status_code ==200):
-                st.session_state['logged_in'] = False
-                st.session_state['username'] = ""
-                st.session_state['logedin_role'] = None
-                st.session_state.chat_history = []
-                st.rerun()
+            logout_user()
     
     role = st.session_state['logedin_role']
 
@@ -32,7 +40,8 @@ def sidebar():
         "student": ["Performance"],
         "parent": ["Performance"],
         "officestaff" :["Info Related"]
-    }
+    }   
+
 
     st.session_state['mode'] = st.sidebar.selectbox("Select Option", role_options.get(role, []))
 

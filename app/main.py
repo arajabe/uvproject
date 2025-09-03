@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,Depends
 from routers import (chat, login)
 from fastapi.middleware.cors import CORSMiddleware
 from core.database.databse import Base, engine
@@ -13,6 +13,11 @@ from routers.infochat import info_chat
 from routers.logging_config import setup_logger
 import logging
 import uvicorn
+from datetime import datetime, timedelta
+from sqlalchemy.orm import Session
+from core.database.databsetable.tables_users import UserPasswordNew
+from core.database.databse import SessionLocal, get_db
+import threading, time
 
 # Setup logging for backend
 #logger = setup_logger("backend")
@@ -41,6 +46,24 @@ app.add_middleware(
 
 # app.add_middleware(AuditMiddleware)
 
+def reset_stale_logins():
+    while True:
+        db: Session = SessionLocal()
+        try:
+            timeout = datetime.utcnow() - timedelta(minutes=2)  # 2 min timeout
+            stale_users = db.query(UserPasswordNew).filter(
+                UserPasswordNew.is_logged_in == True,
+                UserPasswordNew.last_activity < timeout
+            ).all()
+
+            for u in stale_users:
+                u.is_logged_in = False
+            db.commit()
+        finally:
+            db.close()
+        
+        time.sleep(300)  # run every 5 min
+
 app.include_router(users.router)
 app.include_router(chat.router)
 app.include_router(student.router)
@@ -68,12 +91,16 @@ app.include_router(password.router)
 
 
 
-
 @app.get("/")
 def root():
-    logger.info("Root endpoint hit")
+    logger.info(f"Root endpoint hit")
     return {"status": "running"}
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("🚀 Backend started and logging initialized!")
+    logger.info(f"🚀 Backend started and logging initialized!")
+    thread = threading.Thread(target=reset_stale_logins, daemon=True)
+    thread.start()
+
+
+    

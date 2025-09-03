@@ -2,6 +2,9 @@ import streamlit as st
 import requests
 from ui.session import initialize_session_state
 from config import API_URL
+import time
+
+
 
 initialize_session_state()
 
@@ -13,7 +16,6 @@ def login_screen():
 
     username = st.text_input("User_Id")
     password = st.text_input("Password", type="password")
-    
 
     if st.button("Login"):
         try:

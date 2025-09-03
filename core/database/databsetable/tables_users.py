@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, String, TIMESTAMP, func, Boolean
+from sqlalchemy import create_engine, String, TIMESTAMP, func, Boolean, text
 from sqlalchemy import Column,ForeignKey,CheckConstraint
 from core.database.databse import Base
 from sqlalchemy.orm import relationship
@@ -119,6 +119,8 @@ class UserPasswordNew(Base):
     role  = Column(String(50), nullable=False)
     password = Column(String(255), nullable=False)
     is_logged_in = Column(Boolean, default=False)
+    last_activity = Column(TIMESTAMP, server_default=func.now())
+    session_expiry = Column(TIMESTAMP, server_default=text("DATE_ADD(NOW(), INTERVAL 30 MINUTE)"))
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     __table_args__ = (

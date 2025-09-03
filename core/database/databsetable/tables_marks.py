@@ -46,7 +46,8 @@ class Assignement(Base):
     language_2 = Column(Integer, nullable=False, index=True)
     maths = Column(Integer, nullable=False, index=True)
     science = Column(Integer, nullable=False, index=True)
-    social_science = Column(Integer, nullable=False, index=True)     
+    social_science = Column(Integer, nullable=False, index=True)
+    total = Column(Integer, Computed("language_1 + language_2 + maths + science + social_science"), nullable=False)  
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     __table_args__ = (
@@ -73,7 +74,7 @@ class SubjectTermSplit(Base):
     mark_section_B = Column(Integer, nullable=False, index=True)
     mark_section_C = Column(Integer, nullable=False, index=True)
     mark_section_D = Column(Integer, nullable=False, index=True)
-    subject_total = Column(Integer, Computed("mark_section_A + mark_section_B + mark_section_C + mark_section_D"), nullable=False)     
+    total = Column(Integer, Computed("mark_section_A + mark_section_B + mark_section_C + mark_section_D"), nullable=False)     
     abscent = Column(String(50), nullable=False, index=True)
 
     timestamp = Column(DateTime, default=datetime.utcnow)
@@ -90,7 +91,7 @@ class SubjectTermSplit(Base):
         CheckConstraint("subject IN ('language_1', 'language_2', 'maths', 'science', 'social_science')", name="subject_tem_mark_split"),
         CheckConstraint("(abscent = 'no') OR " "(abscent = 'yes' AND mark_section_A = 0 AND mark_section_B = 0 "
                             "AND mark_section_C = 0 AND mark_section_D = 0)", name="check_abscent_term_split_mark"),
-        CheckConstraint("subject_total <= 80", name= 'subject_total'),
+        CheckConstraint("total <= 80", name= 'subject_total'),
         UniqueConstraint('student_id', 'term', 'subject', name='uq_student_term_period_assignement'),
         
     )

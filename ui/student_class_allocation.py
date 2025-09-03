@@ -1,6 +1,7 @@
 import streamlit as st
 from core.model.schema import ( StudentClassAllocationCreate, StudentClassAllocationUpdate)
 from ui.session import initialize_session_state
+import time
 
 initialize_session_state()
 
@@ -22,6 +23,7 @@ def student_class_allocation():
                 ["Student Class Allocation"],
                 horizontal=True
             )
+
         elif st.session_state["radio_action"] in ["view"]:
             with col3:
                 radio_selected = st.radio("select all fields", ["all","selected fields"])

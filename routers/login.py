@@ -8,6 +8,7 @@ from core.model.schema import PasswordChangeRequest
 from core.utils.audit_events import set_audit_user
 from routers.logging_config import setup_logger
 import logging
+from datetime import datetime, timedelta
 
 
 router = APIRouter(prefix="/login", tags=["login"])
@@ -21,12 +22,14 @@ logger = setup_logger("backend")   # use same backend logger
 
 @router.post("/")
 def login(data: LoginRequest, db: Session = Depends(get_db)):
-    # Check if any user is already logged in
-    active_user = db.query(UserPasswordNew).filter(UserPasswordNew.is_logged_in == True).first()
+   
 
-    if active_user:
+    # Check if any user is already logged in
+    user = db.query(UserPasswordNew).filter(UserPasswordNew.id == data.username).first()
+
+    if user.is_logged_in:
         logger.info(f"❌ Another user logging as '{data.username}'")
-        raise HTTPException(status_code=403, detail=f"User '{active_user.id}' is already logged in")
+        raise HTTPException(status_code=403, detail=f"User '{user.id}' is already logged in")
     else:
         user = db.query(UserPasswordNew).filter(UserPasswordNew.id == data.username).first()
     # client_ip = request.client.host
@@ -35,12 +38,14 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
             logger.warning(f"❌ Failed login attempt for '{data.username}'")
             raise HTTPException(status_code=404, detail="User not found")
 
-        if not verify_password(data.password, user.password):
+        elif not verify_password(data.password, user.password):
             logger.warning(f"❌ Failed login attempt for '{data.username}'")
             raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Mark user as logged in
     user.is_logged_in = True
+    user.last_activity = datetime.utcnow()
+    user.session_expiry = datetime.utcnow() + timedelta(minutes=1)  # auto-expire after 30m
     db.commit()
     logger.info(f"✅ User '{data.username}' logged in")
     return {"username": data.username, "role": user.role}
@@ -61,7 +66,7 @@ def change_password(req: PasswordChangeRequest, db: Session = Depends(get_db)):
 @router.post("/logout")
 def logout(username: str, db: Session = Depends(get_db)):
     user = db.query(UserPasswordNew).filter(UserPasswordNew.id == username).first()
-    if user and user.is_logged_in:
+    if user:
         user.is_logged_in = False
         db.commit()
         logger.info(f"👋 User '{username}' logged out")

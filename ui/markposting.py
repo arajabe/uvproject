@@ -3,6 +3,7 @@ from core.model.schema import ( MarkCreate, MarkDelete,
                                AssignementCreate, AssignementUpdate, AssignementDelete, 
                                SubjectTermSplitCreate, SubjectTermSplitDelete)
 from ui.session import initialize_session_state
+import time
 
 initialize_session_state()
 
@@ -34,13 +35,13 @@ def markposting():
                                      "mark_section_D","subject_total","abscent"]
         radio_selected = ""
         
-        def selected_person (value):
+        def selected_exam (value):
             match value:
                 case "Assignement": 
                     with col3:
                         st.session_state["table"] = "assignement"
                         radio_selected = st.radio("select fields", ["all","select fields"])
-                        if radio_selected is not "all":
+                        if radio_selected != "all":
                             st.session_state["multiselect"] = st.multiselect(
                                 "Select required fields:", assignement_fields)
                             
@@ -48,7 +49,7 @@ def markposting():
                     with col3:
                         st.session_state["table"] = "subject_term_split"
                         radio_selected = st.radio("select fields", ["all","selected fields"])
-                        if radio_selected is not "all":
+                        if radio_selected != "all":
                             st.session_state["multiselect"] = st.multiselect(
                                 "Select required fields:", subject_term_split_fields)
                             
@@ -56,14 +57,14 @@ def markposting():
                     with col3:
                         st.session_state["table"] = "termmark"
                         radio_selected = st.radio("select fields", ["all","selected fields"])
-                        if radio_selected is not "all":
+                        if radio_selected != "all":
                             st.session_state["multiselect"] = st.multiselect(
                                 "Select rquired fields:", mark_fields)
 
     
         if st.session_state["radio_action"] in ["view"]:
-            selected_person(st.session_state["radio_action_on_regards"])
-            if radio_selected is "all":
+            selected_exam(st.session_state["radio_action_on_regards"])
+            if radio_selected == "all":
                 st.session_state["selected_field"] = "*"
             else:
                 st.session_state["selected_field"] = st.session_state["multiselect"]

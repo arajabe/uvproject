@@ -8,9 +8,11 @@ from langchain_community.agent_toolkits.sql.base import create_sql_agent
 from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
 from config import DATABASE_URL
 from langchain.agents import AgentExecutor
+from routers.logging_config import setup_logger
 
 router = APIRouter(prefix="/info_chat", tags=["info chat"])
 
+logger = setup_logger("backend")   # use same backend logger
 # DATABASE_URL = "mysql+pymysql://root:Nannilam123@127.0.0.1/testdb"
 engine = create_engine(DATABASE_URL, echo=True, future=True)
 sql_db = SQLDatabase(engine)

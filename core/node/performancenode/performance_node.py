@@ -224,18 +224,41 @@ def intent_chat_node_old(state : ChatState) -> ChatState:
 def intent_chat_node(state : PerformanceState) -> PerformanceState:
     db = next(get_db()) 
     table = state["exam"].strip().lower()
-    df = pd.read_sql(f"SELECT * FROM {table}", db.bind)
-    option = state["performance_request"].lower()
-    result = performance_analysis_overall(df, option)
-    result_md = result.to_markdown(index=False)
+    term = state["term"]
+    username = state["username"]
+    status = state["status"]
+    student_id = state["student_id"]
+    period = state["period"]
+    
+    try:
+        if table == "termmark":
+            df = pd.read_sql(f"SELECT * FROM {table} WHERE term = {term}", db.bind)
+        else:
+            df = pd.read_sql(f"SELECT * FROM {table} WHERE term = {term} and period = {period}", db.bind)
+        if df.empty:
+            result_md = "Mark not yet populated"
+        else:
+            option = state["performance_request"].lower()
+            if state["status"] == "overall":
+                print("overall")
+                result = performance_analysis_overall(df, option)
+            else:
+                result = performance_analysis_individual(df, option,student_id)
+            if result.empty:
+                result_md = "Mark not yet populated"
+            else:
+                result_md = result.to_markdown(index=False)
+        return {"messages" : state["messages"] + [AIMessage(content= "performance analysis")], "response_pd" : result_md}
+    except:
+        return {"messages" : state["messages"] + [AIMessage(content= "Data error")], "response_pd" : "Data error"}
 
-    return {"messages" : state["messages"] + [AIMessage(content= "performance on total")], "response_pd" : result_md}
+    
 
 def performance_analysis_overall(df: pd.DataFrame, option: str):
 
     if option == "overall_total":
         # Average total per student
-        return df.groupby("student_id")["total"].mean().reset_index(name="avg_total")
+        return df.groupby(["term", "student_id"])["total"].mean().reset_index(name="avg_total")
 
     elif option == "overall_subject":
         # Subject-wise average
@@ -267,29 +290,34 @@ def performance_analysis_overall(df: pd.DataFrame, option: str):
 
 def performance_analysis_individual(df: pd.DataFrame, option: str, student_id: str):
 
-    if option == "total":
+    if option == "individual_total":
         # Average total per student
+        df = df[df["student_id"] == student_id]
         return df.groupby("student_id")["total"].mean().reset_index(name="avg_total")
 
-    elif option == "subject":
+    elif option == "individual_subject":
         # Subject-wise average across all students
         subjects = ["language_1", "language_2", "maths", "science", "social_science"]
+        df = df[df["student_id"] == student_id]
         return df[subjects].mean().reset_index(name="avg_score")
 
-    elif option == "trend":
+    elif option == "individual_trend":
         # Student performance trend across terms
+        df = df[df["student_id"] == student_id]
         return df.groupby(["student_id", "term"])["total"].mean().reset_index()
 
-    elif option == "rank":
-        # Rank students within each term
+    elif option == "individual_rank":
+        # Rank students within each term        
         df["rank"] = df.groupby("term")["total"].rank(method="dense", ascending=False)
+        df = df[df["student_id"] == student_id]
         return df[["term", "student_id", "total", "rank"]].sort_values(["term", "rank"])
 
-    elif option == "strength_weakness":
+    elif option == "individual_strength_weakness":
         # Best and weakest subject per student
         subjects = ["language_1", "language_2", "maths", "science", "social_science"]
         best = df.melt(id_vars=["student_id", "term"], value_vars=subjects,
                        var_name="subject", value_name="score")
+        df = df[df["student_id"] == student_id]
         best_sub = best.loc[best.groupby(["student_id", "term"])["score"].idxmax()]
         worst_sub = best.loc[best.groupby(["student_id", "term"])["score"].idxmin()]
         return {"best_subject": best_sub, "worst_subject": worst_sub}
